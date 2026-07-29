@@ -155,3 +155,43 @@ class NullComm(PlatoonComm):
 
     def poll(self) -> list:
         return []
+
+
+# ── 시뮬레이션용 — 실제 ESP32 없이 여러 대를 한 프로세스에서 돌릴 때 ──
+class LoopbackBus:
+    """
+    메모리상의 가짜 V2X 버스. 한 차량이 보낸 패킷을 나머지 모든 차량이 받는다
+    (ESP-NOW 브로드캐스트와 같은 동작). 실제 통신 코드가 붙기 전에
+    결합 로직을 검증하는 용도.
+    """
+
+    def __init__(self):
+        self._ports: dict = {}   # vehicle_id -> 수신 대기 큐
+
+    def create_port(self, vehicle_id: int) -> "LoopbackComm":
+        self._ports.setdefault(vehicle_id, [])
+        return LoopbackComm(self, vehicle_id)
+
+    def broadcast(self, sender_id: int, packet) -> None:
+        for vid, queue in self._ports.items():
+            if vid != sender_id:
+                queue.append(packet)
+
+    def receive(self, vehicle_id: int) -> list:
+        queue = self._ports.get(vehicle_id, [])
+        packets, queue[:] = list(queue), []
+        return packets
+
+
+class LoopbackComm(PlatoonComm):
+    """LoopbackBus에 연결된 한 대의 통신 포트."""
+
+    def __init__(self, bus: LoopbackBus, vehicle_id: int):
+        self.bus = bus
+        self.vehicle_id = vehicle_id
+
+    def send(self, packet) -> None:
+        self.bus.broadcast(self.vehicle_id, packet)
+
+    def poll(self) -> list:
+        return self.bus.receive(self.vehicle_id)
