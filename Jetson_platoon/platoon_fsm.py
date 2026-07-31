@@ -99,6 +99,18 @@ STABILITY_PASS_REQUIRED = 4  # §8 그 중 4회 이상 통과
 JOIN_RESPONSE_TIMEOUT_S = 2.0
 SETUP_TIMEOUT_S = 2.0
 
+# §15.3 예외 처리 — 플래툰 중 상대 차량 정보가 이 시간 이상 끊기면 안전 이탈
+PARTNER_LOST_TIMEOUT_S = 1.0
+
+# ── 전방 장애물 대응 (초음파 기반) ─────────────────────────────────
+# 초음파는 "앞에 뭐가 있는지"를 보고, UWB는 "리더가 어디 있는지"를 본다.
+# 플래툰 중에는 초음파에 리더가 항상 잡히므로 그것만으로는 장애물 판정이 불가능하다.
+# 초음파 거리가 UWB 거리보다 유의미하게 가까우면 = 리더와 나 사이에 뭔가 끼어든 것.
+OBSTACLE_STOP_DISTANCE_M = 0.30   # TODO: 제동거리 실측 후 조정 — 즉시 정지
+OBSTACLE_SLOW_DISTANCE_M = 0.60   # TODO: 감속 시작 거리
+CUTIN_MARGIN_M = 0.15             # TODO: UWB/초음파 측정 오차보다 크게 잡아야 오탐 방지
+OBSTACLE_SLOW_FACTOR = 0.5        # 감속 시 목표속도 배율
+
 # §10.2 거절 사유 코드
 REJECT_NOT_ALLOWED = 1      # 플래툰 참여 비허용 / 긴급·고장 상태
 REJECT_BUSY = 2             # 이미 다른 결합 절차 진행 중
@@ -130,15 +142,10 @@ K_EF_EXIT = 0.3  # TODO: EXIT 시 팔로워 감속 이득 (§21.3)
 V_MIN = 0.0   # TODO: 실제 차량 최소속도로 교체
 V_MAX = 1.0   # TODO: 실제 차량 최대속도로 교체
 
-# §19.4 차선 정렬 허용 오차.
-# 주의 1: 문서 원안은 "카메라 기반 차선 중앙 오프셋"을 기준으로 하지만,
-#         이 프로젝트는 팔로워가 카메라를 쓰지 않고 V2V/UWB만으로 주행하므로
-#         UWB로 계산한 횡방향 이격거리로 대체했습니다.
-# 주의 2: 각도(정면 ±N도)로 판정하면 리더는 영원히 통과할 수 없습니다.
-#         리더 입장에서 팔로워는 뒤(≈180도)에 있기 때문입니다.
-#         횡방향 이격거리 |d·sin(θ)|를 쓰면 앞(θ≈0)이든 뒤(θ≈π)든 0에 수렴하므로
-#         리더·팔로워 모두 같은 기준을 쓸 수 있습니다.
-LANE_ALIGN_LATERAL_TOLERANCE_M = 0.15  # TODO: 실측 튜닝 필요 (차폭·차선폭 고려)
+# §19.4 차선 정렬 허용 오차 — 카메라 기반 차선 중앙 오프셋 (설계문서 원안)
+# 라인트레이싱을 계속 수행하므로 문서대로 카메라 값을 쓴다.
+# 값은 정규화된 오프셋(-1.0 ~ +1.0) 기준.
+LANE_ALIGN_OFFSET_TOLERANCE = 0.15  # TODO: 실측 튜닝 필요
 
 
 @dataclass
@@ -152,7 +159,11 @@ class EgoState:
     accel: float = 0.0
     heading: float = 0.0
     lane: int = 0
-    obstacle: bool = False
+    lane_offset: float = 0.0      # 카메라 기반 차선 중앙 오프셋 (-1.0 ~ +1.0)
+    lane_detected: bool = False   # 이번 프레임에서 라인을 찾았는지
+    obstacle: bool = False        # STM32가 올려준 근접 감지 플래그
+    front_distance: Optional[float] = None  # 초음파 전방거리(m), 미측정이면 None
+    stm32_failsafe: bool = False  # STM32가 RPi 무응답으로 자체 정지 중인지
     platoon_allow: bool = True
     emergency: bool = False
 
@@ -190,6 +201,7 @@ class DrivingCommand:
     target_distance: Optional[float] = None
     leader_id: Optional[int] = None
     accel_request: Optional[str] = None  # ACCELERATE / HOLD / DECELERATE
+    emergency: bool = False              # 비상정지 필요 (STM32에 EMERGENCY_STOP 전송)
 
 
 class PlatoonFSM:
@@ -227,6 +239,10 @@ class PlatoonFSM:
         self._join_response: Optional[bool] = None   # True=승인 / False=거절 / None=무응답
         self._wait_since: Optional[float] = None     # 응답·SETUP 대기 시작 시각
         self._peer_join_complete = False             # 상대가 JOIN_COMPLETE를 보냈는지
+        self._partner_last_seen: Optional[float] = None  # 상대 차량 정보를 마지막으로 본 시각
+        self.partner_lost = False                    # 통신 두절로 안전 이탈 중인지
+        self._hazard_slow = False                    # 전방 위험으로 감속 중인지
+        self.emergency_reason: Optional[str] = None  # 마지막 비상정지 사유 (로깅용)
 
         # vehicle_id -> 최근 평가 결과(bool) 리스트, 최대 STABILITY_WINDOW개 (§8)
         self._score_history: dict = {}
@@ -237,15 +253,88 @@ class PlatoonFSM:
         # (여러 곳에서 poll하면 패킷이 서로 잡아먹혀 유실된다)
         self._handle_incoming(ego, nearby)
 
+        # 상태 로직보다 먼저 — 어떤 상태에 있든 안전이 우선한다
+        emergency_cmd = self._check_safety(ego, nearby)
+        if emergency_cmd is not None:
+            return emergency_cmd
+
         if self.state == PlatoonState.SOLO_DRIVE:
-            return self._run_solo_drive(ego, nearby)
+            cmd = self._run_solo_drive(ego, nearby)
         elif self.state == PlatoonState.PLATOON_JOIN:
-            return self._run_platoon_join(ego, nearby)
+            cmd = self._run_platoon_join(ego, nearby)
         elif self.state == PlatoonState.PLATOON_MAINTAIN:
-            return self._run_platoon_maintain(ego, nearby)
+            cmd = self._run_platoon_maintain(ego, nearby)
         elif self.state == PlatoonState.PLATOON_EXIT:
-            return self._run_platoon_exit(ego, nearby)
-        raise RuntimeError(f"unknown state: {self.state}")
+            cmd = self._run_platoon_exit(ego, nearby)
+        else:
+            raise RuntimeError(f"unknown state: {self.state}")
+
+        # 전방 위험 감속 — 정지까지는 아니지만 속도를 낮춰야 하는 구간
+        if self._hazard_slow and cmd.target_speed is not None:
+            cmd.target_speed *= OBSTACLE_SLOW_FACTOR
+
+        return cmd
+
+    # ══════════════════════════════════════════════════════════════
+    # 안전 검사 — 장애물 / STM32 failsafe
+    # ══════════════════════════════════════════════════════════════
+    def _check_safety(self, ego: EgoState, nearby: list) -> Optional[DrivingCommand]:
+        """
+        비상정지가 필요하면 DrivingCommand를 반환하고, 아니면 None.
+        플래툰 중이면 EMERGENCY 패킷을 전파해서 뒤차도 함께 대응하게 한다.
+        """
+        # STM32가 자체 정지 중 — FSM이 계속 주행 중인 줄 알면 안 된다
+        if ego.stm32_failsafe:
+            return self._emergency_stop(ego, "STM32 failsafe (RPi 무응답 감지)")
+
+        hazard = self._front_hazard(ego, nearby)
+        if hazard == "STOP":
+            return self._emergency_stop(ego, "전방 장애물 근접")
+
+        self._hazard_slow = (hazard == "SLOW")
+        return None
+
+    def _front_hazard(self, ego: EgoState, nearby: list) -> Optional[str]:
+        """
+        초음파 기반 전방 위험 판정. 반환값: "STOP" / "SLOW" / None
+
+        플래툰 중에는 초음파에 리더가 잡히는 게 정상이므로, 그것만으로 장애물이라
+        판정하면 안 된다. UWB로 잰 리더 거리보다 초음파가 유의미하게 가까울 때만
+        "사이에 끼어든 것"으로 본다.
+        """
+        d = ego.front_distance
+        if d is None:
+            return None   # 초음파 값 없음 (미측정 또는 STM32 미연결)
+
+        partner = self._find_partner(nearby) if self.partner_id else None
+        in_platoon = (self.state != PlatoonState.SOLO_DRIVE
+                      and partner is not None
+                      and partner.uwb_distance is not None)
+
+        if in_platoon:
+            # 리더보다 가까운 무언가가 있는지
+            if d >= partner.uwb_distance - CUTIN_MARGIN_M:
+                return None   # 초음파가 본 게 리더 자신
+        # 단독주행이거나, 끼어든 물체가 확인된 경우 → 순수 거리로 판정
+        if d <= OBSTACLE_STOP_DISTANCE_M:
+            return "STOP"
+        if d <= OBSTACLE_SLOW_DISTANCE_M:
+            return "SLOW"
+        return None
+
+    def _emergency_stop(self, ego: EgoState, reason: str) -> DrivingCommand:
+        """비상정지. 플래툰 중이었다면 EMERGENCY를 전파하고 플래툰을 해제한다."""
+        if self.state != PlatoonState.SOLO_DRIVE:
+            self.comm.send(EmergencyMessage(
+                sender_id=self.vehicle_id,
+                platoon_id=self.platoon_id or 0,
+                emergency_type="STOP",
+                timestamp=time.time(),
+            ))
+            self._release_platoon()
+
+        self.emergency_reason = reason
+        return DrivingCommand(mode="SOLO_DRIVE", target_speed=0.0, emergency=True)
 
     # ── SOLO_DRIVE + 매칭 파이프라인 (§4~§13) ───────────────────────
     def _run_solo_drive(self, ego: EgoState, nearby: list) -> DrivingCommand:
@@ -297,6 +386,10 @@ class PlatoonFSM:
     def _run_platoon_join(self, ego: EgoState, nearby: list) -> DrivingCommand:
         partner = self._find_partner(nearby)
 
+        # §15.3 상대 차량 소실 — 결합 중단하고 안전 이탈
+        if self._check_partner_lost():
+            return self._abort_to_exit("JOIN 중 상대 차량 정보 두절")
+
         if self.join_sub_state == JoinSubState.JOIN_REQUESTED:
             # 상대 차량 정보가 실제로 잡히면 정렬 단계로 진행
             if partner is not None:
@@ -341,6 +434,10 @@ class PlatoonFSM:
     def _run_platoon_maintain(self, ego: EgoState, nearby: list) -> DrivingCommand:
         partner = self._find_partner(nearby)
 
+        # §15.3 상대 차량 소실 — 간격 제어 근거가 사라졌으므로 안전 이탈
+        if self._check_partner_lost():
+            return self._abort_to_exit("MAINTAIN 중 상대 차량 정보 두절")
+
         # TODO: §20.6 신규 차량 지속 탐색 및 맨 뒤 합류 처리 (2대 결합 안정화 후 확장)
         if self._exit_condition_met(ego):                    # §21.1
             self.comm.send(LeaveMessage(
@@ -369,9 +466,54 @@ class PlatoonFSM:
             target_distance=TARGET_DISTANCE_M,
         )
 
+    def _abort_to_exit(self, reason: str) -> DrivingCommand:
+        """
+        §15.3 예외 상황에서 플래툰을 중단한다.
+
+        상대 위치를 모르는 상태이므로 EXIT의 간격 확대 제어(거리 피드백)를
+        쓸 수 없다. 팔로워는 UWB 추종도 불가능하므로 즉시 단독주행으로
+        되돌려 카메라 차선추종을 다시 쓰게 하고, 감속은 주행 알고리즘에 맡긴다.
+        """
+        self.partner_lost = True
+        self.comm.send(LeaveMessage(
+            sender_id=self.vehicle_id,
+            platoon_id=self.platoon_id or 0,
+            timestamp=time.time(),
+        ))
+        self._release_platoon()
+        # TODO: 소실 직후 감속 정도를 어떻게 할지 결정 필요.
+        #       지금은 목표속도를 지정하지 않아 주행 알고리즘의 기본값을 따른다.
+        return DrivingCommand(mode="SOLO_DRIVE")
+
+    def _release_platoon(self) -> None:
+        """플래툰 관련 상태를 전부 초기화하고 단독주행으로 되돌린다."""
+        self.state = PlatoonState.SOLO_DRIVE
+        self.match_state = MatchState.IDLE
+        self.join_sub_state = None
+        self.platoon_id = None
+        self.role = None
+        self.leader_id = None
+        self.partner_id = None
+        self.candidate_id = None
+        self.platoon_route = []
+        self.exit_start_checkpoint = None
+        self._pending_candidate = None
+        self._stable_since = None
+        self._join_response = None
+        self._wait_since = None
+        self._peer_join_complete = False
+        self._partner_last_seen = None
+        self._last_target_speed = None
+        self._score_history.clear()
+
     # ── PLATOON_EXIT (§21) ──────────────────────────────────────────
     def _run_platoon_exit(self, ego: EgoState, nearby: list) -> DrivingCommand:
         partner = self._find_partner(nearby)
+
+        # §15.3 해제 중 상대 소실 — 이미 분리된 것으로 보고 단독주행 복귀
+        if self._check_partner_lost():
+            return self._abort_to_exit("EXIT 중 상대 차량 정보 두절")
+
         distance = self._partner_distance(partner)
 
         # §21.3 간격 확대: 리더는 제한범위 내 가속, 팔로워는 제한범위 내 감속
@@ -383,20 +525,7 @@ class PlatoonFSM:
 
         if self._exit_complete(distance):                    # §21.4
             # TODO: §21.2 EXIT_REQUEST/ACK/START, PLATOON_EXIT_COMPLETE 패킷 교환 미구현
-            self.state = PlatoonState.SOLO_DRIVE
-            self.match_state = MatchState.IDLE
-            self.platoon_id = None
-            self.role = None
-            self.leader_id = None
-            self.partner_id = None
-            self.candidate_id = None
-            self.platoon_route = []
-            self.exit_start_checkpoint = None
-            self._stable_since = None
-            self._join_response = None
-            self._wait_since = None
-            self._peer_join_complete = False
-            self._score_history.clear()
+            self._release_platoon()
             return DrivingCommand(mode="SOLO_DRIVE")
 
         return DrivingCommand(
@@ -752,13 +881,27 @@ class PlatoonFSM:
     # §19~§21 결합 이후 단계 판정
     # ══════════════════════════════════════════════════════════════
     def _find_partner(self, nearby: list) -> Optional["NearbyVehicle"]:
-        """플래툰 상대 차량(리더 또는 팔로워)을 nearby 목록에서 찾는다."""
+        """
+        플래툰 상대 차량(리더 또는 팔로워)을 nearby 목록에서 찾는다.
+        찾을 때마다 마지막 목격 시각을 갱신해 통신 두절 판정에 쓴다 (§15.3).
+        """
         if self.partner_id is None:
             return None
         for v in nearby:
             if v.vehicle_id == self.partner_id:
+                self._partner_last_seen = time.time()
                 return v
         return None
+
+    def _check_partner_lost(self) -> bool:
+        """
+        §15.3 상대 차량 정보가 일정 시간 이상 끊겼는지.
+        플래툰 중에는 상대 위치를 모른 채로 간격 제어를 계속하면 안 된다.
+        """
+        if self._partner_last_seen is None:
+            self._partner_last_seen = time.time()
+            return False
+        return (time.time() - self._partner_last_seen) > PARTNER_LOST_TIMEOUT_S
 
     def _partner_distance(self, partner: Optional["NearbyVehicle"]) -> Optional[float]:
         """
@@ -825,22 +968,19 @@ class PlatoonFSM:
 
     def _lane_align_complete(self, ego: EgoState, partner: Optional["NearbyVehicle"]) -> bool:
         """
-        §19.4 차선 정렬 완료 조건.
+        §19.4 차선 정렬 완료 조건 (설계문서 원안 그대로).
 
-        문서 원안은 카메라 기반 차선 중앙 오프셋을 쓰지만, 이 프로젝트는
-        팔로워가 카메라를 쓰지 않으므로 UWB로 계산한 횡방향 이격거리로 대체한다.
+            같은 차선 ID  and  |카메라 차선 오프셋| ≤ 허용치  and  1초 이상 유지
 
-            lateral = |d · sin(θ)|
-
-        상대가 앞(θ≈0)이든 뒤(θ≈π)이든 sin이 0에 수렴하므로
-        리더·팔로워가 같은 기준을 쓸 수 있다.
+        라인트레이싱을 계속 수행하므로 카메라 오프셋을 그대로 쓸 수 있다.
+        리더·팔로워가 각자 자기 차선 중앙에 정렬돼 있고 차선 ID가 같으면
+        서로 정렬된 것이므로, 앞/뒤 위치와 무관하게 같은 기준이 적용된다.
         """
-        if partner is None or partner.uwb_angle is None or partner.uwb_distance is None:
+        if partner is None:
             return self._hold(False)
         same_lane = (partner.lane == ego.lane)
-        lateral = abs(partner.uwb_distance * math.sin(partner.uwb_angle))
-        aligned = lateral <= LANE_ALIGN_LATERAL_TOLERANCE_M
-        return self._hold(same_lane and aligned)
+        centered = ego.lane_detected and abs(ego.lane_offset) <= LANE_ALIGN_OFFSET_TOLERANCE
+        return self._hold(same_lane and centered)
 
     def _gap_control_complete(self, partner: Optional["NearbyVehicle"]) -> bool:
         """§19.5 목표거리 근접구간(목표거리 + 0.3m) 안으로 들어왔는지"""

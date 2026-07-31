@@ -11,13 +11,15 @@ STM32로 보낼 목표 조향각/목표 속도를 계산한다.
 - 출력  목표 조향각(rad)과 목표 속도(m/s)까지만 계산한다.
         PWM 듀티·모터 PID·아커만 기하 보정은 STM32 담당, 여기서 하지 않음.
 
-주행 방식 분기:
-- SOLO_DRIVE, 또는 리더 역할            → 카메라 기반 차선추종 (기존 라인트레이싱 코드 연동 지점)
-- PLATOON_JOIN/PLATOON_MAINTAIN + 팔로워 → UWB 상대위치 기반 pure pursuit
-  (요구사항: 팔로워는 카메라를 쓰지 않고 리더로부터의 V2V 정보만으로 주행)
+주행 방식:
+- 조향(횡방향)은 플래툰 여부와 무관하게 항상 카메라 차선추종을 쓴다.
+  라인트레이싱을 하면서 동시에 V2V로 군집주행하는 구조.
+- V2V/UWB는 속도·차간거리(종방향)를 담당한다.
+- 예외적으로 플래툰 중 라인을 놓쳤을 때만 UWB pure pursuit로 앞차를 따라가며
+  버틴다(뒤차가 붙어 있어 급정지가 더 위험하므로).
 
 이 파일도 골격입니다. 카메라 라인트레이싱 부분은 이미 있는 팀 코드를 연결하는
-자리(TODO)로 남겨뒀고, pure pursuit/팔로워 속도식은 앞서 정한 내용으로 채워져 있습니다.
+자리(TODO)로 남겨뒀고, pure pursuit는 앞서 정한 내용으로 채워져 있습니다.
 """
 
 import math
@@ -72,7 +74,8 @@ class ControlOutput:
     """
     steering_rad: float = 0.0
     speed: float = 0.0
-    lane_lost: bool = False   # 라인 유실로 정지 중인지 (상위 판단/로깅용)
+    lane_lost: bool = False       # 라인을 놓친 상태인지
+    uwb_fallback: bool = False    # 라인 유실로 UWB 추종으로 버티는 중인지
 
 
 # ── 리더 / 단독주행: 카메라 기반 차선추종 ─────────────────────────
@@ -159,11 +162,14 @@ def pure_pursuit_steering(distance_to_leader: Optional[float],
 
 
 # ── FSM 출력 + 센서값 → 최종 제어값 ────────────────────────────────
-# 팔로워가 UWB 추종을 쓰는 구간. EXIT까지 포함하는 이유:
-#   해제 중에 조향 기준을 UWB→카메라로 바꾸면, 거리를 벌리는 도중에
-#   라인을 아직 못 잡은 상태로 전환될 수 있다(뒤차가 있으면 위험).
-#   완전히 분리되어 SOLO_DRIVE로 돌아갈 때 한 번에 전환한다.
-FOLLOWER_UWB_MODES = ("PLATOON_JOIN", "PLATOON_MAINTAIN", "PLATOON_EXIT")
+# 조향(횡방향)은 플래툰 여부와 무관하게 항상 카메라 차선추종을 쓴다.
+# V2V/UWB는 속도·차간거리(종방향) 담당이다.
+#
+# 예외 — 플래툰 중 라인 유실:
+#   단독주행이면 정지가 맞지만, 플래툰 중에는 바로 뒤에 팔로워가
+#   0.8m 거리로 붙어 있어 급정지가 더 위험하다. 이때만 UWB pure pursuit로
+#   앞차를 따라가며 버티고, 라인이 복구되면 카메라로 되돌아간다.
+PLATOON_MODES = ("PLATOON_JOIN", "PLATOON_MAINTAIN", "PLATOON_EXIT")
 
 
 def compute_control(cmd: DrivingCommand,
@@ -180,18 +186,25 @@ def compute_control(cmd: DrivingCommand,
 
     목표 속도는 FSM이 이미 계산해서 cmd.target_speed로 내려준다
     (JOIN §19.5 / MAINTAIN §20.2 / EXIT §21.3). 여기서 다시 계산하지 않는다.
-    이 파일이 정하는 것은 조향각을 어느 센서로 만들 것인가뿐이다.
+    이 파일이 정하는 것은 조향각뿐이다.
     """
     target_speed = cmd.target_speed if cmd.target_speed is not None else current_speed
 
-    if role == "FOLLOWER" and cmd.mode in FOLLOWER_UWB_MODES:
-        # 팔로워는 카메라를 쓰지 않고 V2V/UWB만으로 주행
-        steering = pure_pursuit_steering(uwb_distance, uwb_angle)
+    steering, lane_lost = lane_follower.update(lane, dt)
+
+    if not lane_lost:
         return ControlOutput(steering_rad=steering, speed=target_speed)
 
-    steering, lane_lost = lane_follower.update(lane, dt)
-    if lane_lost:
-        # 라인을 놓친 채로 계속 달리면 이탈한다 — 정지
-        return ControlOutput(steering_rad=0.0, speed=0.0, lane_lost=True)
+    # ── 라인 유실 ──
+    in_platoon = (role == "FOLLOWER" and cmd.mode in PLATOON_MODES)
+    if in_platoon and uwb_distance is not None and uwb_angle is not None:
+        # 앞차를 UWB로 추종하며 버틴다 (급정지 회피)
+        return ControlOutput(
+            steering_rad=pure_pursuit_steering(uwb_distance, uwb_angle),
+            speed=target_speed,
+            lane_lost=True,
+            uwb_fallback=True,
+        )
 
-    return ControlOutput(steering_rad=steering, speed=target_speed)
+    # 그 외에는 정지 — 라인을 놓친 채 계속 달리면 이탈한다
+    return ControlOutput(steering_rad=0.0, speed=0.0, lane_lost=True)

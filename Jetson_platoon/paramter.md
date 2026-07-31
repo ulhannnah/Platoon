@@ -153,6 +153,13 @@ ESP32 팀원에게 UWB 모듈의 신뢰 가능한 최대 측정거리를 확인�
 | `APPROACH_ZONE_M` | 0.3 | 목표거리 근접구간 | 설계문서 §19.5 |
 | `SPEED_TOLERANCE` | 0.1 | 결합완료 판정 속도차 | 설계문서 §19.7 |
 | `STABLE_TIME_S` | 1.0 | 안정 유지시간 (초) | 설계문서 §19.7 |
+| `PARTNER_LOST_TIMEOUT_S` | 1.0 | 상대 차량 정보 두절 판정 시간 (초) | 설계문서 §15.3 |
+| `OBSTACLE_STOP_DISTANCE_M` | 0.30 | 초음파 즉시정지 거리 (m) | **[필수]** 제동거리 실측 후 |
+| `OBSTACLE_SLOW_DISTANCE_M` | 0.60 | 초음파 감속 시작 거리 (m) | [튜닝] |
+| `CUTIN_MARGIN_M` | 0.15 | 끼어듦 판정 여유. UWB/초음파 측정오차보다 커야 오탐 방지 | **[필수]** |
+| `OBSTACLE_SLOW_FACTOR` | 0.5 | 감속 시 목표속도 배율 | [튜닝] |
+| `JOIN_RESPONSE_TIMEOUT_S` | 2.0 | 결합 요청 응답 대기 한계 (초) | 문서 명시 없음 |
+| `SETUP_TIMEOUT_S` | 2.0 | PLATOON_SETUP 대기 한계 (초) | 문서 명시 없음 |
 
 설계문서에 초기값이 명시된 값들이라 **그대로 시작하면 됩니다.**
 다만 문서에도 "실차시험으로 확정한다"고 되어 있으니, 결합 동작이 거칠면
@@ -168,7 +175,7 @@ ESP32 팀원에게 UWB 모듈의 신뢰 가능한 최대 측정거리를 확인�
 |---|---|---|
 | `CHECKPOINT_ADJACENT_RANGE` | `platoon_fsm.py` | 체크포인트 "인접" 판정 기준. 체크포인트 체계 확정 후 |
 | `lane_ok` (현재 항상 True) | `platoon_fsm.py` `_prefilter()` 내부 | 차선 인접 규칙. 트랙 차선 구조 확정 후 |
-| `LANE_ALIGN_LATERAL_TOLERANCE_M` | `platoon_fsm.py` | 0.15m 기준. 카메라 대신 UWB 횡방향 이격거리 `\|d·sin(θ)\|`로 판정. 차폭·차선폭 고려해 결정 |
+| `LANE_ALIGN_OFFSET_TOLERANCE` | `platoon_fsm.py` | 0.15 기준(정규화 오프셋). 카메라 차선 중앙 오프셋 허용치 |
 | `vehicle_id` | `main.py` `main()` 내부 | 차량별 고유 ID 부여 방식 |
 | 시리얼 포트 경로 | `main.py` `open_stm32_port()` | `/dev/ttyAMA0` vs `/dev/ttyUSB0` |
 | `reason_code` 체계 | `v2x_protocol.py` `PlatoonJoinReject` | 거절 사유 코드 정의 |
@@ -190,4 +197,7 @@ ESP32 팀원에게 UWB 모듈의 신뢰 가능한 최대 측정거리를 확인�
 - [ ] 안전거리 결정 → `D_SAFE_M` (반드시 `TARGET_DISTANCE_M`보다 작게)
 - [ ] 라인트레이싱 P게인 튜닝 → `LANE_KP`
 - [ ] 2대 결합 시험하며 → `K_D`, `K_V`
-- [ ] 차선 정렬 허용 이격거리 → `LANE_ALIGN_LATERAL_TOLERANCE_M`
+- [ ] 차선 정렬 허용 오프셋 → `LANE_ALIGN_OFFSET_TOLERANCE`
+- [ ] 제동거리 측정 → `OBSTACLE_STOP_DISTANCE_M` (실제 제동거리보다 여유 있게)
+- [ ] UWB·초음파 동시 측정 오차 확인 → `CUTIN_MARGIN_M` (오차보다 크게 잡아야 오탐 없음)
+- [ ] V2X 실제 수신 주기 확인 후 → `PARTNER_LOST_TIMEOUT_S` (수신 주기의 3~5배 권장)

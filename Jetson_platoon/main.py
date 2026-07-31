@@ -27,7 +27,7 @@ main.py
 ═══════════════════════════════════════════════════════════════════
 
 매 사이클:
-  1) ESP32/센서값 읽기 (팔로워 추종 중이면 라인트레이싱은 건너뜀)
+  1) ESP32/센서값 + 라인트레이싱 읽기 (플래툰 중에도 라인트레이싱은 계속)
   2) EgoState 갱신 + UWB 값 단일화(merge)
   3) fsm.update() 호출 → DrivingCommand(목표값) 받음
   4) compute_control()로 목표 조향각/속도 계산
@@ -37,12 +37,7 @@ main.py
 import time
 
 from platoon_fsm import PlatoonFSM, EgoState
-from driving_control import (
-    compute_control,
-    LaneFollower,
-    LaneTracingResult,
-    FOLLOWER_UWB_MODES,
-)
+from driving_control import compute_control, LaneFollower, LaneTracingResult
 from stm32_interface import STM32Interface
 
 
@@ -149,23 +144,27 @@ def main():
         if feedback is not None:
             current_speed = feedback.current_speed
             ego.obstacle = feedback.obstacle
+            ego.front_distance = feedback.front_distance   # 초음파 실측 거리(m)
+            ego.stm32_failsafe = feedback.failsafe          # STM32 자체 정지 중인지
         else:
             current_speed = ego.speed
 
         # UWB 값 단일화 — FSM과 제어가 같은 값을 보도록
         nearby = merge_link_into_nearby(esp32_data, fsm.partner_id)
 
+        # 라인트레이싱은 플래툰 여부와 무관하게 항상 수행한다
+        # (조향은 언제나 카메라 기반, V2V는 속도·거리 담당)
+        lane = read_lane_tracing()
+
         # FSM 입력값(EgoState) 최신화
         ego.speed = current_speed
+        ego.lane_offset = lane.offset
+        ego.lane_detected = lane.detected
         # TODO: checkpoint / route / lane / heading 도 주행 알고리즘에서 받아 채우기
 
         # FSM은 매 루프 "한 번" 호출될 뿐, 자체 while 없음
         cmd = fsm.update(ego, nearby)
         role = fsm.role  # "LEADER" / "FOLLOWER" / None(SOLO)
-
-        # 팔로워는 카메라를 쓰지 않으므로 라인트레이싱 자체를 건너뜀 (연산 절약)
-        is_following = (role == "FOLLOWER" and cmd.mode in FOLLOWER_UWB_MODES)
-        lane = None if is_following else read_lane_tracing()
 
         partner = find_partner(nearby, fsm.partner_id)
 
@@ -179,8 +178,13 @@ def main():
         )
 
         # STM32로는 "얼만큼 갈지"만 전달 — PID/PWM은 STM32가 처리
+        # 비상정지 조건:
+        #   - FSM 판정 (전방 장애물 / STM32 failsafe)
+        #   - 라인 유실로 실제 정지 (플래툰 중 UWB로 버티는 경우는 제외)
+        lane_stopping = control.lane_lost and not control.uwb_fallback
+        stm32_mode = "EMERGENCY_STOP" if (cmd.emergency or lane_stopping) else cmd.mode
         stm32.send_command(
-            mode=cmd.mode,
+            mode=stm32_mode,
             target_speed=control.speed,
             target_steer=control.steering_rad,
         )

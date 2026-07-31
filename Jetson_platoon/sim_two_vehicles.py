@@ -52,10 +52,13 @@ def run():
     bus = LoopbackBus()
 
     # 두 대 모두 같은 경로 [2,3,4,5]를 달리는 중, 같은 차선
+    # lane_detected/lane_offset = 라인트레이싱이 차선 중앙을 잘 잡고 있는 상태
     v1 = Vehicle(1, bus, EgoState(checkpoint=1, next_checkpoint=2, route=[2, 3, 4, 5],
-                                  destination=5, speed=0.5, heading=0.0, lane=0))
+                                  destination=5, speed=0.5, heading=0.0, lane=0,
+                                  lane_detected=True, lane_offset=0.02))
     v2 = Vehicle(2, bus, EgoState(checkpoint=1, next_checkpoint=2, route=[2, 3, 4, 5],
-                                  destination=5, speed=0.5, heading=0.01, lane=0))
+                                  destination=5, speed=0.5, heading=0.01, lane=0,
+                                  lane_detected=True, lane_offset=0.03))
 
     # 차량 2가 차량 1보다 앞쪽 → UWB 각도 0 근처(정면), 차량 1 기준
     distance = 1.5
