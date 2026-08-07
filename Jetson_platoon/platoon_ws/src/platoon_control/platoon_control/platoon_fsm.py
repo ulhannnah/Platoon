@@ -205,15 +205,20 @@ class DrivingCommand:
 
 
 class PlatoonFSM:
-    def __init__(self, vehicle_id: int = 0, comm: Optional[PlatoonComm] = None):
+    def __init__(self, vehicle_id: int = 0, comm: Optional[PlatoonComm] = None,
+                 is_designated_leader: bool = False):
         """
         vehicle_id : 자차 고유 ID (V2X 패킷에 requester_id 등으로 실림)
                      TODO: 차량마다 실제 고유 ID 부여 방식 확정되면 교체
         comm       : ESP32와의 통신 인터페이스. 아직 시리얼 프로토콜이 없어서
                      기본값은 NullComm(아무것도 안 보내고 항상 빈 리스트 반환).
+        is_designated_leader : 실차 시나리오 고정값 — 젯슨 차량은 True, 라즈베리파이
+                     차량은 False. 역할이 UWB 각도 등으로 동적으로 정해지지 않고
+                     보드 종류로 미리 고정된다.
         """
         self.vehicle_id = vehicle_id
         self.comm: PlatoonComm = comm or NullComm()
+        self.is_designated_leader = is_designated_leader
 
         self.state = PlatoonState.SOLO_DRIVE
         self.match_state = MatchState.IDLE
@@ -222,7 +227,8 @@ class PlatoonFSM:
         self.platoon_id: Optional[int] = None
         self.role: Optional[str] = None       # "LEADER" / "FOLLOWER"
         self.leader_id: Optional[int] = None
-        self.partner_id: Optional[int] = None   # 플래툰 상대 차량(리더 또는 팔로워) ID
+        self.partner_id: Optional[int] = None   # 내 바로 앞차(예정 상대 포함) — 거리유지/JOIN 대상
+        self.successor_id: Optional[int] = None  # 내 바로 뒤에 결합한 차량. 있으면 나는 "맨 뒤"가 아님
         self.candidate_id: Optional[int] = None
         self._pending_candidate: Optional[NearbyVehicle] = None  # JOIN_REQUEST 보낸 상대 캐시
         self._platoon_seq = 1  # TODO: 여러 대 동시 결합 시 전역 고유성 보장 필요 (지금은 단순 카운터)
@@ -252,6 +258,7 @@ class PlatoonFSM:
         # 수신 패킷은 매 주기 한 번만 뽑아서 여기서 전부 처리한다.
         # (여러 곳에서 poll하면 패킷이 서로 잡아먹혀 유실된다)
         self._handle_incoming(ego, nearby)
+        self._expire_open_slot()
 
         # 상태 로직보다 먼저 — 어떤 상태에 있든 안전이 우선한다
         emergency_cmd = self._check_safety(ego, nearby)
@@ -298,24 +305,30 @@ class PlatoonFSM:
         """
         초음파 기반 전방 위험 판정. 반환값: "STOP" / "SLOW" / None
 
-        플래툰 중에는 초음파에 리더가 잡히는 게 정상이므로, 그것만으로 장애물이라
-        판정하면 안 된다. UWB로 잰 리더 거리보다 초음파가 유의미하게 가까울 때만
+        플래툰 팔로워는 초음파에 앞차가 잡히는 게 정상이므로, 그것만으로 장애물이라
+        판정하면 안 된다. UWB로 잰 앞차 거리보다 초음파가 유의미하게 가까울 때만
         "사이에 끼어든 것"으로 본다.
+
+        단, 이 교차판정은 **상대가 내 앞에 있을 때만** 성립한다. 리더는 partner_id가
+        뒤차(successor)라서 전방 초음파에 절대 잡히지 않는데, 그 뒤차 거리와 비교하면
+        진짜 전방 장애물을 "앞차 자신"으로 오판해 비상정지를 놓친다.
+        (예: 뒤차 0.4m, 전방 장애물 0.35m → 0.35 ≥ 0.4-0.15 이라 정지 안 함)
         """
         d = ego.front_distance
         if d is None:
             return None   # 초음파 값 없음 (미측정 또는 STM32 미연결)
 
         partner = self._find_partner(nearby) if self.partner_id else None
-        in_platoon = (self.state != PlatoonState.SOLO_DRIVE
-                      and partner is not None
-                      and partner.uwb_distance is not None)
+        partner_ahead = (self.state != PlatoonState.SOLO_DRIVE
+                         and self.role == "FOLLOWER"
+                         and partner is not None
+                         and partner.uwb_distance is not None)
 
-        if in_platoon:
-            # 리더보다 가까운 무언가가 있는지
+        if partner_ahead:
+            # 앞차보다 가까운 무언가가 있는지
             if d >= partner.uwb_distance - CUTIN_MARGIN_M:
-                return None   # 초음파가 본 게 리더 자신
-        # 단독주행이거나, 끼어든 물체가 확인된 경우 → 순수 거리로 판정
+                return None   # 초음파가 본 게 앞차 자신
+        # 단독주행·리더이거나, 끼어든 물체가 확인된 경우 → 순수 거리로 판정
         if d <= OBSTACLE_STOP_DISTANCE_M:
             return "STOP"
         if d <= OBSTACLE_SLOW_DISTANCE_M:
@@ -338,6 +351,12 @@ class PlatoonFSM:
 
     # ── SOLO_DRIVE + 매칭 파이프라인 (§4~§13) ───────────────────────
     def _run_solo_drive(self, ego: EgoState, nearby: list) -> DrivingCommand:
+        if self.is_designated_leader:
+            # 젯슨(리더)은 능동적으로 결합 상대를 찾지 않는다 — 항상 리더이므로,
+            # 결합은 팔로워 쪽에서 보내는 JOIN_REQUEST를 받는 것으로만 시작된다
+            # (_on_join_request에서 처리). 리더는 그저 계속 SOLO_DRIVE로 주행하며 대기한다.
+            return DrivingCommand(mode="SOLO_DRIVE")
+
         if self.match_state == MatchState.IDLE:
             self.match_state = MatchState.V2X_SEARCH
 
@@ -494,6 +513,7 @@ class PlatoonFSM:
         self.role = None
         self.leader_id = None
         self.partner_id = None
+        self.successor_id = None
         self.candidate_id = None
         self.platoon_route = []
         self.exit_start_checkpoint = None
@@ -692,12 +712,30 @@ class PlatoonFSM:
             reject(REJECT_NOT_ALLOWED)
             return
 
-        # 3. 다른 결합 절차가 진행 중인지 확인
-        busy = (self.state != PlatoonState.SOLO_DRIVE
-                or self.match_state in (MatchState.JOIN_REQUEST,
-                                        MatchState.AWAIT_SETUP,
-                                        MatchState.PLATOON_SETUP))
-        if busy:
+        # 2-1. 실차 시나리오상 리더는 젯슨 1대로 고정이다. 아직 플래툰에 속하지 않은
+        #      팔로워 차량(라즈베리파이)이 요청을 받아주면, 요청자가 SETUP에서 나를
+        #      leader_id로 지정하기 때문에 "라즈베리파이가 리더인 플래툰"이 만들어진다.
+        #      팔로워는 이미 플래툰에 들어가 있을 때(= 맨 뒤 자리를 내주는 경우)만 받는다.
+        if not self.is_designated_leader and self.state == PlatoonState.SOLO_DRIVE:
+            reject(REJECT_NOT_ALLOWED)
+            return
+
+        # 3. "빈 자리(맨 뒤)"인지 확인 — 3대 이상 체인 지원을 위해 §20.7 방식으로:
+        #    - 아직 아무와도 안 붙었고, 다른 상대와 협상 중도 아니거나 (리더의 첫 결합)
+        #    - 이미 MAINTAIN 중이지만 내 뒤에는 아직 아무도 없는 경우(현재 맨 뒤 팔로워)
+        #    둘 중 하나여야 새 요청을 받을 수 있다. 예전엔 "이미 결합돼 있으면 무조건 거절"
+        #    이었는데, 그러면 2번째 차가 결합하는 순간부터 3번째 차는 영원히 거절당한다.
+        #    AWAIT_SETUP 제외는 두 대가 같은 맨 뒤 자리에 동시에 승인받는 것을 막는다.
+        is_open_slot = (
+            (self.state == PlatoonState.SOLO_DRIVE
+             and self.match_state not in (MatchState.JOIN_REQUEST,
+                                          MatchState.AWAIT_SETUP,
+                                          MatchState.PLATOON_SETUP))
+            or (self.state == PlatoonState.PLATOON_MAINTAIN
+                and self.successor_id is None
+                and self.match_state != MatchState.AWAIT_SETUP)
+        )
+        if not is_open_slot:
             reject(REJECT_BUSY)
             return
 
@@ -740,43 +778,107 @@ class PlatoonFSM:
     def _on_join_reject(self, pkt: PlatoonJoinReject) -> None:
         if pkt.requester_id == self.vehicle_id and pkt.responder_id == self.candidate_id:
             self._join_response = False
+            # 거절당한 상대에게 매 주기 재요청하지 않도록 안정성 이력을 비운다.
+            # 이력이 남아 있으면 _is_score_stable()이 계속 True라서 거절→재요청을
+            # 제어주기마다 반복한다. 비워두면 §8대로 5회 재평가 후에나 다시 시도한다.
+            self._score_history.pop(pkt.responder_id, None)
 
     # ── §10.3 PLATOON_SETUP 수신 → 역할·플래툰 ID 채택 ──────────────
     def _on_platoon_setup(self, pkt: PlatoonSetup) -> None:
-        # 내가 참여 대상이 아니면 무시
-        if self.vehicle_id not in (pkt.leader_id, pkt.follower_id):
+        """
+        §10.3 SETUP 수신 처리.
+
+        예전엔 "내가 pkt.leader_id나 pkt.follower_id 중 하나여야 한다"는 조건이었는데,
+        3대 이상 체인에서는 기존 팔로워(맨 뒤, 응답자)가 pkt.leader_id(진짜 리더)도
+        pkt.follower_id(신규 결합자)도 아니게 되어 이 조건에 걸려 자기가 방금 승인한
+        결합 결과를 스스로 무시하는 문제가 있었다. 그래서 "내가 방금 승인 보내고
+        기다리던 바로 그 상대가 보낸 SETUP인가"로 판정 기준을 바꿨다.
+        """
+        if not (self.match_state == MatchState.AWAIT_SETUP and pkt.sender_id == self.candidate_id):
             return
-        # 이미 결합 완료된 상태면 무시 (중복 SETUP 방지)
-        if self.state != PlatoonState.SOLO_DRIVE:
-            return
-        # 내가 보낸 SETUP이 되돌아온 경우는 무시
         if pkt.sender_id == self.vehicle_id:
             return
 
-        self.platoon_id = pkt.platoon_id
-        self.leader_id = pkt.leader_id
-        if pkt.leader_id == self.vehicle_id:
-            self.role = "LEADER"
-            self.partner_id = pkt.follower_id
-        else:
-            self.role = "FOLLOWER"
-            self.partner_id = pkt.leader_id
+        if self.state == PlatoonState.SOLO_DRIVE:
+            # 첫 결합 — 리더가 첫 팔로워를 받아들이는 경우 (또는 그 반대)
+            self.platoon_id = pkt.platoon_id
+            self.leader_id = pkt.leader_id
+            self.role = "LEADER" if pkt.leader_id == self.vehicle_id else "FOLLOWER"
+            self.partner_id = pkt.sender_id     # 내 JOIN 상대 = 방금 결합한 신규 차량
+            self.successor_id = pkt.sender_id   # 이제 내 뒤에 이 차량이 붙음
 
+            self.state = PlatoonState.PLATOON_JOIN
+            self.join_sub_state = JoinSubState.JOIN_REQUESTED
+        else:
+            # 이미 플래툰 중(맨 뒤 팔로워)이었고, 내 뒤에 새 차량이 결합한 경우.
+            # 내 리더/역할/앞차(partner_id)는 그대로 둔다 — 나는 여전히 내 앞차를
+            # 그대로 따라가면 되고, 실제 정렬·간격 조절은 신규 차량 쪽에서 진행한다.
+            self.successor_id = pkt.sender_id
+            # successor가 나중에 EXIT/소실되면 _on_leave가 successor_id를 다시
+            # None으로 돌려서 "맨 뒤" 자리를 재개방한다.
+
+        # AWAIT_SETUP 해제는 두 경우 공통이다. 예전엔 SOLO 분기에서만 IDLE로
+        # 돌려서, MAINTAIN 중 뒤차를 받아준 차량은 match_state가 AWAIT_SETUP에
+        # 영원히 남았다 — 그러면 그 뒤차가 빠진 뒤에도 맨 뒤 자리가 다시 열리지 않는다.
         self.match_state = MatchState.IDLE
-        self.state = PlatoonState.PLATOON_JOIN
-        self.join_sub_state = JoinSubState.JOIN_REQUESTED
+        self.candidate_id = None
         self._pending_candidate = None
         self._wait_since = None
         self._stable_since = None
+
+    def _expire_open_slot(self) -> None:
+        """
+        맨 뒤 자리를 승인해줬는데 신규 차량이 PLATOON_SETUP을 보내지 않는 경우
+        (요청자가 꺼졌거나 패킷 유실) 자리를 잠근 채 방치되지 않도록 대기를 푼다.
+
+        SOLO_DRIVE 상태의 AWAIT_SETUP은 _run_solo_drive()가 같은 타임아웃으로
+        이미 처리하므로 여기서는 플래툰 주행 중인 경우만 본다.
+        """
+        if self.state == PlatoonState.SOLO_DRIVE:
+            return
+        if self.match_state != MatchState.AWAIT_SETUP:
+            return
+        if self._wait_since is None or (time.time() - self._wait_since) <= SETUP_TIMEOUT_S:
+            return
+        self.match_state = MatchState.IDLE
+        self.candidate_id = None
+        self._pending_candidate = None
+        self._wait_since = None
 
     def _on_join_complete(self, pkt: JoinComplete) -> None:
         if pkt.platoon_id == self.platoon_id and pkt.sender_id == self.partner_id:
             self._peer_join_complete = True
 
     def _on_leave(self, pkt: LeaveMessage) -> None:
-        """상대가 플래툰을 떠나면 자차도 해제 절차로 들어간다."""
+        """
+        상대가 플래툰을 떠난다는 통지.
+
+        예전엔 "누가 하나 나가면 나도 무조건 EXIT"이었는데, 3대 이상에서는 안
+        맞는다 — 맨 뒤(3번) 차가 빠지는데 리더나 중간 차까지 끌려 나가면 안 된다.
+        그렇다고 successor_id만 비우면 반대로 "내 앞차가 빠졌는데 아무 반응도
+        안 하는" 구멍이 생긴다. 그래서 앞/뒤를 나눠서 처리한다.
+
+            내 뒤차(successor)가 나감 → 맨 뒤 자리만 다시 열고 계속 주행.
+                                       단 리더는 partner_id == successor_id 라서
+                                       뒤가 비면 플래툰 자체가 성립하지 않는다 → EXIT.
+            내 앞차(partner)가 나감   → 간격 제어 기준이 사라지므로 나도 EXIT.
+            그 외 차량               → 무관하므로 무시.
+
+        TODO: 여기서 전이한 EXIT는 내 LEAVE를 다시 보내지 않는다. 내 뒤차에게는
+              _check_partner_lost() 타임아웃(1초)을 통해 뒤늦게 전파되므로,
+              §21.4의 "마지막 팔로워부터 순차 해제"를 정확히 맞추려면 EXIT_REQUEST/
+              ACK 패킷(§21.2) 구현이 필요하다.
+        """
         if pkt.platoon_id != self.platoon_id:
             return
+
+        if pkt.sender_id == self.successor_id:
+            self.successor_id = None
+            if self.role != "LEADER":
+                return   # 중간 차량은 앞차를 그대로 따라가면 된다
+        elif pkt.sender_id != self.partner_id:
+            return
+
         if self.state in (PlatoonState.PLATOON_JOIN, PlatoonState.PLATOON_MAINTAIN):
             self.state = PlatoonState.PLATOON_EXIT
             self.join_sub_state = None
@@ -839,8 +941,15 @@ class PlatoonFSM:
     def _setup_platoon(self) -> None:
         """
         §10.3 — 리더/팔로워 역할 결정 + 플래툰 ID 생성/공유.
-        앞/뒤 판단은 UWB 각도(전방 90도 이내면 상대가 앞쪽) 기준. 각도 정보가
-        없으면 문서 우선순위 4번(차량 ID가 작은 쪽)으로 임시 대체한다.
+
+        역할은 더 이상 UWB 각도로 추측하지 않는다 — 실차 시나리오가 "젯슨=항상
+        리더, 라즈베리파이=항상 팔로워"로 고정되어 있으므로 self.is_designated_leader
+        하나로 결정된다.
+
+        3대 이상 확장 대응: 이미 플래툰에 속한 차량(맨 뒤 팔로워)에 합류하는 경우,
+        그 차량이 물려준 진짜 리더 ID·플래툰 ID를 그대로 받는다. 그렇지 않으면
+        "내가 결합한 상대가 곧 리더"로 착각해서, 3번째 차가 2번째 차를 리더로
+        오인하는 문제가 생긴다.
 
         TODO: §18 ESP32에 PLATOON_HIGH_RATE 통신모드 전환 명령은 아직 미구현
               (전용 통신 채널 자체가 아직 없음)
@@ -849,23 +958,25 @@ class PlatoonFSM:
         if candidate is None:
             return
 
-        if candidate.uwb_angle is not None:
-            candidate_ahead = abs(candidate.uwb_angle) < (math.pi / 2)
-        else:
-            candidate_ahead = candidate.vehicle_id < self.vehicle_id  # TODO: 임시 대체 기준
-
-        if candidate_ahead:
-            self.role = "FOLLOWER"
-            self.leader_id = candidate.vehicle_id
-            follower_id = self.vehicle_id
-        else:
+        if self.is_designated_leader:
             self.role = "LEADER"
             self.leader_id = self.vehicle_id
-            follower_id = candidate.vehicle_id
+        else:
+            self.role = "FOLLOWER"
+            # candidate가 이미 플래툰에 속해 있으면(맨 뒤 팔로워) 그 차량이 아는
+            # 진짜 리더 ID를 물려받는다. 아니면(candidate가 리더 자신) candidate가 곧 리더.
+            self.leader_id = candidate.leader_id if candidate.leader_id is not None else candidate.vehicle_id
 
-        self.partner_id = candidate.vehicle_id
-        self.platoon_id = self.leader_id * 1000 + self._platoon_seq  # "Leader ID + Sequence" (§10.3)
-        self._platoon_seq += 1
+        follower_id = self.vehicle_id if self.role == "FOLLOWER" else candidate.vehicle_id
+        self.partner_id = candidate.vehicle_id  # 거리 유지 대상 = 방금 결합한 바로 앞차
+
+        if candidate.platoon_id is not None:
+            # 이미 결성된 플래툰 뒤에 합류 — 기존 플래툰 ID를 그대로 받는다
+            self.platoon_id = candidate.platoon_id
+        else:
+            # 새 플래툰 시작 (리더와 첫 팔로워가 처음 만나는 순간)
+            self.platoon_id = self.leader_id * 1000 + self._platoon_seq  # "Leader ID + Sequence" (§10.3)
+            self._platoon_seq += 1
 
         self.comm.send(PlatoonSetup(
             sender_id=self.vehicle_id,
@@ -896,7 +1007,18 @@ class PlatoonFSM:
     def _check_partner_lost(self) -> bool:
         """
         §15.3 상대 차량 정보가 일정 시간 이상 끊겼는지.
-        플래툰 중에는 상대 위치를 모른 채로 간격 제어를 계속하면 안 된다.
+
+        팔로워에게는 안전 조건이다 — 앞차 정보 없이는 간격 제어를 할 수 없다.
+        리더에게는 안전 문제가 아니라 상태 정리 문제다. 뒤차가 조용히 사라져도
+        (전원 차단·통신 범위 이탈처럼 LEAVE조차 못 보내는 경우) 리더 자신의 주행에는
+        지장이 없지만, 아무도 없는 플래툰의 MAINTAIN에 갇힌 채 사라진 차를
+        partner_id로 붙들고 있게 된다. 그러면 새 차량이 붙어도 리더는 여전히
+        옛 차량 기준으로 간격을 계산한다.
+
+        리더의 이탈 처리는 감속을 동반하지 않는다(_abort_to_exit는 목표속도를
+        지정하지 않고 SOLO_DRIVE로만 되돌린다). 또 PARTNER_LOST_TIMEOUT_S(1초)는
+        전용 통신 주기(20~50ms, §18) 기준으로 20~50회 연속 유실이라 순간적인
+        패킷 누락으로는 발동하지 않는다.
         """
         if self._partner_last_seen is None:
             self._partner_last_seen = time.time()

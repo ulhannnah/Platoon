@@ -1,10 +1,13 @@
 """
 platoon_control_launch.py
-mode 파라미터를 launch 인자로 넘길 수 있는 런치 파일.
+mode, is_leader 파라미터를 launch 인자로 넘길 수 있는 런치 파일.
 
 사용:
+    # 젯슨(리더) 차량
+    ros2 launch platoon_control platoon_control_launch.py is_leader:=true
+
+    # 라즈베리파이(팔로워) 차량 — is_leader 생략 시 기본값 false
     ros2 launch platoon_control platoon_control_launch.py mode:=manual
-    ros2 launch platoon_control platoon_control_launch.py mode:=auto   (기본값)
 """
 
 from launch import LaunchDescription
@@ -17,13 +20,20 @@ def generate_launch_description():
     mode_arg = DeclareLaunchArgument(
         "mode", default_value="auto", description="시작 모드: auto 또는 manual"
     )
+    is_leader_arg = DeclareLaunchArgument(
+        "is_leader", default_value="false",
+        description="true면 이 차량은 항상 리더(젯슨). false면 항상 팔로워(라즈베리파이)",
+    )
 
     node = Node(
         package="platoon_control",
         executable="platoon_control_node",
         name="platoon_control_node",
         output="screen",
-        parameters=[{"mode": LaunchConfiguration("mode")}],
+        parameters=[{
+            "mode": LaunchConfiguration("mode"),
+            "is_leader": LaunchConfiguration("is_leader"),
+        }],
     )
 
-    return LaunchDescription([mode_arg, node])
+    return LaunchDescription([mode_arg, is_leader_arg, node])

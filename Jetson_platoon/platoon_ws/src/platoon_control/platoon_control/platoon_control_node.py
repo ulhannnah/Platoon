@@ -52,6 +52,13 @@ def read_esp32_packet():
     """
     ESP32-S3가 올려주는 값. TODO: RPi/Jetson<->ESP32 시리얼 프로토콜 확정되면
     실제 구독/파싱으로 교체. 지금은 main.py 때와 동일한 스텁.
+
+    ★ 프로토콜 확정 시 nearby 항목에 상대 차량의 platoon_state / platoon_id /
+      leader_id 를 반드시 포함해야 한다 (NearbyVehicle의 동명 필드).
+      3대 이상 체인에서 신규 차량은 자기가 붙는 맨 뒤 차량이 아는 "진짜 리더 ID와
+      플래툰 ID"를 이 필드로 물려받는다(platoon_fsm._setup_platoon). 비어 있으면
+      3번째 차량이 2번째 차량을 리더로 착각하고 별도 플래툰을 새로 만든다
+      — tools/sim_two_vehicles.py 시나리오 B-2가 이 경우를 검증한다.
     """
     return {
         "nearby": [],
@@ -95,7 +102,13 @@ class PlatoonControlNode(Node):
         self.declare_parameter("mode", "auto")
         start_mode = self.get_parameter("mode").get_parameter_value().string_value
 
-        self.fsm = PlatoonFSM(vehicle_id=1)  # TODO: 실제 차량 고유 ID로 교체
+        # 실차 시나리오 고정값: 젯슨 차량만 --ros-args -p is_leader:=true 로 띄운다.
+        # 라즈베리파이 팔로워 차량들은 기본값(false) 그대로 실행하면 된다.
+        self.declare_parameter("is_leader", False)
+        is_leader = self.get_parameter("is_leader").get_parameter_value().bool_value
+
+        self.fsm = PlatoonFSM(vehicle_id=1, is_designated_leader=is_leader)  # TODO: 실제 차량 고유 ID로 교체
+        self.get_logger().info(f"역할 고정: {'리더(젯슨)' if is_leader else '팔로워(라즈베리파이)'}")
         self.ego = EgoState()
         self.stm32 = STM32Interface(open_stm32_port())
         self.lane_follower = LaneFollower()

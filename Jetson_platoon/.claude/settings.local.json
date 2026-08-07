@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python tools/sim_two_vehicles.py)",
+      "Bash(python sim3.py)",
+      "Bash(PYTHONIOENCODING=utf-8 python tools/sim_two_vehicles.py)",
+      "Bash(echo \"EXIT=$?\")"
+    ]
+  }
+}
