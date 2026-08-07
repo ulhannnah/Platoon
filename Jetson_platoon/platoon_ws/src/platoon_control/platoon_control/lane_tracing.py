@@ -9,6 +9,9 @@ lane_tracing.py
      이제 detected=False로 명확히 보고합니다.
   3. 정규화 — 픽셀값이 아니라 -1.0~+1.0으로 변환해서 반환합니다 (해상도 바뀌어도
      PID 게인을 다시 안 잡아도 되게).
+  4. 분기점 감지 — 원본에 나중에 추가된 기능을 가져왔습니다. 원본은 픽셀 상수
+     (NORMAL_LANE_WIDTH=320, 640px 화면 전제)를 썼는데, 여기서는 위 3번과 같은
+     이유로 화면 폭 대비 비율로 바꿨습니다.
 
 PerceptionTracker는 카메라를 백그라운드 스레드에서 계속 돌리고, 메인 루프는
 get_lane()으로 "가장 최근 결과"만 논블로킹으로 읽습니다. 이렇게 나눈 이유는
@@ -49,15 +52,35 @@ HISTOGRAM_MIN_PEAK = 100
 SOLID_LEN_RATIO = 0.45
 DASHED_LEN_RATIO = 0.10
 
+# ── 분기점(갈림길) 감지 ────────────────────────────────────────────
+# 판정 근거: 갈림길에 들어서면 (1) 좌우 차선 간격이 벌어지고 (2) 오른쪽 차선이
+# 우측으로 급하게 눕는다. 두 조건이 동시에 성립할 때만 분기로 본다.
+#
+# 원본은 NORMAL_LANE_WIDTH=320(px)을 그대로 썼는데 640px 화면을 전제한 값이라,
+# 해상도를 바꾸면 조용히 오작동한다. 화면 폭 대비 비율로 바꿔뒀다.
+NORMAL_LANE_WIDTH_RATIO = 0.5   # 직진 시 정상 차선폭 ÷ 화면폭 (640px에서 320px)
+JUNCTION_WIDTH_RATIO = 1.30     # 정상폭의 몇 배 이상 벌어지면 "확장"으로 볼지
+JUNCTION_RIGHT_LEAN = 0.40      # 오른쪽 차선이 위로 갈수록 우측으로 눕는 정도(dx/dy)
+
+JUNCTION_NONE = "NONE"
+JUNCTION_FORK_RIGHT = "FORK_RIGHT"
+
 
 @dataclass
 class LaneDebugInfo:
     """제어에는 안 쓰지만 로깅/디버그에 유용한 부가 정보"""
     left_style: str = "Unknown"
     right_style: str = "Unknown"
-    left_slope: float = 0.0
+    left_slope: float = 0.0     # dy/dx. 원본이 발행하던 값과 같은 정의 (거의 수직이면 큰 값)
     right_slope: float = 0.0
+    # dx/dy에 부호를 뒤집은 값 = "위로 갈수록 바깥으로 눕는 정도". 수직이면 0.
+    # 분기 판정에 쓰는 건 이쪽이다 — dy/dx는 수직선에서 발산해서 임계값을 못 잡는다.
+    left_lean: float = 0.0
+    right_lean: float = 0.0
     bases_found: bool = False
+    junction: str = JUNCTION_NONE   # NONE / FORK_RIGHT
+    lane_width_bottom: float = 0.0  # 하단 차선폭(px) — 임계값 튜닝할 때 보는 값
+    lane_width_top: float = 0.0     # 상단 차선폭(px)
 
 
 def _classify_line_style(edges_roi: np.ndarray, mask: np.ndarray, roi_h: int) -> str:
@@ -165,7 +188,8 @@ def detect_lane(frame: np.ndarray):
     if len(leftx) > MIN_FIT_POINTS:
         left_fit = np.polyfit(lefty, leftx, 2)
         left_fitx = left_fit[0] * ploty**2 + left_fit[1] * ploty + left_fit[2]
-        info.left_slope = np.polyfit(leftx, lefty, 1)[0]
+        info.left_slope = float(np.polyfit(leftx, lefty, 1)[0])
+        info.left_lean = -float(np.polyfit(lefty, leftx, 1)[0])
         pts_left = np.vstack((left_fitx, ploty + roi_top)).astype(np.int32).T
         cv2.polylines(debug_img, [pts_left], False, (255, 0, 0), 3)
 
@@ -179,7 +203,8 @@ def detect_lane(frame: np.ndarray):
     if len(rightx) > MIN_FIT_POINTS:
         right_fit = np.polyfit(righty, rightx, 2)
         right_fitx = right_fit[0] * ploty**2 + right_fit[1] * ploty + right_fit[2]
-        info.right_slope = np.polyfit(rightx, righty, 1)[0]
+        info.right_slope = float(np.polyfit(rightx, righty, 1)[0])
+        info.right_lean = -float(np.polyfit(righty, rightx, 1)[0])
         pts_right = np.vstack((right_fitx, ploty + roi_top)).astype(np.int32).T
         cv2.polylines(debug_img, [pts_right], False, (0, 0, 255), 3)
 
@@ -189,6 +214,21 @@ def detect_lane(frame: np.ndarray):
             if 0 <= x_val < W and 0 <= y_val < roi_h:
                 cv2.circle(mask, (x_val, y_val), 15, 255, -1)
         info.right_style = _classify_line_style(roi_edges, mask, roi_h)
+
+    # ── 분기점(갈림길) 감지 ──────────────────────────────────────
+    # 차선을 제대로 못 잡았을 때(bases_found=False)는 leftx_base/rightx_base가
+    # 강제 기본값(W/4, 3W/4)이라 폭이 항상 화면의 절반으로 나온다. 그 값으로
+    # 분기 판정을 하면 의미가 없으므로 검출에 성공했을 때만 본다.
+    info.lane_width_bottom = float(rightx_base - leftx_base)
+    info.lane_width_top = float(right_centers[-1] - left_centers[-1])
+
+    if bases_found:
+        width_threshold = W * NORMAL_LANE_WIDTH_RATIO * JUNCTION_WIDTH_RATIO
+        width_expanded = (info.lane_width_bottom > width_threshold
+                          or info.lane_width_top > width_threshold)
+        right_curved = info.right_lean > JUNCTION_RIGHT_LEAN
+        if width_expanded and right_curved:
+            info.junction = JUNCTION_FORK_RIGHT
 
     # ── 오프셋 계산 (부호 수정 + 정규화) ─────────────────────────
     # 원본은 img_center - lane_center 였음 (부호 반대) → driving_control.py 기준으로 수정:
@@ -206,6 +246,11 @@ def detect_lane(frame: np.ndarray):
                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
     cv2.putText(debug_img, f"offset(norm): {offset_norm:+.3f}  detected={detected}", (10, 55),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+    cv2.putText(debug_img, f"width B/T: {info.lane_width_bottom:.0f}/{info.lane_width_top:.0f}",
+                (10, 85), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+    if info.junction != JUNCTION_NONE:
+        cv2.putText(debug_img, f"JUNCTION: {info.junction}", (10, 115),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
     cv2.line(debug_img, (int(img_center), roi_top), (int(img_center), roi_top + 20), (0, 0, 255), 3)
     cv2.line(debug_img, (int(lane_center), roi_top), (int(lane_center), roi_top + 20), (255, 0, 0), 3)
 
@@ -224,6 +269,7 @@ class PerceptionTracker:
 
     def __init__(self):
         self._lane_result = LaneTracingResult(offset=0.0, detected=False)
+        self._lane_info = LaneDebugInfo()
         self._sign_result = None
         self._debug_frame: Optional[np.ndarray] = None
         self._lock = threading.Lock()
@@ -249,7 +295,7 @@ class PerceptionTracker:
         while self._running:
             try:
                 frame = self.camera.read()
-                lane_result, debug_img, _ = detect_lane(frame)
+                lane_result, debug_img, lane_info = detect_lane(frame)
                 sign_result = detect_signs(frame) if detect_signs is not None else None
             except Exception as e:
                 print(f"[warn] 프레임 처리 중 오류: {e}")
@@ -257,12 +303,25 @@ class PerceptionTracker:
 
             with self._lock:
                 self._lane_result = lane_result
+                self._lane_info = lane_info
                 self._sign_result = sign_result
                 self._debug_frame = debug_img
 
     def get_lane(self) -> LaneTracingResult:
         with self._lock:
             return self._lane_result
+
+    def get_lane_info(self) -> LaneDebugInfo:
+        """
+        차선 형태(실선/점선), 기울기, 분기점 감지 결과 등 부가 정보.
+        제어에는 안 쓰이고 로깅·디버그용이다.
+
+        TODO: junction("FORK_RIGHT")을 EgoState.checkpoint 갱신에 쓸지 검토.
+              체크포인트 인식 방식(표지판 / 바닥마커 / 주행거리)이 아직 팀
+              미정이라 지금은 FSM에 연결하지 않았다 (docs/jetson_rpi_todo.md §1.7).
+        """
+        with self._lock:
+            return self._lane_info
 
     def get_sign(self):
         with self._lock:
