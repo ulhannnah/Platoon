@@ -21,6 +21,7 @@ setup(
     entry_points={
         "console_scripts": [
             "platoon_control_node = platoon_control.platoon_control_node:main",
+            "v2x_node = platoon_control.v2x_node:main",
         ],
     },
 )

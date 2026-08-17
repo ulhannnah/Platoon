@@ -2,19 +2,28 @@
 platoon_control_node.py
 main.py를 ROS2 노드로 재작성한 버전.
 
-바뀐 것: while문 + time.sleep() → create_timer(콜백 방식)
+바뀐 것 1: while문 + time.sleep() → create_timer(콜백 방식)
+바뀐 것 2: ESP32(V2X) 통신을 v2x_node.py로 분리했다. 이 노드는 이제 ESP32와
+          직접 얘기하지 않고 /v2x/esp32_data 구독 + RosPlatoonComm(ros_v2x_comm.py)
+          으로만 주변 차량 정보와 패킷을 주고받는다. read_esp32_packet()이 있던
+          자리는 이제 _on_esp32_data() 구독 콜백이 최신값을 저장해두는 방식으로
+          바뀌었을 뿐, merge_link_into_nearby()/find_partner() 등 나머지 로직은
+          전혀 안 바뀌었다 (esp32_data의 dict 구조가 동일하므로).
 안 바뀐 것: fsm.update(), compute_control() 등 판단/제어 로직은 전부 그대로
-           (platoon_fsm.py, driving_control.py 등 원본 그대로 가져다 씀)
+           (platoon_fsm.py는 v2x_node.py의 존재 자체를 모른다 — PlatoonComm
+           인터페이스만 알면 되므로 이번 노드 분리로 1줄도 안 고쳤다)
 
-지금은 노드 1개로 시작합니다 (라인트레이싱/ESP32가 아직 이 노드 안에 통합되어
-있어서). 나중에 라인트레이싱이 정말 별도 프로세스/노드로 분리되면, 그때는
-perception.get_lane() 호출을 /lane_tracing 토픽 구독으로 바꾸면 됩니다 —
-fsm.update() 이후 로직은 안 바뀝니다.
+지금은 카메라(라인트레이싱)만 이 노드 안에 남아 있습니다. 나중에 그것도 별도
+프로세스/노드로 분리되면, 그때는 perception.get_lane() 호출을 /lane_tracing
+토픽 구독으로 바꾸면 됩니다 — fsm.update() 이후 로직은 안 바뀝니다.
 
 실행:
+    ros2 launch platoon_control platoon_control_launch.py is_leader:=true
+    (v2x_node를 platoon_control_node와 함께 띄워준다 — 런치 파일 참고)
+
+    개별 실행(디버깅용, v2x_node를 따로 띄워야 함):
+    ros2 run platoon_control v2x_node
     ros2 run platoon_control platoon_control_node --ros-args -p mode:=manual
-    ros2 run platoon_control platoon_control_node --ros-args -p mode:=auto
-    (mode 파라미터 생략 시 auto)
 
 실행 중 Q로 자동/수동 전환 가능 (이전과 동일).
 """
@@ -28,6 +37,7 @@ from .driving_control import compute_control, LaneFollower, MAX_STEERING_RAD
 from .stm32_interface import STM32Interface
 from .manual_control import ManualController
 from .lane_tracing import PerceptionTracker
+from .ros_v2x_comm import RosPlatoonComm, decode_esp32_data
 
 
 def open_stm32_port():
@@ -46,27 +56,6 @@ def open_stm32_port():
             continue
     print(f"[warn] STM32 포트를 못 열었습니다 (시도: {candidates}). 송수신 없이 진행합니다.")
     return None
-
-
-def read_esp32_packet():
-    """
-    ESP32-S3가 올려주는 값. TODO: RPi/Jetson<->ESP32 시리얼 프로토콜 확정되면
-    실제 구독/파싱으로 교체. 지금은 main.py 때와 동일한 스텁.
-
-    ★ 프로토콜 확정 시 nearby 항목에 상대 차량의 platoon_state / platoon_id /
-      leader_id 를 반드시 포함해야 한다 (NearbyVehicle의 동명 필드).
-      3대 이상 체인에서 신규 차량은 자기가 붙는 맨 뒤 차량이 아는 "진짜 리더 ID와
-      플래툰 ID"를 이 필드로 물려받는다(platoon_fsm._setup_platoon). 비어 있으면
-      3번째 차량이 2번째 차량을 리더로 착각하고 별도 플래툰을 새로 만든다
-      — tools/sim_two_vehicles.py 시나리오 B-2가 이 경우를 검증한다.
-    """
-    return {
-        "nearby": [],
-        "link_partner_id": None,
-        "link_distance": None,
-        "link_angle": None,
-        "link_speed": None,
-    }
 
 
 def merge_link_into_nearby(esp32_data: dict, partner_id) -> list:
@@ -107,9 +96,22 @@ class PlatoonControlNode(Node):
         self.declare_parameter("is_leader", False)
         is_leader = self.get_parameter("is_leader").get_parameter_value().bool_value
 
-        self.fsm = PlatoonFSM(vehicle_id=1, is_designated_leader=is_leader)  # TODO: 실제 차량 고유 ID로 교체
+        # comm=RosPlatoonComm(self) — v2x_node.py와 /v2x/outgoing, /v2x/incoming
+        # 토픽으로 패킷을 주고받는다. FSM 입장에서는 LoopbackComm(시뮬)이나
+        # NullComm(기본값)과 다를 게 없다 — send()/poll() 뒤에 뭐가 있는지 모른다.
+        self.fsm = PlatoonFSM(vehicle_id=1, comm=RosPlatoonComm(self),
+                              is_designated_leader=is_leader)  # TODO: 실제 차량 고유 ID로 교체
         self.get_logger().info(f"역할 고정: {'리더(젯슨)' if is_leader else '팔로워(라즈베리파이)'}")
         self.ego = EgoState()
+
+        # v2x_node.py가 주기적으로 올려주는 값. read_esp32_packet()이 있던 자리 —
+        # 이제 함수 호출이 아니라 최신 수신값을 저장해두는 방식이라 초기값이 필요하다
+        # (v2x_node가 아직 첫 메시지를 안 보냈을 때 = 스텁이었을 때와 동일한 빈 상태).
+        self._esp32_data = {
+            "nearby": [], "link_partner_id": None,
+            "link_distance": None, "link_angle": None, "link_speed": None,
+        }
+        self.create_subscription(String, "/v2x/esp32_data", self._on_esp32_data, 10)
         self.stm32 = STM32Interface(open_stm32_port())
         self.lane_follower = LaneFollower()
         self.perception = PerceptionTracker()
@@ -133,6 +135,9 @@ class PlatoonControlNode(Node):
 
         self.timer = self.create_timer(self.loop_dt, self._tick)
 
+    def _on_esp32_data(self, msg: String) -> None:
+        self._esp32_data = decode_esp32_data(msg.data)
+
     # ── 매 주기 호출되는 콜백 — main.py의 while문 안 내용과 동일 ──────
     def _tick(self):
         if self.manual.available and self.manual.should_quit:
@@ -148,7 +153,7 @@ class PlatoonControlNode(Node):
             self._publish_status(f"MANUAL steer={steering:+.3f} speed={speed:+.2f}")
             return
 
-        esp32_data = read_esp32_packet()
+        esp32_data = self._esp32_data
 
         feedback = self.stm32.poll()
         if feedback is not None:
