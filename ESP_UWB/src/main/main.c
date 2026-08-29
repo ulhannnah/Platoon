@@ -55,6 +55,13 @@ static void task_pi_tx(void *arg)
         vTaskDelay(pdMS_TO_TICKS(APP_PI_TX_PERIOD_MS));
     }
 }
+
+static void task_pi_rx(void *arg)
+{
+    (void)arg;
+    pi_serial_bridge_rx_loop();
+    vTaskDelete(NULL);
+}
 #endif
 
 static void task_monitor(void *arg)
@@ -90,6 +97,7 @@ void app_main(void)
 #endif
 #if APP_ENABLE_PI_BRIDGE
     xTaskCreate(task_pi_tx, "pi_tx", 4096, NULL, 4, NULL);
+    xTaskCreate(task_pi_rx, "pi_rx", 4096, NULL, 4, NULL);
 #endif
     xTaskCreate(task_monitor, "monitor", 3072, NULL, 3, NULL);
 }

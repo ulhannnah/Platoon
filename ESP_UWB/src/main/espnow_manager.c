@@ -1,6 +1,7 @@
 #include "espnow_manager.h"
 
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -12,6 +13,8 @@
 #include "esp_now.h"
 #include "esp_timer.h"
 #include "esp_wifi.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 #include "nvs_flash.h"
 #include "packet_defs.h"
 #include "vehicle_table.h"
@@ -21,6 +24,9 @@ static const uint8_t BROADCAST_MAC[ESP_NOW_ETH_ALEN] = {0xff, 0xff, 0xff, 0xff, 
 static uint16_t s_seq;
 static uint32_t s_self_vehicle_id;
 static uint32_t s_self_uwb_id;
+static pi_self_status_t s_pi_status;
+static bool s_has_pi_status;
+static SemaphoreHandle_t s_status_lock;
 
 static void print_mac(const uint8_t *mac)
 {
@@ -64,7 +70,8 @@ static void on_recv(const esp_now_recv_info_t *info, const uint8_t *data, int le
     printf("msg_type       : %" PRIu8 "\n", packet.msg_type);
     printf("vehicle_id     : %" PRIu32 "\n", packet.vehicle_id);
     printf("uwb_id         : %" PRIu32 "\n", packet.uwb_id);
-    printf("state          : %" PRIu8 "\n", packet.state);
+    printf("driving_state  : %" PRIu8 "\n", packet.state);
+    printf("platoon_state  : %" PRIu8 "\n", packet.platoon_state);
     printf("destination_id : %" PRIu8 "\n", packet.destination_id);
     printf("platoon_id     : %" PRIu32 "\n", packet.platoon_id);
     printf("platoon_enable : %" PRIu8 "\n", packet.platoon_enable);
@@ -116,6 +123,8 @@ static esp_err_t wifi_init_for_espnow(void)
 
 esp_err_t espnow_manager_init(void)
 {
+    s_status_lock = xSemaphoreCreateMutex();
+
     ESP_RETURN_ON_ERROR(wifi_init_for_espnow(), TAG, "wifi init failed");
     ESP_RETURN_ON_ERROR(esp_now_init(), TAG, "esp-now init failed");
     ESP_RETURN_ON_ERROR(esp_now_register_send_cb(on_send), TAG, "esp-now send callback failed");
@@ -140,21 +149,34 @@ esp_err_t espnow_manager_send_self_status(void)
 {
     const uint32_t now_ms = (uint32_t)(esp_timer_get_time() / 1000);
     const uint16_t seq = s_seq++;
-    const uint8_t state = (seq % 10u) < 5u ? V2X_STATE_SOLO : V2X_STATE_WAIT;
-    const uint8_t destination_id = (uint8_t)((seq % 4u) + 1u);
-    const float speed_mps = 0.30f + 0.01f * (float)(seq % 20u);
-    const float heading_deg = (float)((seq * 15u) % 360u);
+
+    pi_self_status_t pi_status = {0};
+    bool has_pi_status = false;
+    if (s_status_lock != NULL) {
+        xSemaphoreTake(s_status_lock, portMAX_DELAY);
+        pi_status = s_pi_status;
+        has_pi_status = s_has_pi_status;
+        xSemaphoreGive(s_status_lock);
+    }
+
+    const uint8_t driving_state = has_pi_status ? pi_status.driving_state
+                                                : ((seq % 10u) < 5u ? V2X_STATE_SOLO : V2X_STATE_WAIT);
+    const uint8_t platoon_state = has_pi_status ? pi_status.platoon_state : driving_state;
+    const uint8_t destination_id = has_pi_status ? pi_status.destination_id : (uint8_t)((seq % 4u) + 1u);
+    const float speed_mps = has_pi_status ? pi_status.speed_mps : 0.30f + 0.01f * (float)(seq % 20u);
+    const float heading_deg = has_pi_status ? pi_status.heading_deg : (float)((seq * 15u) % 360u);
 
     vehicle_status_packet_t packet = {
         .msg_type = V2X_MSG_BASIC_STATUS,
-        .state = state,
+        .state = driving_state,
         .destination_id = destination_id,
-        .vehicle_id = s_self_vehicle_id,
-        .uwb_id = s_self_uwb_id,
-        .platoon_id = APP_PLATOON_ID,
-        .platoon_enable = APP_PLATOON_ENABLE,
-        .platoon_role = APP_PLATOON_ROLE,
-        .platoon_index = APP_PLATOON_INDEX,
+        .platoon_state = platoon_state,
+        .vehicle_id = has_pi_status && pi_status.vehicle_id != 0 ? pi_status.vehicle_id : s_self_vehicle_id,
+        .uwb_id = has_pi_status && pi_status.uwb_id != 0 ? pi_status.uwb_id : s_self_uwb_id,
+        .platoon_id = has_pi_status ? pi_status.platoon_id : APP_PLATOON_ID,
+        .platoon_enable = has_pi_status ? pi_status.platoon_enable : APP_PLATOON_ENABLE,
+        .platoon_role = has_pi_status ? pi_status.platoon_role : APP_PLATOON_ROLE,
+        .platoon_index = has_pi_status ? pi_status.platoon_index : APP_PLATOON_INDEX,
         .speed_mps = speed_mps,
         .heading_deg = heading_deg,
         .timestamp_ms = now_ms,
@@ -163,16 +185,46 @@ esp_err_t espnow_manager_send_self_status(void)
 
     esp_err_t err = esp_now_send(BROADCAST_MAC, (const uint8_t *)&packet, sizeof(packet));
     if (err == ESP_OK) {
-        ESP_LOGI(TAG, "[TX] vehicle_id=%" PRIu32 " state=%" PRIu8 " dest=%" PRIu8
+        ESP_LOGI(TAG, "[TX] vehicle_id=%" PRIu32 " driving=%" PRIu8 " platoon=%" PRIu8 " dest=%" PRIu8
                  " speed=%.3f heading=%.1f seq=%" PRIu16,
                  packet.vehicle_id,
                  packet.state,
+                 packet.platoon_state,
                  packet.destination_id,
                  packet.speed_mps,
                  packet.heading_deg,
                  packet.seq);
     }
     return err;
+}
+
+void espnow_manager_update_self_status_from_pi(const pi_self_status_t *status)
+{
+    if (status == NULL) {
+        return;
+    }
+
+    if (s_status_lock != NULL) {
+        xSemaphoreTake(s_status_lock, portMAX_DELAY);
+        s_pi_status = *status;
+        s_has_pi_status = true;
+        if (s_pi_status.vehicle_id != 0) {
+            s_self_vehicle_id = s_pi_status.vehicle_id;
+        }
+        if (s_pi_status.uwb_id != 0) {
+            s_self_uwb_id = s_pi_status.uwb_id;
+        }
+        xSemaphoreGive(s_status_lock);
+    }
+
+    ESP_LOGI(TAG, "Pi self_status applied vehicle_id=%" PRIu32 " uwb_id=%" PRIu32
+             " driving=%" PRIu8 " platoon=%" PRIu8 " speed=%.3f heading=%.1f",
+             status->vehicle_id,
+             status->uwb_id,
+             status->driving_state,
+             status->platoon_state,
+             status->speed_mps,
+             status->heading_deg);
 }
 
 uint32_t espnow_manager_get_self_vehicle_id(void)

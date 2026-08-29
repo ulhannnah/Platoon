@@ -6,7 +6,7 @@ typedef struct __attribute__((packed)) {
     uint8_t msg_type;
     uint8_t state;
     uint8_t destination_id;
-    uint8_t reserved;
+    uint8_t platoon_state;
 
     uint32_t vehicle_id;
     uint32_t uwb_id;

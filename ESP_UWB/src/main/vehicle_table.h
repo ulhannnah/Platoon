@@ -19,6 +19,9 @@ typedef struct {
     float speed_mps;
     float heading_deg;
 
+    uint8_t driving_state;
+    uint8_t platoon_state;
+
     uint32_t platoon_id;
     uint8_t platoon_enable;
     uint8_t platoon_role;

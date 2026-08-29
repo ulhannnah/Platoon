@@ -68,6 +68,8 @@ void vehicle_table_update_status(const vehicle_status_packet_t *packet, uint32_t
         item->uwb_id = packet->uwb_id;
         item->speed_mps = packet->speed_mps;
         item->heading_deg = packet->heading_deg;
+        item->driving_state = packet->state;
+        item->platoon_state = packet->platoon_state;
         item->platoon_id = packet->platoon_id;
         item->platoon_enable = packet->platoon_enable;
         item->platoon_role = packet->platoon_role;
