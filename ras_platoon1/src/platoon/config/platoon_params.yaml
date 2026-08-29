@@ -1,0 +1,31 @@
+decision_node:
+  ros__parameters:
+    # go/stop 명령어로 시작/정지
+    is_running: false
+
+    # 차선 감지 못했을 때 멈출지 여부
+    lost_stop: True
+    # steer = offset * offset_gain
+    offset_gain: 0.5
+    # 차선 복귀를 위한 목표 각도(degree) - 최대 조향각으로 할꺼라 vehicle_cmd 보면서 해야함.
+    target_recovery_deg: 25.0
+    # 곡선/직선 감지
+    curve_slope_threshold: 5
+
+control_node:
+  ros__parameters:
+    # 모터 고정 듀티 (0 ~ 255)
+    slow_duty: 80                 # speed_mode 1 (감속/코너/복귀)
+    cruise_duty: 130              # speed_mode 2 (직진 크루즈)
+
+
+lane_detector_node:
+  ros__parameters:
+    canny_low: 50
+    canny_high: 150
+    hist_threshold: 100
+    window_margin: 30
+    window_minpix: 20
+    virtual_offset: 160
+
+
