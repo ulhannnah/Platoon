@@ -31,7 +31,11 @@ class ControlNode(Node):
         super().__init__('control')
 
         # 1. 내부 고정변수
-        self.port = '/dev/ttyACM0'
+        # /dev/ttyACM0 대신 by-id 고정 경로 사용 — ttyACM 번호는 재부팅 때마다
+        # USB 열거 순서에 따라 ESP32/STM32끼리 뒤바뀔 수 있다(실제로 겪은 문제).
+        # 이 경로는 이 STM32 보드의 시리얼번호에 매여 있어 재부팅해도 안 바뀐다.
+        # 보드를 교체하면 `ls /dev/serial/by-id/`로 새 이름 확인 후 갱신 필요.
+        self.port = '/dev/serial/by-id/usb-STMicroelectronics_STM32_STLink_066AFF485775495067181954-if02'
         self.baud = 115200
         self.steer_offset = 70
         self.stop_duty = 0

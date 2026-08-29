@@ -14,18 +14,20 @@ ESP32-S3 V2X 통신 전용 ROS2 노드.
 fsm_decision_node.py 쪽에만 있다 (이 노드가 fsm_decision_node.py를 import하지
 않는 것도 그래서다 — 두 노드는 토픽으로만 연결된다).
 
-★ 포트 충돌 주의: 문서는 ESP32도 /dev/ttyACM0을 예상한다고 되어 있지만,
-  control_node.py가 이미 STM32용으로 /dev/ttyACM0을 쓰고 있다. 같은 포트를 두
-  USB 장치가 동시에 쓸 수 없으므로, 실제로는 다른 경로(예: /dev/ttyACM1)로
-  잡힐 가능성이 높다. 실행 전 `ls /dev/ttyACM* /dev/ttyUSB*`로 확인하고
-  serial_port 파라미터로 지정할 것 — 기본값은 확정이 아니라 추정값이다.
+★ 포트 번호(ttyACM0/1)는 재부팅 때마다 USB 열거 순서에 따라 ESP32/STM32끼리
+  뒤바뀔 수 있다(실측으로 확인됨). 그래서 기본값을 /dev/serial/by-id/의 고정
+  경로로 잡는다 — 이 경로는 이 ESP32 보드의 시리얼번호에 매여 있어 재부팅해도
+  안 바뀐다. 보드를 교체하면 `ls /dev/serial/by-id/`로 새 이름 확인 후 이
+  기본값 또는 serial_port 파라미터를 갱신할 것.
 
 토픽:
     발행 /v2x/targets      V2xTargets  (ESP32가 준 주변 차량 목록)
     구독 /v2x/self_status  SelfStatus  (fsm_decision_node.py가 주는 내 상태)
 
-실행:
-    ros2 run platoon v2x_node --ros-args -p serial_port:=/dev/ttyACM1
+실행 (기본값이 by-id 고정 경로라 보통은 파라미터 없이 실행):
+    ros2 run platoon v2x_node
+    # 다른 포트로 강제 지정하고 싶을 때만:
+    ros2 run platoon v2x_node --ros-args -p serial_port:=/dev/ttyACM0
 """
 
 import json
@@ -69,7 +71,10 @@ class V2XNode(Node):
     def __init__(self):
         super().__init__("v2x_node")
 
-        self.declare_parameter("serial_port", "/dev/ttyACM1")
+        self.declare_parameter(
+            "serial_port",
+            "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_14:C1:9F:C1:26:8C-if00",
+        )
         self.declare_parameter("baud", 115200)
         self.declare_parameter("self_status_rate_hz", 10.0)  # 문서 §10: 주행 통합 단계 50~100ms
 
