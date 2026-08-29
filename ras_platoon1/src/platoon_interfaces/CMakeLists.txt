@@ -10,6 +10,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/VehicleCmd.msg"
   "msg/Telemetry.msg"
   "msg/FsmCmd.msg"
+  "msg/V2xTarget.msg"
+  "msg/V2xTargets.msg"
+  "msg/SelfStatus.msg"
 
 )
 

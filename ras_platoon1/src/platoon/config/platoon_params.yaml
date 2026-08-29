@@ -18,6 +18,12 @@ control_node:
     slow_duty: 80                 # speed_mode 1 (감속/코너/복귀)
     cruise_duty: 130              # speed_mode 2 (직진 크루즈)
 
+    # speed_mps 계산용 (모터 제어엔 안 씀 — 지금은 고정 듀티라 PID 게인 없음).
+    # V2X self_status로 다른 차량에 알려줄 "지금 실제 속도"를 만드는 데만 쓰인다.
+    # TODO: 실측 필요 — 바퀴 지름 줄자로 재고, CPR은 엔코더 스펙시트 확인
+    enc_cpr: 1560.0                # 바퀴 1회전당 엔코더 펄스 수
+    wheel_dia_mm: 65.0             # 바퀴 지름 (mm)
+
 
 lane_detector_node:
   ros__parameters:

@@ -20,7 +20,7 @@ def generate_launch_description():
 
     )
 
-    # 3. 플래툰 할때는 이 코드로
+    # 3. 플래툰 할때는 이 코드로 (v2x_node도 같이 켜야 함 — fsm_decision의 nearby_vehicles 공급원)
     '''
     fsm_decision = Node(
         package='platoon',
@@ -31,6 +31,20 @@ def generate_launch_description():
         parameters=[{
             'vehicle_id': 1,
             'is_designated_leader': False,
+            'uwb_id': 0,          # ESP32와 맞는 실제 UWB ID로 교체
+            'destination_id': 0,
+        }]
+    )
+
+    v2x = Node(
+        package='platoon',
+        executable='v2x_node',
+        name='v2x_node',
+        output='screen',
+        emulate_tty=True,
+        parameters=[{
+            'serial_port': '/dev/ttyACM1',  # control_node가 /dev/ttyACM0(STM32)를 이미 씀 — 실제 포트 ls로 확인
+            'baud': 115200,
         }]
     )
     '''

@@ -1,4 +1,5 @@
 import os
+import math
 import rclpy
 from rclpy.node import Node
 import serial
@@ -38,15 +39,22 @@ class ControlNode(Node):
         # 1-1. 파라미터 선언 및 초기값 할당
         self.declare_parameter('slow_duty', 80)
         self.declare_parameter('cruise_duty', 130)
+        # PID 제거하면서 같이 없어졌던 값들. speed_mps 계산에만 다시 쓴다
+        # (모터 제어엔 안 씀 — duty는 여전히 고정값). TODO: 실측 필요.
+        self.declare_parameter('enc_cpr', 1560.0)       # 바퀴 1회전당 엔코더 펄스 수
+        self.declare_parameter('wheel_dia_mm', 65.0)    # 바퀴 지름(mm)
 
         self.slow_duty = self.get_parameter('slow_duty').value
         self.cruise_duty = self.get_parameter('cruise_duty').value
+        self.enc_cpr = self.get_parameter('enc_cpr').value
+        self.wheel_circ_m = (math.pi * self.get_parameter('wheel_dia_mm').value) / 1000.0
 
         self.get_logger().info('=============== Decision Node Parameters ===============')
         self.get_logger().info(f'초기 파라미터 로드 - slow_duty: {self.slow_duty}, cruise_duty: {self.cruise_duty}')
         self.get_logger().info('========================================================')
         # 2. 상태 저장용 변수 초기화
         self.current_speed = 0.0  # 텔레메트리에서 지속적으로 갱신됨
+        self.last_tele_time = time.time()  # speed_mps 계산용 dt 기준
 
         # 3. 시리얼 스레드 락 및 통신 포트 초기화
         self.serial_lock = threading.Lock()
@@ -173,8 +181,17 @@ class ControlNode(Node):
         msg.right_delta = struct.unpack('>h', frame[4:6])[0]
         msg.dist_cm = struct.unpack('>H', frame[6:8])[0]
 
-        # [핵심] 좌우 엔코더 변화량의 평균을 '현재 속도'로 저장하여 PID 계산에 활용
-        self.current_speed = (msg.left_delta + msg.right_delta) / 2.0
+        # 좌우 엔코더 변화량의 평균 펄스 수 (PID 제거 이후 duty 제어엔 안 쓰지만,
+        # 다른 노드가 "지금 실제 속도"를 알아야 할 때 필요해서 m/s로 환산해 내보낸다)
+        now = time.time()
+        dt = now - self.last_tele_time
+        self.last_tele_time = now
+        if dt <= 0.0 or dt > 0.5:  # 패킷 누락/최초 수신 시 비정상 dt 방지
+            dt = 0.02
+
+        avg_delta = (msg.left_delta + msg.right_delta) / 2.0
+        self.current_speed = (avg_delta / self.enc_cpr) * self.wheel_circ_m / dt
+        msg.speed_mps = self.current_speed
 
         self.tele_pub.publish(msg)
 

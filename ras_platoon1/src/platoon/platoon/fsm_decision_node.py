@@ -1,17 +1,44 @@
 """
 FSM 기반 판단 노드
 - platoon_fsm.py 모듈을 불러와 ROS 2 환경에서 가동
+
+V2X 연동 (v2x_node.py와 토픽으로만 연결, 서로 import 안 함):
+    구독 /v2x/targets       (V2xTargets) → NearbyVehicle 리스트로 변환해 FSM에 공급
+    발행 /v2x/self_status   (SelfStatus) → v2x_node.py가 그대로 ESP32로 중계
+
+★ 남은 문제 — V2X를 연결해도 실제 결합(JOIN)은 여전히 안 될 수 있다.
+  "ESP32-S3 V2X 인터페이스 정리.md" 문서의 v2x_targets 패킷엔 체크포인트/경로
+  정보가 없다. platoon_fsm.py의 절대조건(§6 C_R, 경로 중첩 ≥ MIN_ROUTE_OVERLAP)은
+  EgoState.route / NearbyVehicle.route가 채워져 있어야 통과하는데, 이 값들을
+  채울 방법이 아직 없다(체크포인트 인식 방식 자체가 팀 미정 — 표지판/바닥마커/
+  주행거리 중 결정 필요). 이 문서만으로는 여기까지만 되고, 그다음 단계는 체크포인트
+  인식이 정해져야 진행 가능하다.
 """
+
+import math
 
 import rclpy
 from rclpy.node import Node
 
 # 동일 패키지 내의 platoon_fsm 모듈 import
 from .platoon_fsm import PlatoonFSM, EgoState, NearbyVehicle, DrivingCommand
+from .v2x_node import (
+    DRIVING_STATE_AUTO, DRIVING_STATE_PLATOON,
+    PLATOON_STATE_SOLO, PLATOON_STATE_JOIN, PLATOON_STATE_KEEP, PLATOON_STATE_EXIT,
+    PLATOON_ROLE_NONE, PLATOON_ROLE_LEADER, PLATOON_ROLE_FOLLOWER,
+)
 
-from platoon_interfaces.msg import LaneInfo, Telemetry, VehicleCmd
+from platoon_interfaces.msg import LaneInfo, Telemetry, VehicleCmd, V2xTargets, SelfStatus
 
 from std_msgs.msg import String
+
+_PLATOON_STATE_MAP = {
+    "SOLO_DRIVE": PLATOON_STATE_SOLO,
+    "PLATOON_JOIN": PLATOON_STATE_JOIN,
+    "PLATOON_MAINTAIN": PLATOON_STATE_KEEP,
+    "PLATOON_EXIT": PLATOON_STATE_EXIT,
+}
+_ROLE_MAP = {None: PLATOON_ROLE_NONE, "LEADER": PLATOON_ROLE_LEADER, "FOLLOWER": PLATOON_ROLE_FOLLOWER}
 
 
 class FsmDecisionNode(Node):
@@ -24,9 +51,14 @@ class FsmDecisionNode(Node):
         # 1. 파라미터 선언
         self.declare_parameter('vehicle_id', 1)
         self.declare_parameter('is_designated_leader', False)
+        self.declare_parameter('uwb_id', 0)          # self_status 송신용 — ESP32와 맞는 값으로 지정 필요
+        self.declare_parameter('destination_id', 0)  # 목적지 인식 방법 미정이라 당분간 고정값
 
         vehicle_id = self.get_parameter('vehicle_id').value
         is_designated_leader = self.get_parameter('is_designated_leader').value
+        self.vehicle_id = vehicle_id
+        self.uwb_id = self.get_parameter('uwb_id').value
+        self.destination_id = self.get_parameter('destination_id').value
 
         # 2. FSM 객체 생성 (친구분의 코드를 그대로 인스턴스화)
         self.fsm = PlatoonFSM(
@@ -36,7 +68,7 @@ class FsmDecisionNode(Node):
 
         # 자차 상태(EgoState) 및 주변 차량 정보 저장용 변수
         self.ego_state = EgoState()
-        self.nearby_vehicles = []  # 추후 ESP32 V2X 수신 시 채워질 리스트
+        self.nearby_vehicles = []  # /v2x/targets 수신 시 _on_v2x_targets()가 채움
 
         # 3. 구독 및 발행
         self.sub_lane = self.create_subscription(
@@ -45,8 +77,14 @@ class FsmDecisionNode(Node):
         self.sub_tele = self.create_subscription(
             Telemetry, '/telemetry', self.on_telemetry, 10
         )
+        self.sub_v2x = self.create_subscription(
+            V2xTargets, '/v2x/targets', self.on_v2x_targets, 10
+        )
         self.pub_cmd = self.create_publisher(
             VehicleCmd, '/vehicle_cmd', 10
+        )
+        self.pub_self_status = self.create_publisher(
+            SelfStatus, '/v2x/self_status', 10
         )
 
         # 4. 20Hz (0.05초) 주기로 FSM update 실행
@@ -62,12 +100,84 @@ class FsmDecisionNode(Node):
         self.ego_state.lane = 0
 
     def on_telemetry(self, msg: Telemetry):
-        """STM32 텔레메트리 정보를 EgoState로 전달"""
-        # distance_cm (cm) -> front_distance (m 단위 변환)
-        if msg.distance_cm > 0:
-            self.ego_state.front_distance = float(msg.distance_cm) / 100.0
+        """
+        STM32 텔레메트리 정보를 EgoState로 전달.
+
+        ego_state.speed는 예전엔 여기서 한 번도 안 채워져서 항상 0.0이었다 —
+        self_status.speed_mps로 그대로 나가던 값이라 다른 차량에 항상 "정지 중"으로
+        잘못 보고되고 있었다. control_node.py가 엔코더로 계산해서 채워주는
+        msg.speed_mps를 그대로 받는다.
+        """
+        self.ego_state.speed = msg.speed_mps
+
+        # dist_cm (cm) -> front_distance (m 단위 변환)
+        # 예전엔 msg.distance_cm을 읽었는데 Telemetry.msg의 실제 필드명은 dist_cm이라
+        # 매 호출마다 AttributeError가 나서 front_distance가 한 번도 안 채워지고
+        # 있었다 (즉 초음파 기반 장애물 정지가 조용히 죽어있던 상태).
+        if msg.dist_cm > 0:
+            self.ego_state.front_distance = float(msg.dist_cm) / 100.0
         else:
             self.ego_state.front_distance = None
+
+    def on_v2x_targets(self, msg: V2xTargets):
+        """
+        v2x_node.py가 ESP32에서 받은 주변 차량 목록을 NearbyVehicle 리스트로 변환.
+
+        checkpoint/next_checkpoint/route는 문서(v2x_targets)에 해당 필드가 없어서
+        전부 기본값(0, [])으로 남는다 — §6 절대조건(C_R 경로중첩)이 항상 실패하니,
+        체크포인트 인식 방법이 정해지기 전까지는 이 리스트가 채워져도 실제 결합
+        요청까지는 못 간다 (파일 상단 TODO 참고).
+        """
+        self.nearby_vehicles = [
+            NearbyVehicle(
+                vehicle_id=t.vehicle_id,
+                speed=t.speed_mps,
+                heading=math.radians(t.heading_deg),
+                platoon_allow=bool(t.platoon_enable),
+                platoon_id=(t.platoon_id if t.platoon_id else None),
+                leader_id=(t.leader_vehicle_id if t.leader_vehicle_id != -1 else None),
+                uwb_distance=t.distance_m,
+                uwb_angle=math.radians(t.angle_deg),
+                timestamp=msg.timestamp_ms / 1000.0,
+            )
+            for t in msg.targets
+        ]
+
+    def _build_self_status(self, cmd: DrivingCommand) -> SelfStatus:
+        """§5 self_status로 내보낼 값을 FSM 현재 상태에서 뽑아 채운다."""
+        s = SelfStatus()
+        s.vehicle_id = self.vehicle_id
+        s.uwb_id = self.uwb_id
+        s.destination_id = self.destination_id
+
+        in_platoon = self.fsm.state.name != "SOLO_DRIVE"
+        s.driving_state = DRIVING_STATE_PLATOON if in_platoon else DRIVING_STATE_AUTO
+        s.platoon_state = _PLATOON_STATE_MAP.get(self.fsm.state.name, PLATOON_STATE_SOLO)
+
+        s.speed_mps = self.ego_state.speed
+        s.heading_deg = math.degrees(self.ego_state.heading)
+
+        s.platoon_enable = int(self.ego_state.platoon_allow)
+        s.platoon_id = self.fsm.platoon_id or 0
+        s.platoon_role = _ROLE_MAP.get(self.fsm.role, PLATOON_ROLE_NONE)
+
+        # TODO: 대열 내 절대 순번은 이 차량 혼자서는 알 수 없다 — 각자 앞/뒤차
+        # ID만 안다(platoon_fsm.py의 partner_id/successor_id). 리더는 0으로
+        # 확정할 수 있지만 팔로워 순번은 근거가 없어 1로 잠정 처리한다.
+        # 실제 순번이 필요해지면 리더가 매겨서 내려주는 방식(§10.3 PLATOON_SETUP
+        # 확장) 등을 검토해야 한다.
+        s.platoon_index = 0 if s.platoon_role == PLATOON_ROLE_LEADER else (
+            1 if s.platoon_role == PLATOON_ROLE_FOLLOWER else 0
+        )
+
+        s.leader_vehicle_id = self.fsm.leader_id if self.fsm.leader_id is not None else 0
+        s.front_vehicle_id = (
+            self.fsm.partner_id if (self.fsm.role == "FOLLOWER" and self.fsm.partner_id) else 0
+        )
+
+        s.target_speed_mps = cmd.target_speed if cmd.target_speed is not None else 0.0
+        s.target_gap_m = cmd.target_distance if cmd.target_distance is not None else 0.0
+        return s
 
     def control_loop(self):
         """20Hz 메인 제어 주기로 FSM 실행 및 출력값 매핑"""
@@ -80,7 +190,9 @@ class FsmDecisionNode(Node):
         state_msg.data = f"State: {self.fsm.state.name} | MatchState: {self.fsm.match_state.name} | Mode: {cmd.mode} | TargetSpeed: {cmd.target_speed}"
         self.pub_fsm_state.publish(state_msg)
 
-        
+        # V2X로 내 상태 보고 (ESP32 -> 주변 차량에 브로드캐스트됨)
+        self.pub_self_status.publish(self._build_self_status(cmd))
+
         # 2. DrivingCommand -> VehicleCmd 매핑
         vehicle_cmd = VehicleCmd()
 
