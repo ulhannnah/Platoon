@@ -1,0 +1,986 @@
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0x8 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4037c0f2
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2810,len:0x15a0
+load:0x403c8700,len:0x4
+load:0x403c8704,len:0xd20
+load:0x403cb700,len:0x2ee4
+entry 0x403c8928
+[0;32mI (26) boot: ESP-IDF v5.4 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Aug 17 2026 02:35:33[0m
+[0;32mI (27) boot: Multicore bootloader[0m
+[0;32mI (27) boot: chip revision: v0.2[0m
+[0;32mI (29) boot: efuse block revision: v1.4[0m
+[0;32mI (33) boot.esp32s3: Boot SPI Speed : 80MHz[0m
+[0;32mI (37) boot.esp32s3: SPI Mode       : DIO[0m
+[0;32mI (41) boot.esp32s3: SPI Flash Size : 4MB[0m
+[0;32mI (44) boot: Enabling RNG early entropy source...[0m
+[0;32mI (49) boot: Partition Table:[0m
+[0;32mI (52) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (58) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (64) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (71) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (77) boot: End of partition table[0m
+[0;32mI (81) esp_image: segment 0: paddr=00010020 vaddr=3c090020 size=1bd8ch (114060) map[0m
+[0;32mI (108) esp_image: segment 1: paddr=0002bdb4 vaddr=3fc9ba00 size=04264h ( 16996) load[0m
+[0;32mI (112) esp_image: segment 2: paddr=00030020 vaddr=42000020 size=88850h (559184) map[0m
+[0;32mI (211) esp_image: segment 3: paddr=000b8878 vaddr=3fc9fc64 size=008ech (  2284) load[0m
+[0;32mI (212) esp_image: segment 4: paddr=000b916c vaddr=40374000 size=17918h ( 96536) load[0m
+[0;32mI (236) esp_image: segment 5: paddr=000d0a8c vaddr=600fe100 size=0001ch (    28) load[0m
+[0;32mI (245) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (246) boot: Disabling RNG early entropy source...[0m
+[0;32mI (256) cpu_start: Multicore app[0m
+[0;32mI (265) cpu_start: Pro cpu start user code[0m
+[0;32mI (265) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (265) app_init: Application information:[0m
+[0;32mI (265) app_init: Project name:     esp32s3_uwb_v2v_gateway[0m
+[0;32mI (270) app_init: App version:      d30bcc4-dirty[0m
+[0;32mI (275) app_init: Compile time:     Aug 28 2026 01:49:17[0m
+[0;32mI (280) app_init: ELF file SHA256:  492975b8d...[0m
+[0;32mI (284) app_init: ESP-IDF:          v5.4[0m
+[0;32mI (288) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (291) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (295) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (299) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (306) heap_init: At 3FCA4830 len 00044EE0 (275 KiB): RAM[0m
+[0;32mI (311) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM[0m
+[0;32mI (316) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM[0m
+[0;32mI (321) heap_init: At 600FE11C len 00001ECC (7 KiB): RTCRAM[0m
+[0;32mI (327) spi_flash: detected chip: boya[0m
+[0;32mI (330) spi_flash: flash io: dio[0m
+[0;33mW (333) spi_flash: Detected size(16384k) larger than the size in the binary image header(4096k). Using the size in the binary image header.[0m
+[0;32mI (345) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (351) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (358) main_task: Started on CPU0[0m
+[0;32mI (368) main_task: Calling app_main()[0m
+[0;32mI (368) app_main: ESP32-S3 V2V gateway boot[0m
+[0;32mI (368) uwb_manager: UWB role=TAG/INITIATOR base_mac=14:c1:9f:c1:2f:18 mac16=0x0002 peer=0x0001[0m
+[0;32mI (378) DW3000: HW Init (RESET:4 WAKEUP:-1 IRQ:5)[0m
+[0;32mI (378) gpio: GPIO[4]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 [0m
+[0;32mI (388) DW3000: SPI Init (MOSI:12 MISO:11 CLK:10 CS:13)[0m
+[0;32mI (398) DW3000: HW reset[0m
+[0;32mI (428) gpio: GPIO[5]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:1 [0m
+[0;32mI (428) DECA: Decadriver source: DW3XXX Device Driver Version 08.02.02[0m
+[0;32mI (428) DW3000: WAKEUP CS[0m
+[0;32mI (448) DECA: DEV ID: DECA0312[0m
+[0;32mI (448) gpio: GPIO[13]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 [0m
+[0;32mI (448) DECA: config CH 9 6.8Mbps PRF 64MHz Plen 64 PAC 8[0m
+[0;32mI (448) DECA: config code 11/11 SFD 65[0m
+[0;32mI (458) DECA: PRE 66 (SFD 9) PHD 22 12B DATA 19 = 114 us[0m
+[0;32mI (458) uwb_manager: UWB PDoA test enabled: STS/PDOA + RF auto switch; angle_deg is raw phase deg[0m
+[0;32mI (468) DECA: Init PANID: DECA MAC: 0002[0m
+[0;32mI (468) DWTASK: TASK started[0m
+[0;32mI (478) TWR: delay 2192 us RX delay 2078 us PTO 8 (66 us) rep 1[0m
+[0;32mI (478) uwb_manager: UWB tag ready; ranging target=0x0001[0m
+[0;32mI (488) uwb_manager: DW3000 libdeca init OK[0m
+[0;32mI (498) pp: pp rom version: e7ae62f[0m
+[0;32mI (498) net80211: net80211 rom version: e7ae62f[0m
+[0;32mI (508) wifi:wifi driver task: 3fcafd60, prio:23, stack:6656, core=0[0m
+[0;32mI (508) wifi:wifi firmware version: 48ea317a7[0m
+[0;32mI (508) wifi:wifi certification version: v7.0[0m
+[0;32mI (508) wifi:config NVS flash: enabled[0m
+[0;32mI (518) wifi:config nano formatting: disabled[0m
+[0;32mI (518) wifi:Init data frame dynamic rx buffer num: 32[0m
+[0;32mI (528) wifi:Init static rx mgmt buffer num: 5[0m
+[0;32mI (528) wifi:Init management short buffer num: 32[0m
+[0;32mI (528) wifi:Init dynamic tx buffer num: 32[0m
+[0;32mI (538) wifi:Init static tx FG buffer num: 2[0m
+[0;32mI (538) wifi:Init static rx buffer size: 1600[0m
+[0;32mI (548) wifi:Init static rx buffer num: 10[0m
+[0;32mI (548) wifi:Init dynamic rx buffer num: 32[0m
+[0;32mI (548) wifi_init: rx ba win: 6[0m
+[0;32mI (558) wifi_init: accept mbox: 6[0m
+[0;32mI (558) wifi_init: tcpip mbox: 32[0m
+[0;32mI (558) wifi_init: udp mbox: 6[0m
+[0;32mI (568) wifi_init: tcp mbox: 6[0m
+[0;32mI (568) wifi_init: tcp tx win: 5760[0m
+[0;32mI (568) wifi_init: tcp rx win: 5760[0m
+[0;32mI (578) wifi_init: tcp mss: 1440[0m
+[0;32mI (578) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (578) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (588) phy_init: phy_version 680,a6008b2,Jun  4 2024,16:41:10[0m
+[0;32mI (628) wifi:mode : sta (14:c1:9f:c1:2f:18)[0m
+[0;32mI (628) wifi:enable tsf[0m
+================================
+ESP32-S3 ESP-NOW BASIC TEST
+STA MAC        : 14:C1:9F:C1:2F:18
+vehicle_id     : 12660504
+uwb_id         : 12660504
+Wi-Fi channel  : 1
+================================
+[0;32mI (638) ESPNOW: espnow [version: 2.0] init[0m
+[0;32mI (638) espnow_manager: ESP-NOW ready on channel 1[0m
+[0;32mI (648) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=1 speed=0.300 heading=0.0 seq=0[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (658) main_task: Returned from app_main()[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 0
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.380
+heading_deg    : 300.0
+seq            : 68
+timestamp_ms   : 34336
+================================
+
+[0;32mI (858) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (868) TWR: retry 1 to [0000000000000001] after 13 ms[0m
+[1;31mE (868) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (868) TWR: retry 2 to [0000000000000001] after 3 ms[0m
+[1;31mE (868) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (868) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (878) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=1 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (1158) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=2 speed=0.310 heading=15.0 seq=1[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 0
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.390
+heading_deg    : 315.0
+seq            : 69
+timestamp_ms   : 34836
+================================
+
+[0;32mI (1358) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (1358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (1358) TWR: retry 1 to [0000000000000001] after 2 ms[0m
+[1;31mE (1358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (1358) TWR: retry 2 to [0000000000000001] after 9 ms[0m
+[1;31mE (1368) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (1368) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (1378) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=2 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (1658) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=3 speed=0.320 heading=30.0 seq=2[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 1
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.400
+heading_deg    : 330.0
+seq            : 70
+timestamp_ms   : 35336
+================================
+
+[0;32mI (1858) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (1858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (1858) TWR: retry 1 to [0000000000000001] after 0 ms[0m
+[1;31mE (1858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (1858) TWR: retry 2 to [0000000000000001] after 8 ms[0m
+[1;31mE (1868) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (1868) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (1878) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=3 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (2158) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=4 speed=0.330 heading=45.0 seq=3[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 1
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.410
+heading_deg    : 345.0
+seq            : 71
+timestamp_ms   : 35836
+================================
+
+[0;32mI (2358) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (2358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (2368) TWR: retry 1 to [0000000000000001] after 12 ms[0m
+[1;31mE (2368) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (2378) TWR: retry 2 to [0000000000000001] after 16 ms[0m
+[1;31mE (2378) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (2378) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (2378) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=4 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (2658) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=1 speed=0.340 heading=60.0 seq=4[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 1
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.420
+heading_deg    : 0.0
+seq            : 72
+timestamp_ms   : 36336
+================================
+
+[0;32mI (2858) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (2858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (2868) TWR: retry 1 to [0000000000000001] after 16 ms[0m
+[1;31mE (2868) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (2878) TWR: retry 2 to [0000000000000001] after 19 ms[0m
+[1;31mE (2878) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (2878) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (2878) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=5 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (3158) espnow_manager: [TX] vehicle_id=12660504 state=0 dest=2 speed=0.350 heading=75.0 seq=5[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 1
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.430
+heading_deg    : 15.0
+seq            : 73
+timestamp_ms   : 36836
+================================
+
+[0;32mI (3358) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (3358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (3368) TWR: retry 1 to [0000000000000001] after 11 ms[0m
+[1;31mE (3368) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (3378) TWR: retry 2 to [0000000000000001] after 11 ms[0m
+[1;31mE (3378) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (3378) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (3378) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=6 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (3658) espnow_manager: [TX] vehicle_id=12660504 state=0 dest=3 speed=0.360 heading=90.0 seq=6[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 1
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.440
+heading_deg    : 30.0
+seq            : 74
+timestamp_ms   : 37336
+================================
+
+[0;32mI (3858) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (3858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (3858) TWR: retry 1 to [0000000000000001] after 3 ms[0m
+[1;31mE (3858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (3858) TWR: retry 2 to [0000000000000001] after 5 ms[0m
+[1;31mE (3868) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (3868) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (3878) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=7 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (4158) espnow_manager: [TX] vehicle_id=12660504 state=0 dest=4 speed=0.370 heading=105.0 seq=7[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 0
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.450
+heading_deg    : 45.0
+seq            : 75
+timestamp_ms   : 37836
+================================
+
+[0;32mI (4358) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (4358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (4358) TWR: retry 1 to [0000000000000001] after 8 ms[0m
+[1;31mE (4358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (4368) TWR: retry 2 to [0000000000000001] after 13 ms[0m
+[1;31mE (4368) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (4368) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (4378) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=8 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (4658) espnow_manager: [TX] vehicle_id=12660504 state=0 dest=1 speed=0.380 heading=120.0 seq=8[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 0
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.460
+heading_deg    : 60.0
+seq            : 76
+timestamp_ms   : 38336
+================================
+
+[0;32mI (4858) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (4858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (4868) TWR: retry 1 to [0000000000000001] after 10 ms[0m
+[1;31mE (4868) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (4868) TWR: retry 2 to [0000000000000001] after 6 ms[0m
+[1;31mE (4868) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (4868) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (4878) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=9 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (5158) espnow_manager: [TX] vehicle_id=12660504 state=0 dest=2 speed=0.390 heading=135.0 seq=9[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 0
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.470
+heading_deg    : 75.0
+seq            : 77
+timestamp_ms   : 38836
+================================
+
+[0;32mI (5358) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (5358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (5358) TWR: retry 1 to [0000000000000001] after 9 ms[0m
+[1;31mE (5358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (5368) TWR: retry 2 to [0000000000000001] after 12 ms[0m
+[1;31mE (5368) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (5368) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (5378) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=10 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (5658) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=3 speed=0.400 heading=150.0 seq=10[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 0
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.480
+heading_deg    : 90.0
+seq            : 78
+timestamp_ms   : 39336
+================================
+
+[0;32mI (5858) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (5858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (5868) TWR: retry 1 to [0000000000000001] after 17 ms[0m
+[1;31mE (5868) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (5868) TWR: retry 2 to [0000000000000001] after 7 ms[0m
+[1;31mE (5868) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (5868) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (5878) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=11 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (6158) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=4 speed=0.410 heading=165.0 seq=11[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 0
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.490
+heading_deg    : 105.0
+seq            : 79
+timestamp_ms   : 39836
+================================
+
+[0;32mI (6358) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (6358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (6368) TWR: retry 1 to [0000000000000001] after 12 ms[0m
+[1;31mE (6368) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (6368) TWR: retry 2 to [0000000000000001] after 8 ms[0m
+[1;31mE (6368) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (6368) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (6378) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=12 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (6658) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=1 speed=0.420 heading=180.0 seq=12[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 1
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.300
+heading_deg    : 120.0
+seq            : 80
+timestamp_ms   : 40336
+================================
+
+[0;32mI (6858) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (6858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (6858) TWR: retry 1 to [0000000000000001] after 0 ms[0m
+[1;31mE (6858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (6858) TWR: retry 2 to [0000000000000001] after 3 ms[0m
+[1;31mE (6868) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (6868) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (6878) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=13 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (7158) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=2 speed=0.430 heading=195.0 seq=13[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 1
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.310
+heading_deg    : 135.0
+seq            : 81
+timestamp_ms   : 40836
+================================
+
+[0;32mI (7358) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (7358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (7358) TWR: retry 1 to [0000000000000001] after 9 ms[0m
+[1;31mE (7358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (7368) TWR: retry 2 to [0000000000000001] after 12 ms[0m
+[1;31mE (7368) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (7368) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (7378) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=14 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (7658) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=3 speed=0.440 heading=210.0 seq=14[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 1
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.320
+heading_deg    : 150.0
+seq            : 82
+timestamp_ms   : 41336
+================================
+
+[0;32mI (7858) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (7858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (7858) TWR: retry 1 to [0000000000000001] after 4 ms[0m
+[1;31mE (7858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (7858) TWR: retry 2 to [0000000000000001] after 9 ms[0m
+[1;31mE (7868) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (7868) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (7878) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=15 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (8158) espnow_manager: [TX] vehicle_id=12660504 state=0 dest=4 speed=0.450 heading=225.0 seq=15[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 1
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.330
+heading_deg    : 165.0
+seq            : 83
+timestamp_ms   : 41836
+================================
+
+[0;32mI (8358) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (8358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (8368) TWR: retry 1 to [0000000000000001] after 11 ms[0m
+[1;31mE (8368) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (8368) TWR: retry 2 to [0000000000000001] after 7 ms[0m
+[1;31mE (8368) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (8368) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (8378) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=16 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (8658) espnow_manager: [TX] vehicle_id=12660504 state=0 dest=1 speed=0.460 heading=240.0 seq=16[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 1
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.340
+heading_deg    : 180.0
+seq            : 84
+timestamp_ms   : 42336
+================================
+
+[0;32mI (8858) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (8858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (8868) TWR: retry 1 to [0000000000000001] after 10 ms[0m
+[1;31mE (8868) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (8868) TWR: retry 2 to [0000000000000001] after 4 ms[0m
+[1;31mE (8868) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (8868) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (8878) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=17 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (9158) espnow_manager: [TX] vehicle_id=12660504 state=0 dest=2 speed=0.470 heading=255.0 seq=17[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 0
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.350
+heading_deg    : 195.0
+seq            : 85
+timestamp_ms   : 42836
+================================
+
+[0;32mI (9358) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (9358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (9368) TWR: retry 1 to [0000000000000001] after 15 ms[0m
+[1;31mE (9368) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (9368) TWR: retry 2 to [0000000000000001] after 0 ms[0m
+[1;31mE (9368) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (9368) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (9378) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=18 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (9658) espnow_manager: [TX] vehicle_id=12660504 state=0 dest=3 speed=0.480 heading=270.0 seq=18[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 0
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.360
+heading_deg    : 210.0
+seq            : 86
+timestamp_ms   : 43336
+================================
+
+[0;32mI (9858) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (9858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (9858) TWR: retry 1 to [0000000000000001] after 4 ms[0m
+[1;31mE (9858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (9868) TWR: retry 2 to [0000000000000001] after 10 ms[0m
+[1;31mE (9868) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (9868) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (9878) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=19 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (10158) espnow_manager: [TX] vehicle_id=12660504 state=0 dest=4 speed=0.490 heading=285.0 seq=19[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 0
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.370
+heading_deg    : 225.0
+seq            : 87
+timestamp_ms   : 43836
+================================
+
+[0;32mI (10358) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (10358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (10358) TWR: retry 1 to [0000000000000001] after 2 ms[0m
+[1;31mE (10358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (10358) TWR: retry 2 to [0000000000000001] after 4 ms[0m
+[1;31mE (10368) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (10368) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (10378) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=20 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (10658) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=1 speed=0.300 heading=300.0 seq=20[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 0
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.380
+heading_deg    : 240.0
+seq            : 88
+timestamp_ms   : 44336
+================================
+
+[0;32mI (10858) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (10858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (10858) TWR: retry 1 to [0000000000000001] after 3 ms[0m
+[1;31mE (10858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (10858) TWR: retry 2 to [0000000000000001] after 1 ms[0m
+[1;31mE (10868) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (10868) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (10878) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=21 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (11158) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=2 speed=0.310 heading=315.0 seq=21[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 0
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.390
+heading_deg    : 255.0
+seq            : 89
+timestamp_ms   : 44836
+================================
+
+[0;32mI (11358) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (11358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (11368) TWR: retry 1 to [0000000000000001] after 10 ms[0m
+[1;31mE (11368) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (11378) TWR: retry 2 to [0000000000000001] after 16 ms[0m
+[1;31mE (11378) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (11378) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (11378) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=22 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (11658) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=3 speed=0.320 heading=330.0 seq=22[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 1
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.400
+heading_deg    : 270.0
+seq            : 90
+timestamp_ms   : 45336
+================================
+
+[0;32mI (11858) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (11858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (11868) TWR: retry 1 to [0000000000000001] after 16 ms[0m
+[1;31mE (11868) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (11878) TWR: retry 2 to [0000000000000001] after 11 ms[0m
+[1;31mE (11878) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (11878) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (11878) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=23 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (12158) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=4 speed=0.330 heading=345.0 seq=23[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 1
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.410
+heading_deg    : 285.0
+seq            : 91
+timestamp_ms   : 45836
+================================
+
+[0;32mI (12358) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (12358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (12358) TWR: retry 1 to [0000000000000001] after 9 ms[0m
+[1;31mE (12358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (12368) TWR: retry 2 to [0000000000000001] after 17 ms[0m
+[1;31mE (12368) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (12368) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (12378) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=24 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (12658) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=1 speed=0.340 heading=0.0 seq=24[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 1
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.420
+heading_deg    : 300.0
+seq            : 92
+timestamp_ms   : 46336
+================================
+
+[0;32mI (12858) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (12858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (12868) TWR: retry 1 to [0000000000000001] after 15 ms[0m
+[1;31mE (12868) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (12878) TWR: retry 2 to [0000000000000001] after 11 ms[0m
+[1;31mE (12878) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (12878) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (12878) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=25 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (13158) espnow_manager: [TX] vehicle_id=12660504 state=0 dest=2 speed=0.350 heading=15.0 seq=25[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 1
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.430
+heading_deg    : 315.0
+seq            : 93
+timestamp_ms   : 46836
+================================
+
+[0;32mI (13358) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (13358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (13368) TWR: retry 1 to [0000000000000001] after 10 ms[0m
+[1;31mE (13368) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (13368) TWR: retry 2 to [0000000000000001] after 4 ms[0m
+[1;31mE (13368) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (13368) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (13378) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=26 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (13658) espnow_manager: [TX] vehicle_id=12660504 state=0 dest=3 speed=0.360 heading=30.0 seq=26[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 1
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.440
+heading_deg    : 330.0
+seq            : 94
+timestamp_ms   : 47336
+================================
+
+[0;32mI (13858) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (13858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (13868) TWR: retry 1 to [0000000000000001] after 14 ms[0m
+[1;31mE (13868) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (13868) TWR: retry 2 to [0000000000000001] after 5 ms[0m
+[1;31mE (13868) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (13868) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (13878) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=27 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (14158) espnow_manager: [TX] vehicle_id=12660504 state=0 dest=4 speed=0.370 heading=45.0 seq=27[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 0
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.450
+heading_deg    : 345.0
+seq            : 95
+timestamp_ms   : 47836
+================================
+
+[0;32mI (14358) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (14358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (14358) TWR: retry 1 to [0000000000000001] after 9 ms[0m
+[1;31mE (14358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (14368) TWR: retry 2 to [0000000000000001] after 10 ms[0m
+[1;31mE (14368) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (14368) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (14378) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=28 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (14658) espnow_manager: [TX] vehicle_id=12660504 state=0 dest=1 speed=0.380 heading=60.0 seq=28[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 0
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.460
+heading_deg    : 0.0
+seq            : 96
+timestamp_ms   : 48336
+================================
+
+[0;32mI (14858) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (14858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (14858) TWR: retry 1 to [0000000000000001] after 7 ms[0m
+[1;31mE (14858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (14858) TWR: retry 2 to [0000000000000001] after 6 ms[0m
+[1;31mE (14868) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (14868) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (14878) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=29 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (15158) espnow_manager: [TX] vehicle_id=12660504 state=0 dest=2 speed=0.390 heading=75.0 seq=29[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 0
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.470
+heading_deg    : 15.0
+seq            : 97
+timestamp_ms   : 48836
+================================
+
+[0;32mI (15358) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (15358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (15358) TWR: retry 1 to [0000000000000001] after 3 ms[0m
+[1;31mE (15358) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (15368) TWR: retry 2 to [0000000000000001] after 14 ms[0m
+[1;31mE (15368) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (15368) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (15378) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=30 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (15658) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=3 speed=0.400 heading=90.0 seq=30[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:26:8C
+msg_type       : 1
+vehicle_id     : 12658316
+uwb_id         : 12658316
+state          : 0
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.480
+heading_deg    : 30.0
+seq            : 98
+timestamp_ms   : 49336
+================================
+
+[0;32mI (15858) uwb_manager: UWB TWR start target=0x0001[0m
+[1;31mE (15858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (15858) TWR: retry 1 to [0000000000000001] after 4 ms[0m
+[1;31mE (15858) TWR: RX timeout from [0000000000000001][0m
+[0;32mI (15858) TWR: retry 2 to [0000000000000001] after 0 ms[0m
+[1;31mE (15868) TWR: RX timeout from [0000000000000001][0m
+[1;31mE (15868) TWR: retry limit exceeded [0000000000000001][0m
+[0;33mW (15878) uwb_manager: UWB TWR failed src=0x0002 dst=0x0001 num=31 pdoa_raw=0 pdoa_phase=0.00 deg[0m
+[0;32mI (16158) espnow_manager: [TX] vehicle_id=12660504 state=1 dest=4 speed=0.410 heading=105.0 seq=31[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS

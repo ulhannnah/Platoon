@@ -10,18 +10,18 @@ if(NOT EXISTS "C:/Espressif/frameworks/esp-idf-v5.4/components/bootloader/subpro
   file(MAKE_DIRECTORY "C:/Espressif/frameworks/esp-idf-v5.4/components/bootloader/subproject")
 endif()
 file(MAKE_DIRECTORY
-  "D:/WorkSpace/Platoon/ESP_UWB/src/build/bootloader"
-  "D:/WorkSpace/Platoon/ESP_UWB/src/build/bootloader-prefix"
-  "D:/WorkSpace/Platoon/ESP_UWB/src/build/bootloader-prefix/tmp"
-  "D:/WorkSpace/Platoon/ESP_UWB/src/build/bootloader-prefix/src/bootloader-stamp"
-  "D:/WorkSpace/Platoon/ESP_UWB/src/build/bootloader-prefix/src"
-  "D:/WorkSpace/Platoon/ESP_UWB/src/build/bootloader-prefix/src/bootloader-stamp"
+  "D:/WorkSpace/Platoon_26/ESP_UWB/src/build/bootloader"
+  "D:/WorkSpace/Platoon_26/ESP_UWB/src/build/bootloader-prefix"
+  "D:/WorkSpace/Platoon_26/ESP_UWB/src/build/bootloader-prefix/tmp"
+  "D:/WorkSpace/Platoon_26/ESP_UWB/src/build/bootloader-prefix/src/bootloader-stamp"
+  "D:/WorkSpace/Platoon_26/ESP_UWB/src/build/bootloader-prefix/src"
+  "D:/WorkSpace/Platoon_26/ESP_UWB/src/build/bootloader-prefix/src/bootloader-stamp"
 )
 
 set(configSubDirs )
 foreach(subDir IN LISTS configSubDirs)
-    file(MAKE_DIRECTORY "D:/WorkSpace/Platoon/ESP_UWB/src/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
+    file(MAKE_DIRECTORY "D:/WorkSpace/Platoon_26/ESP_UWB/src/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
 endforeach()
 if(cfgdir)
-  file(MAKE_DIRECTORY "D:/WorkSpace/Platoon/ESP_UWB/src/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
+  file(MAKE_DIRECTORY "D:/WorkSpace/Platoon_26/ESP_UWB/src/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
 endif()

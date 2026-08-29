@@ -6297,6 +6297,281 @@
     {
         "children": [
             {
+                "children": [],
+                "depends_on": null,
+                "help": null,
+                "id": "DW3000_GPIO_IRQ",
+                "name": "DW3000_GPIO_IRQ",
+                "range": null,
+                "title": "DW3000 GPIO for IRQ",
+                "type": "int"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": null,
+                "id": "DW3000_GPIO_RESET",
+                "name": "DW3000_GPIO_RESET",
+                "range": null,
+                "title": "DW3000 GPIO for RESET",
+                "type": "int"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": null,
+                "id": "DW3000_GPIO_WAKEUP",
+                "name": "DW3000_GPIO_WAKEUP",
+                "range": null,
+                "title": "DW3000 GPIO for WAKEUP",
+                "type": "int"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": null,
+                "id": "DW3000_SPI_MOSI",
+                "name": "DW3000_SPI_MOSI",
+                "range": null,
+                "title": "DW3000 GPIO for MOSI",
+                "type": "int"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": null,
+                "id": "DW3000_SPI_MISO",
+                "name": "DW3000_SPI_MISO",
+                "range": null,
+                "title": "DW3000 GPIO for MISO",
+                "type": "int"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": null,
+                "id": "DW3000_SPI_CLK",
+                "name": "DW3000_SPI_CLK",
+                "range": null,
+                "title": "DW3000 GPIO for CLK",
+                "type": "int"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": null,
+                "id": "DW3000_SPI_CS",
+                "name": "DW3000_SPI_CS",
+                "range": null,
+                "title": "DW3000 GPIO for CS",
+                "type": "int"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": null,
+                "id": "DW3000_SPI_MAX_MHZ",
+                "name": "DW3000_SPI_MAX_MHZ",
+                "range": null,
+                "title": "DW3000 Max SPI speed in MHz",
+                "type": "int"
+            },
+            {
+                "children": [
+                    {
+                        "children": [],
+                        "depends_on": "DW3000_SPI_TRACE",
+                        "help": null,
+                        "id": "DW3000_SPI_TRACE_CNT",
+                        "name": "DW3000_SPI_TRACE_CNT",
+                        "range": null,
+                        "title": "Number of SPI trace entries",
+                        "type": "int"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": "DW3000_SPI_TRACE",
+                        "help": null,
+                        "id": "DW3000_SPI_TRACE_BODY_LEN",
+                        "name": "DW3000_SPI_TRACE_BODY_LEN",
+                        "range": null,
+                        "title": "Maximum size of SPI trace body",
+                        "type": "int"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": "DW3000_SPI_TRACE",
+                        "help": null,
+                        "id": "DW3000_SPI_TRACE_REALTIME",
+                        "name": "DW3000_SPI_TRACE_REALTIME",
+                        "range": null,
+                        "title": "Real-time output of SPI trace (normally too slow)",
+                        "type": "bool"
+                    }
+                ],
+                "depends_on": null,
+                "help": null,
+                "id": "DW3000_SPI_TRACE",
+                "name": "DW3000_SPI_TRACE",
+                "range": null,
+                "title": "Trace SPI transmissons",
+                "type": "bool"
+            },
+            {
+                "children": [
+                    {
+                        "children": [],
+                        "depends_on": "<choice>",
+                        "help": null,
+                        "id": "DW3000_CHIP_DW3000",
+                        "name": "DW3000_CHIP_DW3000",
+                        "range": null,
+                        "title": "DW3000",
+                        "type": "bool"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": "<choice>",
+                        "help": null,
+                        "id": "DW3000_CHIP_DW3720",
+                        "name": "DW3000_CHIP_DW3720",
+                        "range": null,
+                        "title": "DW3720/QM33xx",
+                        "type": "bool"
+                    }
+                ],
+                "depends_on": null,
+                "help": null,
+                "id": "decadriver-select-chip",
+                "name": null,
+                "title": "Select  Chip",
+                "type": "choice"
+            }
+        ],
+        "depends_on": null,
+        "id": "decadriver",
+        "title": "Decadriver",
+        "type": "menu"
+    },
+    {
+        "children": [
+            {
+                "children": [],
+                "depends_on": null,
+                "help": null,
+                "id": "DECA_USE_CARRIERINTEG",
+                "name": "DECA_USE_CARRIERINTEG",
+                "range": null,
+                "title": "Store carrier integrator value with each received packet",
+                "type": "bool"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": null,
+                "id": "DECA_READ_RXDIAG",
+                "name": "DECA_READ_RXDIAG",
+                "range": null,
+                "title": "Include RX diagnostic data with each received packet",
+                "type": "bool"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": "Warning: This tunes to the clock of ONE other sender, but it can\nreduce reception of other senders with a different clock offset!",
+                "id": "DECA_XTAL_TRIM",
+                "name": "DECA_XTAL_TRIM",
+                "range": null,
+                "title": "Use XTAL trimming to compensate clock offset to sender (warning!)",
+                "type": "bool"
+            },
+            {
+                "children": [
+                    {
+                        "children": [],
+                        "depends_on": null,
+                        "help": null,
+                        "id": "DECA_DEBUG_IRQ_TIME",
+                        "name": "DECA_DEBUG_IRQ_TIME",
+                        "range": null,
+                        "title": "Debug output of time between RX and IRQ and handler",
+                        "type": "bool"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": null,
+                        "help": null,
+                        "id": "DECA_DEBUG_RX_STATUS",
+                        "name": "DECA_DEBUG_RX_STATUS",
+                        "range": null,
+                        "title": "Output RX status flags",
+                        "type": "bool"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": null,
+                        "help": null,
+                        "id": "DECA_DEBUG_RX_DUMP",
+                        "name": "DECA_DEBUG_RX_DUMP",
+                        "range": null,
+                        "title": "Dump received packets",
+                        "type": "bool"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": null,
+                        "help": null,
+                        "id": "DECA_DEBUG_TX_DUMP",
+                        "name": "DECA_DEBUG_TX_DUMP",
+                        "range": null,
+                        "title": "Dump transmitted packets",
+                        "type": "bool"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": null,
+                        "help": null,
+                        "id": "DECA_DEBUG_TX_TIME",
+                        "name": "DECA_DEBUG_TX_TIME",
+                        "range": null,
+                        "title": "Output TX times",
+                        "type": "bool"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": null,
+                        "help": null,
+                        "id": "DECA_DEBUG_FRAME_FILTER",
+                        "name": "DECA_DEBUG_FRAME_FILTER",
+                        "range": null,
+                        "title": "Log filtered frames",
+                        "type": "bool"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": null,
+                        "help": "Warning: Logging in IRQ context can slow down the system too\nmuch and is generally not recommended!",
+                        "id": "DECA_DEBUG_OUTPUT_IRQ",
+                        "name": "DECA_DEBUG_OUTPUT_IRQ",
+                        "range": null,
+                        "title": "Log output from callbacks in IRQ context (warning!)",
+                        "type": "bool"
+                    }
+                ],
+                "depends_on": null,
+                "id": "libdeca-debugging",
+                "title": "Debugging",
+                "type": "menu"
+            }
+        ],
+        "depends_on": null,
+        "id": "libdeca",
+        "title": "libdeca",
+        "type": "menu"
+    },
+    {
+        "children": [
+            {
                 "children": [
                     {
                         "children": [],

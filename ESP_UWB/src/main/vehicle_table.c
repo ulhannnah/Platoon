@@ -53,7 +53,7 @@ void vehicle_table_init(void)
 
 void vehicle_table_update_status(const vehicle_status_packet_t *packet, uint32_t now_ms)
 {
-    if (packet == NULL || packet->vehicle_id == APP_SELF_VEHICLE_ID) {
+    if (packet == NULL) {
         return;
     }
 

@@ -1,4 +1,4 @@
-# Install script for directory: D:/WorkSpace/Platoon/ESP_UWB/src/main
+# Install script for directory: D:/WorkSpace/Platoon_26/ESP_UWB/src/main
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

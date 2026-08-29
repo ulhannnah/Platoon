@@ -1,0 +1,774 @@
+[0;32mI (15039) espnow_manager: [TX] vehicle_id=12658316 seq=29 speed=ESP-ROM:esp32s3-20210327[0m
+Build:Mar 27 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0x8 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4037abfa
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2810,len:0x15a0
+load:0x403c8700,len:0x4
+load:0x403c8704,len:0xd20
+load:0x403cb700,len:0x2ee4
+entry 0x403c8928
+[0;32mI (26) boot: ESP-IDF v5.4 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Aug 17 2026 02:35:33[0m
+[0;32mI (27) boot: Multicore bootloader[0m
+[0;32mI (27) boot: chip revision: v0.2[0m
+[0;32mI (29) boot: efuse block revision: v1.4[0m
+[0;32mI (33) boot.esp32s3: Boot SPI Speed : 80MHz[0m
+[0;32mI (37) boot.esp32s3: SPI Mode       : DIO[0m
+[0;32mI (41) boot.esp32s3: SPI Flash Size : 4MB[0m
+[0;32mI (44) boot: Enabling RNG early entropy source...[0m
+[0;32mI (49) boot: Partition Table:[0m
+[0;32mI (52) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (58) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (64) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (71) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (77) boot: End of partition table[0m
+[0;32mI (81) esp_image: segment 0: paddr=00010020 vaddr=3c080020 size=18ce4h (101604) map[0m
+[0;32mI (106) esp_image: segment 1: paddr=00028d0c vaddr=3fc99a00 size=04948h ( 18760) load[0m
+[0;32mI (110) esp_image: segment 2: paddr=0002d65c vaddr=40374000 size=029bch ( 10684) load[0m
+[0;32mI (113) esp_image: segment 3: paddr=00030020 vaddr=42000020 size=7e5c0h (517568) map[0m
+[0;32mI (209) esp_image: segment 4: paddr=000ae5e8 vaddr=403769bc size=12f88h ( 77704) load[0m
+[0;32mI (226) esp_image: segment 5: paddr=000c1578 vaddr=600fe100 size=0001ch (    28) load[0m
+[0;32mI (235) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (235) boot: Disabling RNG early entropy source...[0m
+[0;32mI (245) cpu_start: Multicore app[0m
+[0;32mI (254) cpu_start: Pro cpu start user code[0m
+[0;32mI (254) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (254) app_init: Application information:[0m
+[0;32mI (254) app_init: Project name:     esp32s3_uwb_v2v_gateway[0m
+[0;32mI (259) app_init: App version:      d30bcc4-dirty[0m
+[0;32mI (264) app_init: Compile time:     Aug 17 2026 02:35:18[0m
+[0;32mI (269) app_init: ELF file SHA256:  322ce1f6d...[0m
+[0;32mI (273) app_init: ESP-IDF:          v5.4[0m
+[0;32mI (277) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (281) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (285) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (289) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (295) heap_init: At 3FCA2318 len 000473F8 (284 KiB): RAM[0m
+[0;32mI (300) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM[0m
+[0;32mI (305) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM[0m
+[0;32mI (310) heap_init: At 600FE11C len 00001ECC (7 KiB): RTCRAM[0m
+[0;32mI (317) spi_flash: detected chip: boya[0m
+[0;32mI (319) spi_flash: flash io: dio[0m
+[0;33mW (322) spi_flash: Detected size(16384k) larger than the size in the binary image header(4096k). Using the size in the binary image header.[0m
+[0;32mI (335) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (341) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (348) main_task: Started on CPU0[0m
+[0;32mI (358) main_task: Calling app_main()[0m
+[0;32mI (358) app_main: ESP32-S3 V2V gateway boot[0m
+[0;32mI (358) app_main: UWB disabled, running ESP-NOW only[0m
+[0;32mI (368) pp: pp rom version: e7ae62f[0m
+[0;32mI (368) net80211: net80211 rom version: e7ae62f[0m
+[0;32mI (388) wifi:wifi driver task: 3fcac084, prio:23, stack:6656, core=0[0m
+[0;32mI (388) wifi:wifi firmware version: 48ea317a7[0m
+[0;32mI (388) wifi:wifi certification version: v7.0[0m
+[0;32mI (388) wifi:config NVS flash: enabled[0m
+[0;32mI (388) wifi:config nano formatting: disabled[0m
+[0;32mI (398) wifi:Init data frame dynamic rx buffer num: 32[0m
+[0;32mI (398) wifi:Init static rx mgmt buffer num: 5[0m
+[0;32mI (408) wifi:Init management short buffer num: 32[0m
+[0;32mI (408) wifi:Init dynamic tx buffer num: 32[0m
+[0;32mI (408) wifi:Init static tx FG buffer num: 2[0m
+[0;32mI (418) wifi:Init static rx buffer size: 1600[0m
+[0;32mI (418) wifi:Init static rx buffer num: 10[0m
+[0;32mI (428) wifi:Init dynamic rx buffer num: 32[0m
+[0;32mI (428) wifi_init: rx ba win: 6[0m
+[0;32mI (428) wifi_init: accept mbox: 6[0m
+[0;32mI (438) wifi_init: tcpip mbox: 32[0m
+[0;32mI (438) wifi_init: udp mbox: 6[0m
+[0;32mI (438) wifi_init: tcp mbox: 6[0m
+[0;32mI (438) wifi_init: tcp tx win: 5760[0m
+[0;32mI (448) wifi_init: tcp rx win: 5760[0m
+[0;32mI (448) wifi_init: tcp mss: 1440[0m
+[0;32mI (448) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (458) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (458) phy_init: phy_version 680,a6008b2,Jun  4 2024,16:41:10[0m
+[0;32mI (498) wifi:mode : sta (14:c1:9f:c1:26:8c)[0m
+[0;32mI (498) wifi:enable tsf[0m
+================================
+ESP32-S3 ESP-NOW BASIC TEST
+STA MAC        : 14:C1:9F:C1:26:8C
+vehicle_id     : 12658316
+uwb_id         : 12658316
+Wi-Fi channel  : 1
+================================
+[0;32mI (508) ESPNOW: espnow [version: 2.0] init[0m
+[0;32mI (518) espnow_manager: ESP-NOW ready on channel 1[0m
+[0;32mI (518) espnow_manager: [TX] vehicle_id=12658316 seq=0 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (528) main_task: Returned from app_main()[0m
+[0;33mW (578) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (778) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (978) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (1028) espnow_manager: [TX] vehicle_id=12658316 seq=1 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (1178) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (1378) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (1528) espnow_manager: [TX] vehicle_id=12658316 seq=2 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (1578) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (1978) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (2028) espnow_manager: [TX] vehicle_id=12658316 seq=3 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (2178) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (2378) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (2528) espnow_manager: [TX] vehicle_id=12658316 seq=4 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (2578) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (2778) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (3028) espnow_manager: [TX] vehicle_id=12658316 seq=5 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (3528) espnow_manager: [TX] vehicle_id=12658316 seq=6 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (3578) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (3978) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (4028) espnow_manager: [TX] vehicle_id=12658316 seq=7 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (4178) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (4378) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (4528) espnow_manager: [TX] vehicle_id=12658316 seq=8 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (4578) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (4778) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (4978) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (5028) espnow_manager: [TX] vehicle_id=12658316 seq=9 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (5528) espnow_manager: [TX] vehicle_id=12658316 seq=10 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (5578) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (5778) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (5978) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (6028) espnow_manager: [TX] vehicle_id=12658316 seq=11 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (6178) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (6378) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (6528) espnow_manager: [TX] vehicle_id=12658316 seq=12 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (6578) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (6978) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (7028) espnow_manager: [TX] vehicle_id=12658316 seq=13 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (7528) espnow_manager: [TX] vehicle_id=12658316 seq=14 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (8028) espnow_manager: [TX] vehicle_id=12658316 seq=15 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (8178) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (8378) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (8528) espnow_manager: [TX] vehicle_id=12658316 seq=16 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (8578) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (9028) espnow_manager: [TX] vehicle_id=12658316 seq=17 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (9178) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (9378) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (9528) espnow_manager: [TX] vehicle_id=12658316 seq=18 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (9578) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (9778) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (9978) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (10028) espnow_manager: [TX] vehicle_id=12658316 seq=19 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (10178) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (10378) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (10528) espnow_manager: [TX] vehicle_id=12658316 seq=20 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (10578) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (10778) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (11028) espnow_manager: [TX] vehicle_id=12658316 seq=21 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (11178) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (11378) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (11528) espnow_manager: [TX] vehicle_id=12658316 seq=22 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (11578) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (11778) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (11978) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (12028) espnow_manager: [TX] vehicle_id=12658316 seq=23 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (12528) espnow_manager: [TX] vehicle_id=12658316 seq=24 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (13028) espnow_manager: [TX] vehicle_id=12658316 seq=25 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (13528) espnow_manager: [TX] vehicle_id=12658316 seq=26 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (14028) espnow_manager: [TX] vehicle_id=12658316 seq=27 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (14528) espnow_manager: [TX] vehicle_id=12658316 seq=28 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (14678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (14878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (15028) espnow_manager: [TX] vehicle_id=12658316 seq=29 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (15078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (15268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (15478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (15528) espnow_manager: [TX] vehicle_id=12658316 seq=30 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (15678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (15878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (16028) espnow_manager: [TX] vehicle_id=12658316 seq=31 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (16078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (16278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (16478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (16528) espnow_manager: [TX] vehicle_id=12658316 seq=32 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (16678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (16878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (17028) espnow_manager: [TX] vehicle_id=12658316 seq=33 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (17078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (17278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (17478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (17528) espnow_manager: [TX] vehicle_id=12658316 seq=34 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (17678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (17878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (18028) espnow_manager: [TX] vehicle_id=12658316 seq=35 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (18078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (18268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (18478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (18528) espnow_manager: [TX] vehicle_id=12658316 seq=36 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (18678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (18878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (19028) espnow_manager: [TX] vehicle_id=12658316 seq=37 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (19078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (19278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (19478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (19528) espnow_manager: [TX] vehicle_id=12658316 seq=38 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (19678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (19878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (20028) espnow_manager: [TX] vehicle_id=12658316 seq=39 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (20078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (20268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (20478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (20528) espnow_manager: [TX] vehicle_id=12658316 seq=40 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (20678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (20878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (21028) espnow_manager: [TX] vehicle_id=12658316 seq=41 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (21078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (21268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (21478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (21528) espnow_manager: [TX] vehicle_id=12658316 seq=42 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (21678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (21878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (22028) espnow_manager: [TX] vehicle_id=12658316 seq=43 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (22078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (22278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (22478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (22528) espnow_manager: [TX] vehicle_id=12658316 seq=44 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (22678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (22878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (23028) espnow_manager: [TX] vehicle_id=12658316 seq=45 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (23078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (23268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (23478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (23528) espnow_manager: [TX] vehicle_id=12658316 seq=46 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (23678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (23878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (24028) espnow_manager: [TX] vehicle_id=12658316 seq=47 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (24078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (24268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (24478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (24528) espnow_manager: [TX] vehicle_id=12658316 seq=48 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (24678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (24878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (25028) espnow_manager: [TX] vehicle_id=12658316 seq=49 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (25078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (25268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (25478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (25528) espnow_manager: [TX] vehicle_id=12658316 seq=50 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (25678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (25868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (26028) espnow_manager: [TX] vehicle_id=12658316 seq=51 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (26078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (26278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (26478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (26528) espnow_manager: [TX] vehicle_id=12658316 seq=52 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (26678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (26878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (27028) espnow_manager: [TX] vehicle_id=12658316 seq=53 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (27078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (27268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (27478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (27528) espnow_manager: [TX] vehicle_id=12658316 seq=54 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (27678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (27868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (28028) espnow_manager: [TX] vehicle_id=12658316 seq=55 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (28078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (28268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (28478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (28528) espnow_manager: [TX] vehicle_id=12658316 seq=56 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (28678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (28868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (29028) espnow_manager: [TX] vehicle_id=12658316 seq=57 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (29078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (29278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (29478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (29528) espnow_manager: [TX] vehicle_id=12658316 seq=58 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (29678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (29868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (30028) espnow_manager: [TX] vehicle_id=12658316 seq=59 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (30078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (30268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (30478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (30528) espnow_manager: [TX] vehicle_id=12658316 seq=60 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (30678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (30868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (31028) espnow_manager: [TX] vehicle_id=12658316 seq=61 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (31078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (31268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (31468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (31528) espnow_manager: [TX] vehicle_id=12658316 seq=62 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (31678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (31868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (32028) espnow_manager: [TX] vehicle_id=12658316 seq=63 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (32078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (32268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (32478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (32528) espnow_manager: [TX] vehicle_id=12658316 seq=64 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (32678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (32868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (33028) espnow_manager: [TX] vehicle_id=12658316 seq=65 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (33078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (33268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (33478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (33528) espnow_manager: [TX] vehicle_id=12658316 seq=66 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (33678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (33868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (34028) espnow_manager: [TX] vehicle_id=12658316 seq=67 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (34078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (34278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (34478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (34528) espnow_manager: [TX] vehicle_id=12658316 seq=68 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (34678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (34868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (35028) espnow_manager: [TX] vehicle_id=12658316 seq=69 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (35078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (35278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (35468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (35528) espnow_manager: [TX] vehicle_id=12658316 seq=70 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (35678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (35868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (36028) espnow_manager: [TX] vehicle_id=12658316 seq=71 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (36078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (36268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (36468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (36528) espnow_manager: [TX] vehicle_id=12658316 seq=72 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (36678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (36868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (37028) espnow_manager: [TX] vehicle_id=12658316 seq=73 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (37078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (37268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (37468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (37528) espnow_manager: [TX] vehicle_id=12658316 seq=74 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (37678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (37878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (38028) espnow_manager: [TX] vehicle_id=12658316 seq=75 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (38068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (38268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (38478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (38528) espnow_manager: [TX] vehicle_id=12658316 seq=76 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (38678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (38878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (39028) espnow_manager: [TX] vehicle_id=12658316 seq=77 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (39078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (39278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (39478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (39528) espnow_manager: [TX] vehicle_id=12658316 seq=78 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (39678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (39868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (40028) espnow_manager: [TX] vehicle_id=12658316 seq=79 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (40068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (40268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (40468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (40528) espnow_manager: [TX] vehicle_id=12658316 seq=80 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (40678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (40868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (41028) espnow_manager: [TX] vehicle_id=12658316 seq=81 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (41068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (41278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (41468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (41528) espnow_manager: [TX] vehicle_id=12658316 seq=82 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (41678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (41868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (42028) espnow_manager: [TX] vehicle_id=12658316 seq=83 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (42078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (42268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (42468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (42528) espnow_manager: [TX] vehicle_id=12658316 seq=84 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (42678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (42868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (43028) espnow_manager: [TX] vehicle_id=12658316 seq=85 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (43068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (43278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (43478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (43528) espnow_manager: [TX] vehicle_id=12658316 seq=86 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (43668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (43868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (44028) espnow_manager: [TX] vehicle_id=12658316 seq=87 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (44068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (44268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (44468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (44528) espnow_manager: [TX] vehicle_id=12658316 seq=88 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (44668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (44878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (45028) espnow_manager: [TX] vehicle_id=12658316 seq=89 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (45078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (45268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (45468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (45528) espnow_manager: [TX] vehicle_id=12658316 seq=90 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (45668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (45878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (46028) espnow_manager: [TX] vehicle_id=12658316 seq=91 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (46068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (46278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (46478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (46528) espnow_manager: [TX] vehicle_id=12658316 seq=92 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (46668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (46868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (47028) espnow_manager: [TX] vehicle_id=12658316 seq=93 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (47068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (47268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (47468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (47528) espnow_manager: [TX] vehicle_id=12658316 seq=94 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (47678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (47868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (48028) espnow_manager: [TX] vehicle_id=12658316 seq=95 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (48068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (48268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (48468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (48528) espnow_manager: [TX] vehicle_id=12658316 seq=96 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (48678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (48878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (49028) espnow_manager: [TX] vehicle_id=12658316 seq=97 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (49068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (49278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (49468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (49528) espnow_manager: [TX] vehicle_id=12658316 seq=98 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (49678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (49868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (50028) espnow_manager: [TX] vehicle_id=12658316 seq=99 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (50068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (50278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (50478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (50528) espnow_manager: [TX] vehicle_id=12658316 seq=100 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (50668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (50878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (51028) espnow_manager: [TX] vehicle_id=12658316 seq=101 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (51068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (51278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (51468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (51528) espnow_manager: [TX] vehicle_id=12658316 seq=102 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (51668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (51878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (52028) espnow_manager: [TX] vehicle_id=12658316 seq=103 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (52068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (52268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (52468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (52528) espnow_manager: [TX] vehicle_id=12658316 seq=104 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (52668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (52868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (53028) espnow_manager: [TX] vehicle_id=12658316 seq=105 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (53078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (53268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (53468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (53528) espnow_manager: [TX] vehicle_id=12658316 seq=106 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (53668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (53878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (54028) espnow_manager: [TX] vehicle_id=12658316 seq=107 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (54068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (54268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (54478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (54528) espnow_manager: [TX] vehicle_id=12658316 seq=108 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (54668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (54878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (55028) espnow_manager: [TX] vehicle_id=12658316 seq=109 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (55078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (55268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (55468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (55528) espnow_manager: [TX] vehicle_id=12658316 seq=110 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (55668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (55868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (56028) espnow_manager: [TX] vehicle_id=12658316 seq=111 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (56078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (56278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (56468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (56528) espnow_manager: [TX] vehicle_id=12658316 seq=112 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (56668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (56868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (57028) espnow_manager: [TX] vehicle_id=12658316 seq=113 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (57068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (57268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (57468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (57528) espnow_manager: [TX] vehicle_id=12658316 seq=114 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (57678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (57868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (58028) espnow_manager: [TX] vehicle_id=12658316 seq=115 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (58068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (58268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (58468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (58528) espnow_manager: [TX] vehicle_id=12658316 seq=116 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (58668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (58868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (59028) espnow_manager: [TX] vehicle_id=12658316 seq=117 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (59078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (59278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (59468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (59528) espnow_manager: [TX] vehicle_id=12658316 seq=118 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (59668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (59868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (60028) espnow_manager: [TX] vehicle_id=12658316 seq=119 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (60068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (60278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (60478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (60528) espnow_manager: [TX] vehicle_id=12658316 seq=120 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (60668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (60868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (61028) espnow_manager: [TX] vehicle_id=12658316 seq=121 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (61068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (61268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (61468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (61528) espnow_manager: [TX] vehicle_id=12658316 seq=122 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (61668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (61878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (62028) espnow_manager: [TX] vehicle_id=12658316 seq=123 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (62068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (62268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (62468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (62528) espnow_manager: [TX] vehicle_id=12658316 seq=124 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (62668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (62868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (63028) espnow_manager: [TX] vehicle_id=12658316 seq=125 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (63068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (63278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (63468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (63528) espnow_manager: [TX] vehicle_id=12658316 seq=126 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (63668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (63868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (64028) espnow_manager: [TX] vehicle_id=12658316 seq=127 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (64078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (64268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (64478) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (64528) espnow_manager: [TX] vehicle_id=12658316 seq=128 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (64668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (64878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (65028) espnow_manager: [TX] vehicle_id=12658316 seq=129 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (65078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (65268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (65468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (65528) espnow_manager: [TX] vehicle_id=12658316 seq=130 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (65668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (65878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (66028) espnow_manager: [TX] vehicle_id=12658316 seq=131 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (66068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (66268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (66468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (66528) espnow_manager: [TX] vehicle_id=12658316 seq=132 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (66668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (66868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (67028) espnow_manager: [TX] vehicle_id=12658316 seq=133 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (67068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (67268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (67468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (67528) espnow_manager: [TX] vehicle_id=12658316 seq=134 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (67678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (67868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (68028) espnow_manager: [TX] vehicle_id=12658316 seq=135 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (68068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (68278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (68468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (68528) espnow_manager: [TX] vehicle_id=12658316 seq=136 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (68668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (68878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (69028) espnow_manager: [TX] vehicle_id=12658316 seq=137 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (69078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (69278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (69468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (69528) espnow_manager: [TX] vehicle_id=12658316 seq=138 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (69668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (69868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (70028) espnow_manager: [TX] vehicle_id=12658316 seq=139 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (70068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (70268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (70468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (70528) espnow_manager: [TX] vehicle_id=12658316 seq=140 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (70668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (70868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (71028) espnow_manager: [TX] vehicle_id=12658316 seq=141 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (71068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (71268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (71468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (71528) espnow_manager: [TX] vehicle_id=12658316 seq=142 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (71668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (71878) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (72028) espnow_manager: [TX] vehicle_id=12658316 seq=143 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (72078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (72268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (72468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (72528) espnow_manager: [TX] vehicle_id=12658316 seq=144 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (72668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (72868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (73028) espnow_manager: [TX] vehicle_id=12658316 seq=145 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (73068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (73278) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (73468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (73528) espnow_manager: [TX] vehicle_id=12658316 seq=146 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (73668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (73868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (74028) espnow_manager: [TX] vehicle_id=12658316 seq=147 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (74068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (74268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (74468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (74528) espnow_manager: [TX] vehicle_id=12658316 seq=148 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (74678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (74868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (75028) espnow_manager: [TX] vehicle_id=12658316 seq=149 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (75068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (75268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (75468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (75528) espnow_manager: [TX] vehicle_id=12658316 seq=150 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (75678) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (75868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (76028) espnow_manager: [TX] vehicle_id=12658316 seq=151 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (76078) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (76268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (76468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (76528) espnow_manager: [TX] vehicle_id=12658316 seq=152 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (76668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (76868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (77028) espnow_manager: [TX] vehicle_id=12658316 seq=153 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (77068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (77268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (77468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (77528) espnow_manager: [TX] vehicle_id=12658316 seq=154 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (77668) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (77868) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (78028) espnow_manager: [TX] vehicle_id=12658316 seq=155 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;33mW (78068) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (78268) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;33mW (78468) espnow_manager: invalid RX packet length=29 expected=33[0m
+[0;32mI (78528) espnow_manager: [TX] vehicle_id=12658316 seq=156 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS

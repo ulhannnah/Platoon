@@ -1,0 +1,923 @@
+[0;32mI (108161) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=24ESP-ROM:esp32s3-20210327[0m
+Build:Mar 27 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0x8 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4037c0f2
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2810,len:0x15a0
+load:0x403c8700,len:0x4
+load:0x403c8704,len:0xd20
+load:0x403cb700,len:0x2ee4
+entry 0x403c8928
+[0;32mI (26) boot: ESP-IDF v5.4 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Aug 17 2026 02:35:33[0m
+[0;32mI (27) boot: Multicore bootloader[0m
+[0;32mI (27) boot: chip revision: v0.2[0m
+[0;32mI (29) boot: efuse block revision: v1.4[0m
+[0;32mI (33) boot.esp32s3: Boot SPI Speed : 80MHz[0m
+[0;32mI (37) boot.esp32s3: SPI Mode       : DIO[0m
+[0;32mI (41) boot.esp32s3: SPI Flash Size : 4MB[0m
+[0;32mI (44) boot: Enabling RNG early entropy source...[0m
+[0;32mI (49) boot: Partition Table:[0m
+[0;32mI (52) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (58) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (64) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (71) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (77) boot: End of partition table[0m
+[0;32mI (81) esp_image: segment 0: paddr=00010020 vaddr=3c090020 size=1b71ch (112412) map[0m
+[0;32mI (108) esp_image: segment 1: paddr=0002b744 vaddr=3fc9ba00 size=048d4h ( 18644) load[0m
+[0;32mI (112) esp_image: segment 2: paddr=00030020 vaddr=42000020 size=866ech (550636) map[0m
+[0;32mI (210) esp_image: segment 3: paddr=000b6714 vaddr=3fca02d4 size=001e8h (   488) load[0m
+[0;32mI (210) esp_image: segment 4: paddr=000b6904 vaddr=40374000 size=17918h ( 96536) load[0m
+[0;32mI (234) esp_image: segment 5: paddr=000ce224 vaddr=600fe100 size=0001ch (    28) load[0m
+[0;32mI (244) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (244) boot: Disabling RNG early entropy source...[0m
+[0;32mI (254) cpu_start: Multicore app[0m
+[0;32mI (263) cpu_start: Pro cpu start user code[0m
+[0;32mI (263) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (263) app_init: Application information:[0m
+[0;32mI (264) app_init: Project name:     esp32s3_uwb_v2v_gateway[0m
+[0;32mI (269) app_init: App version:      d30bcc4-dirty[0m
+[0;32mI (273) app_init: Compile time:     Aug 28 2026 01:49:17[0m
+[0;32mI (278) app_init: ELF file SHA256:  7c425cb77...[0m
+[0;32mI (282) app_init: ESP-IDF:          v5.4[0m
+[0;32mI (286) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (290) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (294) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (298) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (304) heap_init: At 3FCA4690 len 00045080 (276 KiB): RAM[0m
+[0;32mI (309) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM[0m
+[0;32mI (314) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM[0m
+[0;32mI (319) heap_init: At 600FE11C len 00001ECC (7 KiB): RTCRAM[0m
+[0;32mI (326) spi_flash: detected chip: boya[0m
+[0;32mI (328) spi_flash: flash io: dio[0m
+[0;33mW (331) spi_flash: Detected size(16384k) larger than the size in the binary image header(4096k). Using the size in the binary image header.[0m
+[0;32mI (344) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (350) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (357) main_task: Started on CPU0[0m
+[0;32mI (367) main_task: Calling app_main()[0m
+[0;32mI (367) app_main: ESP32-S3 V2V gateway boot[0m
+[0;32mI (367) uwb_manager: UWB role=ANCHOR/RESPONDER base_mac=14:c1:9f:c1:26:8c mac16=0x0001 peer=0x0002[0m
+[0;32mI (377) DW3000: HW Init (RESET:4 WAKEUP:-1 IRQ:5)[0m
+[0;32mI (377) gpio: GPIO[4]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 [0m
+[0;32mI (387) DW3000: SPI Init (MOSI:12 MISO:11 CLK:10 CS:13)[0m
+[0;32mI (397) DW3000: HW reset[0m
+[0;32mI (427) gpio: GPIO[5]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:1 [0m
+[0;32mI (427) DECA: Decadriver source: DW3XXX Device Driver Version 08.02.02[0m
+[0;32mI (427) DW3000: WAKEUP CS[0m
+[0;32mI (447) DECA: DEV ID: DECA0312[0m
+[0;32mI (447) gpio: GPIO[13]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 [0m
+[0;32mI (447) DECA: config CH 9 6.8Mbps PRF 64MHz Plen 64 PAC 8[0m
+[0;32mI (447) DECA: config code 11/11 SFD 65[0m
+[0;32mI (457) DECA: PRE 66 (SFD 9) PHD 22 12B DATA 19 = 114 us[0m
+[0;32mI (457) uwb_manager: UWB-X3-AOA PDoA test enabled: simple TX/RX, no TWR; angle_deg is raw phase deg[0m
+[0;32mI (467) uwb_manager: UWB-X3-AOA PDOA RX mode start; rotate/move tag and watch pdoa_phase[0m
+[0;32mI (477) uwb_manager: DW3000 libdeca init OK[0m
+[0;32mI (487) pp: pp rom version: e7ae62f[0m
+[0;32mI (487) net80211: net80211 rom version: e7ae62f[0m
+[0;32mI (497) wifi:wifi driver task: 3fcae9b8, prio:23, stack:6656, core=0[0m
+[0;32mI (497) wifi:wifi firmware version: 48ea317a7[0m
+[0;32mI (497) wifi:wifi certification version: v7.0[0m
+[0;32mI (497) wifi:config NVS flash: enabled[0m
+[0;32mI (507) wifi:config nano formatting: disabled[0m
+[0;32mI (507) wifi:Init data frame dynamic rx buffer num: 32[0m
+[0;32mI (517) wifi:Init static rx mgmt buffer num: 5[0m
+[0;32mI (517) wifi:Init management short buffer num: 32[0m
+[0;32mI (527) wifi:Init dynamic tx buffer num: 32[0m
+[0;32mI (527) wifi:Init static tx FG buffer num: 2[0m
+[0;32mI (527) wifi:Init static rx buffer size: 1600[0m
+[0;32mI (537) wifi:Init static rx buffer num: 10[0m
+[0;32mI (537) wifi:Init dynamic rx buffer num: 32[0m
+[0;32mI (547) wifi_init: rx ba win: 6[0m
+[0;32mI (547) wifi_init: accept mbox: 6[0m
+[0;32mI (547) wifi_init: tcpip mbox: 32[0m
+[0;32mI (547) wifi_init: udp mbox: 6[0m
+[0;32mI (557) wifi_init: tcp mbox: 6[0m
+[0;32mI (557) wifi_init: tcp tx win: 5760[0m
+[0;32mI (557) wifi_init: tcp rx win: 5760[0m
+[0;32mI (567) wifi_init: tcp mss: 1440[0m
+[0;32mI (567) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (567) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (577) phy_init: phy_version 680,a6008b2,Jun  4 2024,16:41:10[0m
+[0;32mI (617) wifi:mode : sta (14:c1:9f:c1:26:8c)[0m
+[0;32mI (617) wifi:enable tsf[0m
+================================
+ESP32-S3 ESP-NOW BASIC TEST
+STA MAC        : 14:C1:9F:C1:26:8C
+vehicle_id     : 12658316
+uwb_id         : 12658316
+Wi-Fi channel  : 1
+================================
+[0;32mI (627) ESPNOW: espnow [version: 2.0] init[0m
+[0;32mI (637) espnow_manager: ESP-NOW ready on channel 1[0m
+[0;32mI (637) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.300 heading=0.0 seq=0[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (647) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2528 pdoa_phase=-70.72 deg[0m
+[0;32mI (657) main_task: Returned from app_main()[0m
+[0;32mI (857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=-3223 pdoa_phase=-90.17 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.460
+heading_deg    : 120.0
+seq            : 176
+timestamp_ms   : 88336
+================================
+
+[0;32mI (1057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-1966 pdoa_phase=-55.00 deg[0m
+[0;32mI (1147) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=2 speed=0.310 heading=15.0 seq=1[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (1257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-2323 pdoa_phase=-64.99 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.470
+heading_deg    : 135.0
+seq            : 177
+timestamp_ms   : 88836
+================================
+
+[0;32mI (1457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2790 pdoa_phase=-78.05 deg[0m
+[0;32mI (1647) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=3 speed=0.320 heading=30.0 seq=2[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (1657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2435 pdoa_phase=-68.12 deg[0m
+[0;32mI (1857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-2953 pdoa_phase=-82.61 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.480
+heading_deg    : 150.0
+seq            : 178
+timestamp_ms   : 89336
+================================
+
+[0;32mI (2057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-2888 pdoa_phase=-80.80 deg[0m
+[0;32mI (2147) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=4 speed=0.330 heading=45.0 seq=3[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (2257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-2614 pdoa_phase=-73.13 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.490
+heading_deg    : 165.0
+seq            : 179
+timestamp_ms   : 89836
+================================
+
+[0;32mI (2457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2391 pdoa_phase=-66.89 deg[0m
+[0;32mI (2647) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.340 heading=60.0 seq=4[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (2657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2868 pdoa_phase=-80.24 deg[0m
+[0;32mI (2857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-1950 pdoa_phase=-54.55 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.300
+heading_deg    : 180.0
+seq            : 180
+timestamp_ms   : 90336
+================================
+
+[0;32mI (3057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2405 pdoa_phase=-67.28 deg[0m
+[0;32mI (3147) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=2 speed=0.350 heading=75.0 seq=5[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (3257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=3051 pdoa_phase=85.36 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.310
+heading_deg    : 195.0
+seq            : 181
+timestamp_ms   : 90836
+================================
+
+[0;32mI (3457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-2892 pdoa_phase=-80.91 deg[0m
+[0;32mI (3647) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=3 speed=0.360 heading=90.0 seq=6[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (3657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-2103 pdoa_phase=-58.83 deg[0m
+[0;32mI (3857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-1972 pdoa_phase=-55.17 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.320
+heading_deg    : 210.0
+seq            : 182
+timestamp_ms   : 91336
+================================
+
+[0;32mI (4057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=2800 pdoa_phase=78.33 deg[0m
+[0;32mI (4147) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=4 speed=0.370 heading=105.0 seq=7[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (4257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2916 pdoa_phase=-81.58 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.330
+heading_deg    : 225.0
+seq            : 183
+timestamp_ms   : 91836
+================================
+
+[0;32mI (4457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-2461 pdoa_phase=-68.85 deg[0m
+[0;32mI (4647) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=1 speed=0.380 heading=120.0 seq=8[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (4657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2654 pdoa_phase=-74.25 deg[0m
+[0;32mI (4857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-3301 pdoa_phase=-92.35 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.340
+heading_deg    : 240.0
+seq            : 184
+timestamp_ms   : 92336
+================================
+
+[0;32mI (5057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-3057 pdoa_phase=-85.52 deg[0m
+[0;32mI (5147) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=2 speed=0.390 heading=135.0 seq=9[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (5257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-3109 pdoa_phase=-86.98 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.350
+heading_deg    : 255.0
+seq            : 185
+timestamp_ms   : 92836
+================================
+
+[0;32mI (5457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-2624 pdoa_phase=-73.41 deg[0m
+[0;32mI (5647) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=3 speed=0.400 heading=150.0 seq=10[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (5657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2910 pdoa_phase=-81.41 deg[0m
+[0;32mI (5857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2405 pdoa_phase=-67.28 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.360
+heading_deg    : 270.0
+seq            : 186
+timestamp_ms   : 93336
+================================
+
+[0;32mI (6057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=-2961 pdoa_phase=-82.84 deg[0m
+[0;32mI (6147) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=4 speed=0.410 heading=165.0 seq=11[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (6257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2750 pdoa_phase=-76.94 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.370
+heading_deg    : 285.0
+seq            : 187
+timestamp_ms   : 93836
+================================
+
+[0;32mI (6457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-1504 pdoa_phase=-42.08 deg[0m
+[0;32mI (6647) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.420 heading=180.0 seq=12[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (6657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2463 pdoa_phase=-68.91 deg[0m
+[0;32mI (6857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-1767 pdoa_phase=-49.43 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.380
+heading_deg    : 300.0
+seq            : 188
+timestamp_ms   : 94336
+================================
+
+[0;32mI (7057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=3591 pdoa_phase=100.46 deg[0m
+[0;32mI (7147) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=2 speed=0.430 heading=195.0 seq=13[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (7257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2955 pdoa_phase=-82.67 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.390
+heading_deg    : 315.0
+seq            : 189
+timestamp_ms   : 94836
+================================
+
+[0;32mI (7457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=2997 pdoa_phase=83.85 deg[0m
+[0;32mI (7647) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=3 speed=0.440 heading=210.0 seq=14[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (7657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2544 pdoa_phase=-71.17 deg[0m
+[0;32mI (7857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2568 pdoa_phase=-71.84 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.400
+heading_deg    : 330.0
+seq            : 190
+timestamp_ms   : 95336
+================================
+
+[0;32mI (8057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=2780 pdoa_phase=77.77 deg[0m
+[0;32mI (8147) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=4 speed=0.450 heading=225.0 seq=15[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (8257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-2898 pdoa_phase=-81.08 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.410
+heading_deg    : 345.0
+seq            : 191
+timestamp_ms   : 95836
+================================
+
+[0;32mI (8457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=-2618 pdoa_phase=-73.24 deg[0m
+[0;32mI (8647) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=1 speed=0.460 heading=240.0 seq=16[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (8657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2866 pdoa_phase=-80.18 deg[0m
+[0;32mI (8857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2413 pdoa_phase=-67.51 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.420
+heading_deg    : 0.0
+seq            : 192
+timestamp_ms   : 96336
+================================
+
+[0;32mI (9057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-3059 pdoa_phase=-85.58 deg[0m
+[0;32mI (9147) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=2 speed=0.470 heading=255.0 seq=17[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (9257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2680 pdoa_phase=-74.98 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.430
+heading_deg    : 15.0
+seq            : 193
+timestamp_ms   : 96836
+================================
+
+[0;32mI (9457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2588 pdoa_phase=-72.40 deg[0m
+[0;32mI (9647) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=3 speed=0.480 heading=270.0 seq=18[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (9657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=-2014 pdoa_phase=-56.34 deg[0m
+[0;32mI (9857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-2670 pdoa_phase=-74.70 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.440
+heading_deg    : 30.0
+seq            : 194
+timestamp_ms   : 97336
+================================
+
+[0;32mI (10057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=-2718 pdoa_phase=-76.04 deg[0m
+[0;32mI (10147) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=4 speed=0.490 heading=285.0 seq=19[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (10257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=2293 pdoa_phase=64.15 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.450
+heading_deg    : 45.0
+seq            : 195
+timestamp_ms   : 97836
+================================
+
+[0;32mI (10457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-3071 pdoa_phase=-85.92 deg[0m
+[0;32mI (10647) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.300 heading=300.0 seq=20[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (10657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=-2704 pdoa_phase=-75.65 deg[0m
+[0;32mI (10857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2363 pdoa_phase=-66.11 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.460
+heading_deg    : 60.0
+seq            : 196
+timestamp_ms   : 98336
+================================
+
+[0;32mI (11057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2062 pdoa_phase=-57.69 deg[0m
+[0;32mI (11147) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=2 speed=0.310 heading=315.0 seq=21[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (11257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=-2235 pdoa_phase=-62.53 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.470
+heading_deg    : 75.0
+seq            : 197
+timestamp_ms   : 98836
+================================
+
+[0;32mI (11457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=2289 pdoa_phase=64.04 deg[0m
+[0;32mI (11647) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=3 speed=0.320 heading=330.0 seq=22[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (11657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-3021 pdoa_phase=-84.52 deg[0m
+[0;32mI (11857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=-2632 pdoa_phase=-73.63 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.480
+heading_deg    : 90.0
+seq            : 198
+timestamp_ms   : 99336
+================================
+
+[0;32mI (12057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2632 pdoa_phase=-73.63 deg[0m
+[0;32mI (12147) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=4 speed=0.330 heading=345.0 seq=23[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (12257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2672 pdoa_phase=-74.75 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.490
+heading_deg    : 105.0
+seq            : 199
+timestamp_ms   : 99836
+================================
+
+[0;32mI (12457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=-2293 pdoa_phase=-64.15 deg[0m
+[0;32mI (12647) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.340 heading=0.0 seq=24[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (12657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=-2904 pdoa_phase=-81.24 deg[0m
+[0;32mI (12857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=-2241 pdoa_phase=-62.70 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.300
+heading_deg    : 120.0
+seq            : 200
+timestamp_ms   : 100336
+================================
+
+[0;32mI (13057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2800 pdoa_phase=-78.33 deg[0m
+[0;32mI (13147) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=2 speed=0.350 heading=15.0 seq=25[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (13257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-3173 pdoa_phase=-88.77 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.310
+heading_deg    : 135.0
+seq            : 201
+timestamp_ms   : 100836
+================================
+
+[0;32mI (13457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2219 pdoa_phase=-62.08 deg[0m
+[0;32mI (13647) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=3 speed=0.360 heading=30.0 seq=26[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (13657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2485 pdoa_phase=-69.52 deg[0m
+[0;32mI (13857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=245 pdoa_raw=-2453 pdoa_phase=-68.63 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.320
+heading_deg    : 150.0
+seq            : 202
+timestamp_ms   : 101336
+================================
+
+[0;32mI (14057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2423 pdoa_phase=-67.79 deg[0m
+[0;32mI (14147) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=4 speed=0.370 heading=45.0 seq=27[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (14257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=-2686 pdoa_phase=-75.14 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.330
+heading_deg    : 165.0
+seq            : 203
+timestamp_ms   : 101836
+================================
+
+[0;32mI (14457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2957 pdoa_phase=-82.73 deg[0m
+[0;32mI (14647) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=1 speed=0.380 heading=60.0 seq=28[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (14657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=-2361 pdoa_phase=-66.05 deg[0m
+[0;32mI (14857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2369 pdoa_phase=-66.28 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.340
+heading_deg    : 180.0
+seq            : 204
+timestamp_ms   : 102336
+================================
+
+[0;32mI (15057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-3009 pdoa_phase=-84.18 deg[0m
+[0;32mI (15147) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=2 speed=0.390 heading=75.0 seq=29[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (15257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2014 pdoa_phase=-56.34 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.350
+heading_deg    : 195.0
+seq            : 205
+timestamp_ms   : 102836
+================================
+
+[0;32mI (15457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2417 pdoa_phase=-67.62 deg[0m
+[0;32mI (15647) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=3 speed=0.400 heading=90.0 seq=30[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (15657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-3247 pdoa_phase=-90.84 deg[0m
+[0;32mI (15857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-3053 pdoa_phase=-85.41 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.360
+heading_deg    : 210.0
+seq            : 206
+timestamp_ms   : 103336
+================================
+
+[0;32mI (16057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2814 pdoa_phase=-78.73 deg[0m
+[0;32mI (16147) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=4 speed=0.410 heading=105.0 seq=31[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (16257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2227 pdoa_phase=-62.30 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.370
+heading_deg    : 225.0
+seq            : 207
+timestamp_ms   : 103836
+================================
+
+[0;32mI (16457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=-2672 pdoa_phase=-74.75 deg[0m
+[0;32mI (16647) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.420 heading=120.0 seq=32[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (16657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=1825 pdoa_phase=51.06 deg[0m
+[0;32mI (16857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=245 pdoa_raw=-2632 pdoa_phase=-73.63 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.380
+heading_deg    : 240.0
+seq            : 208
+timestamp_ms   : 104336
+================================
+
+[0;32mI (17057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-1753 pdoa_phase=-49.04 deg[0m
+[0;32mI (17147) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=2 speed=0.430 heading=135.0 seq=33[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (17257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=248 pdoa_raw=-2646 pdoa_phase=-74.03 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.390
+heading_deg    : 255.0
+seq            : 209
+timestamp_ms   : 104836
+================================
+
+[0;32mI (17457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=2878 pdoa_phase=80.52 deg[0m
+[0;32mI (17647) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=3 speed=0.440 heading=150.0 seq=34[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (17657) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-2427 pdoa_phase=-67.90 deg[0m
+[0;32mI (17857) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=246 pdoa_raw=-2628 pdoa_phase=-73.52 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.400
+heading_deg    : 270.0
+seq            : 210
+timestamp_ms   : 105336
+================================
+
+[0;32mI (18057) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-3067 pdoa_phase=-85.80 deg[0m
+[0;32mI (18147) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=4 speed=0.450 heading=165.0 seq=35[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (18257) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2945 pdoa_phase=-82.39 deg[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.410
+heading_deg    : 285.0
+seq            : 211
+timestamp_ms   : 105836
+================================
+
+[0;32mI (18457) uwb_manager: UWB-X3-AOA PDOA rx len=13 sts_quality=247 pdoa_raw=-2949 pdoa_phase=-82.50 deg[0m

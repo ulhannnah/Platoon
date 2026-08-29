@@ -3,3 +3,5 @@ source "C:/Espressif/frameworks/esp-idf-v5.4/components/esp_app_format/Kconfig.p
 source "C:/Espressif/frameworks/esp-idf-v5.4/components/esp_rom/Kconfig.projbuild"
 source "C:/Espressif/frameworks/esp-idf-v5.4/components/esptool_py/Kconfig.projbuild"
 source "C:/Espressif/frameworks/esp-idf-v5.4/components/partition_table/Kconfig.projbuild"
+source "D:/WorkSpace/Platoon_26/ESP_UWB/src/components/dw3000-decadriver-source/platform/esp-idf/decadriver/Kconfig.projbuild"
+source "D:/WorkSpace/Platoon_26/ESP_UWB/src/components/libdeca/Kconfig.projbuild"

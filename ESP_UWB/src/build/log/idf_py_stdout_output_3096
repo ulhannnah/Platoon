@@ -1,0 +1,961 @@
+[0;32mI (38283) TWR: Sent Report to [0000000000000002]: distance 35 cmESP-ROM:esp32s3-20210327[0m
+Build:Mar 27 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0x8 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4037c0f2
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2810,len:0x15a0
+load:0x403c8700,len:0x4
+load:0x403c8704,len:0xd20
+load:0x403cb700,len:0x2ee4
+entry 0x403c8928
+[0;32mI (26) boot: ESP-IDF v5.4 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Aug 17 2026 02:35:33[0m
+[0;32mI (27) boot: Multicore bootloader[0m
+[0;32mI (27) boot: chip revision: v0.2[0m
+[0;32mI (29) boot: efuse block revision: v1.4[0m
+[0;32mI (33) boot.esp32s3: Boot SPI Speed : 80MHz[0m
+[0;32mI (37) boot.esp32s3: SPI Mode       : DIO[0m
+[0;32mI (41) boot.esp32s3: SPI Flash Size : 4MB[0m
+[0;32mI (44) boot: Enabling RNG early entropy source...[0m
+[0;32mI (49) boot: Partition Table:[0m
+[0;32mI (52) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (58) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (64) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (71) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (77) boot: End of partition table[0m
+[0;32mI (81) esp_image: segment 0: paddr=00010020 vaddr=3c090020 size=1bcfch (113916) map[0m
+[0;32mI (108) esp_image: segment 1: paddr=0002bd24 vaddr=3fc9ba00 size=042f4h ( 17140) load[0m
+[0;32mI (112) esp_image: segment 2: paddr=00030020 vaddr=42000020 size=88708h (558856) map[0m
+[0;32mI (211) esp_image: segment 3: paddr=000b8730 vaddr=3fc9fcf4 size=0085ch (  2140) load[0m
+[0;32mI (212) esp_image: segment 4: paddr=000b8f94 vaddr=40374000 size=17918h ( 96536) load[0m
+[0;32mI (236) esp_image: segment 5: paddr=000d08b4 vaddr=600fe100 size=0001ch (    28) load[0m
+[0;32mI (245) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (245) boot: Disabling RNG early entropy source...[0m
+[0;32mI (255) cpu_start: Multicore app[0m
+[0;32mI (265) cpu_start: Pro cpu start user code[0m
+[0;32mI (265) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (265) app_init: Application information:[0m
+[0;32mI (265) app_init: Project name:     esp32s3_uwb_v2v_gateway[0m
+[0;32mI (270) app_init: App version:      d30bcc4-dirty[0m
+[0;32mI (274) app_init: Compile time:     Aug 28 2026 01:49:17[0m
+[0;32mI (279) app_init: ELF file SHA256:  0300837d8...[0m
+[0;32mI (284) app_init: ESP-IDF:          v5.4[0m
+[0;32mI (287) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (291) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (295) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (299) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (305) heap_init: At 3FCA4830 len 00044EE0 (275 KiB): RAM[0m
+[0;32mI (311) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM[0m
+[0;32mI (316) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM[0m
+[0;32mI (321) heap_init: At 600FE11C len 00001ECC (7 KiB): RTCRAM[0m
+[0;32mI (327) spi_flash: detected chip: boya[0m
+[0;32mI (330) spi_flash: flash io: dio[0m
+[0;33mW (333) spi_flash: Detected size(16384k) larger than the size in the binary image header(4096k). Using the size in the binary image header.[0m
+[0;32mI (345) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (351) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (358) main_task: Started on CPU0[0m
+[0;32mI (368) main_task: Calling app_main()[0m
+[0;32mI (368) app_main: ESP32-S3 V2V gateway boot[0m
+[0;32mI (368) uwb_manager: UWB role=ANCHOR/RESPONDER base_mac=14:c1:9f:c1:26:8c mac16=0x0001 peer=0x0002[0m
+[0;32mI (378) DW3000: HW Init (RESET:4 WAKEUP:-1 IRQ:5)[0m
+[0;32mI (378) gpio: GPIO[4]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 [0m
+[0;32mI (388) DW3000: SPI Init (MOSI:12 MISO:11 CLK:10 CS:13)[0m
+[0;32mI (398) DW3000: HW reset[0m
+[0;32mI (428) gpio: GPIO[5]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:1 [0m
+[0;32mI (428) DECA: Decadriver source: DW3XXX Device Driver Version 08.02.02[0m
+[0;32mI (428) DW3000: WAKEUP CS[0m
+[0;32mI (448) DECA: DEV ID: DECA0312[0m
+[0;32mI (448) gpio: GPIO[13]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 [0m
+[0;32mI (448) DECA: config CH 9 6.8Mbps PRF 64MHz Plen 64 PAC 8[0m
+[0;32mI (448) DECA: config code 11/11 SFD 65[0m
+[0;32mI (458) DECA: PRE 66 (SFD 9) PHD 22 12B DATA 19 = 114 us[0m
+[0;32mI (458) DECA: Init PANID: DECA MAC: 0001[0m
+[0;32mI (468) DWTASK: TASK started[0m
+[0;32mI (468) TWR: delay 2192 us RX delay 2078 us PTO 8 (66 us) rep 1[0m
+[0;32mI (468) uwb_manager: UWB anchor RX start[0m
+[0;32mI (478) uwb_manager: DW3000 libdeca init OK[0m
+[0;32mI (488) pp: pp rom version: e7ae62f[0m
+[0;32mI (488) net80211: net80211 rom version: e7ae62f[0m
+[0;32mI (498) wifi:wifi driver task: 3fcafd60, prio:23, stack:6656, core=0[0m
+[0;32mI (498) wifi:wifi firmware version: 48ea317a7[0m
+[0;32mI (498) wifi:wifi certification version: v7.0[0m
+[0;32mI (498) wifi:config NVS flash: enabled[0m
+[0;32mI (508) wifi:config nano formatting: disabled[0m
+[0;32mI (508) wifi:Init data frame dynamic rx buffer num: 32[0m
+[0;32mI (518) wifi:Init static rx mgmt buffer num: 5[0m
+[0;32mI (518) wifi:Init management short buffer num: 32[0m
+[0;32mI (518) wifi:Init dynamic tx buffer num: 32[0m
+[0;32mI (528) wifi:Init static tx FG buffer num: 2[0m
+[0;32mI (528) wifi:Init static rx buffer size: 1600[0m
+[0;32mI (538) wifi:Init static rx buffer num: 10[0m
+[0;32mI (538) wifi:Init dynamic rx buffer num: 32[0m
+[0;32mI (538) wifi_init: rx ba win: 6[0m
+[0;32mI (548) wifi_init: accept mbox: 6[0m
+[0;32mI (548) wifi_init: tcpip mbox: 32[0m
+[0;32mI (548) wifi_init: udp mbox: 6[0m
+[0;32mI (558) wifi_init: tcp mbox: 6[0m
+[0;32mI (558) wifi_init: tcp tx win: 5760[0m
+[0;32mI (558) wifi_init: tcp rx win: 5760[0m
+[0;32mI (558) wifi_init: tcp mss: 1440[0m
+[0;32mI (568) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (568) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (578) phy_init: phy_version 680,a6008b2,Jun  4 2024,16:41:10[0m
+[0;32mI (618) wifi:mode : sta (14:c1:9f:c1:26:8c)[0m
+[0;32mI (618) wifi:enable tsf[0m
+================================
+ESP32-S3 ESP-NOW BASIC TEST
+STA MAC        : 14:C1:9F:C1:26:8C
+vehicle_id     : 12658316
+uwb_id         : 12658316
+Wi-Fi channel  : 1
+================================
+[0;32mI (628) ESPNOW: espnow [version: 2.0] init[0m
+[0;32mI (628) espnow_manager: ESP-NOW ready on channel 1[0m
+[0;32mI (638) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.300 heading=0.0 seq=0[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (648) main_task: Returned from app_main()[0m
+[0;32mI (808) TWR: Sent Report to [0000000000000002]: distance 31 cm[0m
+[0;32mI (808) TWR: #29 [0000000000000002] -> [0000000000000001]: 31 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.390
+heading_deg    : 75.0
+seq            : 29
+timestamp_ms   : 14816
+================================
+
+[0;32mI (1148) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=2 speed=0.310 heading=15.0 seq=1[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (1308) TWR: Sent Report to [0000000000000002]: distance 33 cm[0m
+[0;32mI (1308) TWR: #30 [0000000000000002] -> [0000000000000001]: 33 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.400
+heading_deg    : 90.0
+seq            : 30
+timestamp_ms   : 15316
+================================
+
+[0;32mI (1648) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=3 speed=0.320 heading=30.0 seq=2[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (1808) TWR: Sent Report to [0000000000000002]: distance 28 cm[0m
+[0;32mI (1808) TWR: #31 [0000000000000002] -> [0000000000000001]: 28 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.410
+heading_deg    : 105.0
+seq            : 31
+timestamp_ms   : 15816
+================================
+
+[0;32mI (2148) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=4 speed=0.330 heading=45.0 seq=3[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (2308) TWR: Sent Report to [0000000000000002]: distance 28 cm[0m
+[0;32mI (2308) TWR: #32 [0000000000000002] -> [0000000000000001]: 28 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.420
+heading_deg    : 120.0
+seq            : 32
+timestamp_ms   : 16316
+================================
+
+[0;32mI (2648) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.340 heading=60.0 seq=4[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (2808) TWR: Sent Report to [0000000000000002]: distance 29 cm[0m
+[0;32mI (2808) TWR: #33 [0000000000000002] -> [0000000000000001]: 29 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.430
+heading_deg    : 135.0
+seq            : 33
+timestamp_ms   : 16816
+================================
+
+[0;32mI (3148) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=2 speed=0.350 heading=75.0 seq=5[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (3308) TWR: Sent Report to [0000000000000002]: distance 26 cm[0m
+[0;32mI (3308) TWR: #34 [0000000000000002] -> [0000000000000001]: 26 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.440
+heading_deg    : 150.0
+seq            : 34
+timestamp_ms   : 17316
+================================
+
+[0;32mI (3648) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=3 speed=0.360 heading=90.0 seq=6[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (3808) TWR: Sent Report to [0000000000000002]: distance 31 cm[0m
+[0;32mI (3808) TWR: #35 [0000000000000002] -> [0000000000000001]: 31 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.450
+heading_deg    : 165.0
+seq            : 35
+timestamp_ms   : 17816
+================================
+
+[0;32mI (4148) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=4 speed=0.370 heading=105.0 seq=7[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (4308) TWR: Sent Report to [0000000000000002]: distance 26 cm[0m
+[0;32mI (4308) TWR: #36 [0000000000000002] -> [0000000000000001]: 26 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.460
+heading_deg    : 180.0
+seq            : 36
+timestamp_ms   : 18316
+================================
+
+[0;32mI (4648) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=1 speed=0.380 heading=120.0 seq=8[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (4808) TWR: Sent Report to [0000000000000002]: distance 25 cm[0m
+[0;32mI (4808) TWR: #37 [0000000000000002] -> [0000000000000001]: 25 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.470
+heading_deg    : 195.0
+seq            : 37
+timestamp_ms   : 18816
+================================
+
+[0;32mI (5148) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=2 speed=0.390 heading=135.0 seq=9[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (5308) TWR: Sent Report to [0000000000000002]: distance 22 cm[0m
+[0;32mI (5308) TWR: #38 [0000000000000002] -> [0000000000000001]: 22 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.480
+heading_deg    : 210.0
+seq            : 38
+timestamp_ms   : 19316
+================================
+
+[0;32mI (5648) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=3 speed=0.400 heading=150.0 seq=10[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (5808) TWR: Sent Report to [0000000000000002]: distance 36 cm[0m
+[0;32mI (5808) TWR: #39 [0000000000000002] -> [0000000000000001]: 36 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.490
+heading_deg    : 225.0
+seq            : 39
+timestamp_ms   : 19816
+================================
+
+[0;32mI (6148) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=4 speed=0.410 heading=165.0 seq=11[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (6308) TWR: Sent Report to [0000000000000002]: distance 32 cm[0m
+[0;32mI (6308) TWR: #40 [0000000000000002] -> [0000000000000001]: 32 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.300
+heading_deg    : 240.0
+seq            : 40
+timestamp_ms   : 20316
+================================
+
+[0;32mI (6648) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.420 heading=180.0 seq=12[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (6808) TWR: Sent Report to [0000000000000002]: distance 28 cm[0m
+[0;32mI (6808) TWR: #41 [0000000000000002] -> [0000000000000001]: 28 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.310
+heading_deg    : 255.0
+seq            : 41
+timestamp_ms   : 20816
+================================
+
+[0;32mI (7148) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=2 speed=0.430 heading=195.0 seq=13[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (7308) TWR: Sent Report to [0000000000000002]: distance 30 cm[0m
+[0;32mI (7308) TWR: #42 [0000000000000002] -> [0000000000000001]: 30 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.320
+heading_deg    : 270.0
+seq            : 42
+timestamp_ms   : 21316
+================================
+
+[0;32mI (7648) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=3 speed=0.440 heading=210.0 seq=14[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (7808) TWR: Sent Report to [0000000000000002]: distance 32 cm[0m
+[0;32mI (7808) TWR: #43 [0000000000000002] -> [0000000000000001]: 32 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.330
+heading_deg    : 285.0
+seq            : 43
+timestamp_ms   : 21816
+================================
+
+[0;32mI (8148) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=4 speed=0.450 heading=225.0 seq=15[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (8308) TWR: Sent Report to [0000000000000002]: distance 25 cm[0m
+[0;32mI (8308) TWR: #44 [0000000000000002] -> [0000000000000001]: 25 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.340
+heading_deg    : 300.0
+seq            : 44
+timestamp_ms   : 22316
+================================
+
+[0;32mI (8648) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=1 speed=0.460 heading=240.0 seq=16[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (8808) TWR: Sent Report to [0000000000000002]: distance 34 cm[0m
+[0;32mI (8808) TWR: #45 [0000000000000002] -> [0000000000000001]: 34 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.350
+heading_deg    : 315.0
+seq            : 45
+timestamp_ms   : 22816
+================================
+
+[0;32mI (9148) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=2 speed=0.470 heading=255.0 seq=17[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (9308) TWR: Sent Report to [0000000000000002]: distance 33 cm[0m
+[0;32mI (9308) TWR: #46 [0000000000000002] -> [0000000000000001]: 33 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.360
+heading_deg    : 330.0
+seq            : 46
+timestamp_ms   : 23316
+================================
+
+[0;32mI (9648) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=3 speed=0.480 heading=270.0 seq=18[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (9808) TWR: Sent Report to [0000000000000002]: distance 33 cm[0m
+[0;32mI (9808) TWR: #47 [0000000000000002] -> [0000000000000001]: 33 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.370
+heading_deg    : 345.0
+seq            : 47
+timestamp_ms   : 23816
+================================
+
+[0;32mI (10148) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=4 speed=0.490 heading=285.0 seq=19[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (10308) TWR: Sent Report to [0000000000000002]: distance 26 cm[0m
+[0;32mI (10308) TWR: #48 [0000000000000002] -> [0000000000000001]: 26 cm [0m
+[0;32mI (10648) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.300 heading=300.0 seq=20[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (10808) TWR: Sent Report to [0000000000000002]: distance 32 cm[0m
+[0;32mI (10808) TWR: #49 [0000000000000002] -> [0000000000000001]: 32 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.390
+heading_deg    : 15.0
+seq            : 49
+timestamp_ms   : 24816
+================================
+
+[0;32mI (11148) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=2 speed=0.310 heading=315.0 seq=21[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (11308) TWR: Sent Report to [0000000000000002]: distance 51 cm[0m
+[0;32mI (11308) TWR: #50 [0000000000000002] -> [0000000000000001]: 51 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.400
+heading_deg    : 30.0
+seq            : 50
+timestamp_ms   : 25316
+================================
+
+[0;32mI (11648) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=3 speed=0.320 heading=330.0 seq=22[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (11808) TWR: Sent Report to [0000000000000002]: distance 83 cm[0m
+[0;32mI (11808) TWR: #51 [0000000000000002] -> [0000000000000001]: 83 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.410
+heading_deg    : 45.0
+seq            : 51
+timestamp_ms   : 25816
+================================
+
+[0;32mI (12148) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=4 speed=0.330 heading=345.0 seq=23[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (12308) TWR: Sent Report to [0000000000000002]: distance 61 cm[0m
+[0;32mI (12308) TWR: #52 [0000000000000002] -> [0000000000000001]: 61 cm [0m
+[0;32mI (12648) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.340 heading=0.0 seq=24[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (12808) TWR: Sent Report to [0000000000000002]: distance 33 cm[0m
+[0;32mI (12808) TWR: #53 [0000000000000002] -> [0000000000000001]: 33 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.430
+heading_deg    : 75.0
+seq            : 53
+timestamp_ms   : 26816
+================================
+
+[0;32mI (13148) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=2 speed=0.350 heading=15.0 seq=25[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (13308) TWR: Sent Report to [0000000000000002]: distance 36 cm[0m
+[0;32mI (13308) TWR: #54 [0000000000000002] -> [0000000000000001]: 36 cm [0m
+[0;32mI (13648) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=3 speed=0.360 heading=30.0 seq=26[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (13808) TWR: Sent Report to [0000000000000002]: distance 42 cm[0m
+[0;32mI (13808) TWR: #55 [0000000000000002] -> [0000000000000001]: 42 cm [0m
+[0;32mI (14148) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=4 speed=0.370 heading=45.0 seq=27[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (14308) TWR: Sent Report to [0000000000000002]: distance 38 cm[0m
+[0;32mI (14308) TWR: #56 [0000000000000002] -> [0000000000000001]: 38 cm [0m
+[0;32mI (14648) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=1 speed=0.380 heading=60.0 seq=28[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (14808) TWR: Sent Report to [0000000000000002]: distance 36 cm[0m
+[0;32mI (14808) TWR: #57 [0000000000000002] -> [0000000000000001]: 36 cm [0m
+[0;32mI (15148) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=2 speed=0.390 heading=75.0 seq=29[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (15308) TWR: Sent Report to [0000000000000002]: distance 42 cm[0m
+[0;32mI (15308) TWR: #58 [0000000000000002] -> [0000000000000001]: 42 cm [0m
+[0;32mI (15648) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=3 speed=0.400 heading=90.0 seq=30[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (15808) TWR: Sent Report to [0000000000000002]: distance 37 cm[0m
+[0;32mI (15808) TWR: #59 [0000000000000002] -> [0000000000000001]: 37 cm [0m
+[0;32mI (16148) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=4 speed=0.410 heading=105.0 seq=31[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (16308) TWR: Sent Report to [0000000000000002]: distance 36 cm[0m
+[0;32mI (16308) TWR: #60 [0000000000000002] -> [0000000000000001]: 36 cm [0m
+[0;32mI (16648) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.420 heading=120.0 seq=32[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (16808) TWR: Sent Report to [0000000000000002]: distance 38 cm[0m
+[0;32mI (16808) TWR: #61 [0000000000000002] -> [0000000000000001]: 38 cm [0m
+[0;32mI (17148) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=2 speed=0.430 heading=135.0 seq=33[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (17308) TWR: Sent Report to [0000000000000002]: distance 35 cm[0m
+[0;32mI (17308) TWR: #62 [0000000000000002] -> [0000000000000001]: 35 cm [0m
+[0;32mI (17648) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=3 speed=0.440 heading=150.0 seq=34[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (17808) TWR: Sent Report to [0000000000000002]: distance 36 cm[0m
+[0;32mI (17808) TWR: #63 [0000000000000002] -> [0000000000000001]: 36 cm [0m
+[0;32mI (18148) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=4 speed=0.450 heading=165.0 seq=35[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (18308) TWR: Sent Report to [0000000000000002]: distance 41 cm[0m
+[0;32mI (18308) TWR: #64 [0000000000000002] -> [0000000000000001]: 41 cm [0m
+[0;32mI (18648) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=1 speed=0.460 heading=180.0 seq=36[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (18808) TWR: Sent Report to [0000000000000002]: distance 34 cm[0m
+[0;32mI (18808) TWR: #65 [0000000000000002] -> [0000000000000001]: 34 cm [0m
+[0;32mI (19148) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=2 speed=0.470 heading=195.0 seq=37[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (19308) TWR: Sent Report to [0000000000000002]: distance 43 cm[0m
+[0;32mI (19308) TWR: #66 [0000000000000002] -> [0000000000000001]: 43 cm [0m
+[0;32mI (19648) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=3 speed=0.480 heading=210.0 seq=38[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (19808) TWR: Sent Report to [0000000000000002]: distance 34 cm[0m
+[0;32mI (19808) TWR: #67 [0000000000000002] -> [0000000000000001]: 34 cm [0m
+[0;32mI (20148) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=4 speed=0.490 heading=225.0 seq=39[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (20308) TWR: Sent Report to [0000000000000002]: distance 35 cm[0m
+[0;32mI (20308) TWR: #68 [0000000000000002] -> [0000000000000001]: 35 cm [0m
+[0;32mI (20648) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.300 heading=240.0 seq=40[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (20808) TWR: Sent Report to [0000000000000002]: distance 40 cm[0m
+[0;32mI (20808) TWR: #69 [0000000000000002] -> [0000000000000001]: 40 cm [0m
+[0;32mI (21148) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=2 speed=0.310 heading=255.0 seq=41[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (21308) TWR: Sent Report to [0000000000000002]: distance 41 cm[0m
+[0;32mI (21308) TWR: #70 [0000000000000002] -> [0000000000000001]: 41 cm [0m
+[0;32mI (21648) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=3 speed=0.320 heading=270.0 seq=42[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (21808) TWR: Sent Report to [0000000000000002]: distance 34 cm[0m
+[0;32mI (21808) TWR: #71 [0000000000000002] -> [0000000000000001]: 34 cm [0m
+[0;32mI (22148) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=4 speed=0.330 heading=285.0 seq=43[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (22308) TWR: Sent Report to [0000000000000002]: distance 33 cm[0m
+[0;32mI (22308) TWR: #72 [0000000000000002] -> [0000000000000001]: 33 cm [0m
+[0;32mI (22648) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.340 heading=300.0 seq=44[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (22808) TWR: Sent Report to [0000000000000002]: distance 35 cm[0m
+[0;32mI (22808) TWR: #73 [0000000000000002] -> [0000000000000001]: 35 cm [0m
+[0;32mI (23148) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=2 speed=0.350 heading=315.0 seq=45[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (23308) TWR: Sent Report to [0000000000000002]: distance 42 cm[0m
+[0;32mI (23308) TWR: #74 [0000000000000002] -> [0000000000000001]: 42 cm [0m
+[0;32mI (23648) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=3 speed=0.360 heading=330.0 seq=46[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (23808) TWR: Sent Report to [0000000000000002]: distance 38 cm[0m
+[0;32mI (23808) TWR: #75 [0000000000000002] -> [0000000000000001]: 38 cm [0m
+[0;32mI (24148) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=4 speed=0.370 heading=345.0 seq=47[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (24308) TWR: Sent Report to [0000000000000002]: distance 33 cm[0m
+[0;32mI (24308) TWR: #76 [0000000000000002] -> [0000000000000001]: 33 cm [0m
+[0;32mI (24648) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=1 speed=0.380 heading=0.0 seq=48[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (24808) TWR: Sent Report to [0000000000000002]: distance 30 cm[0m
+[0;32mI (24808) TWR: #77 [0000000000000002] -> [0000000000000001]: 30 cm [0m
+[0;32mI (25148) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=2 speed=0.390 heading=15.0 seq=49[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (25308) TWR: Sent Report to [0000000000000002]: distance 31 cm[0m
+[0;32mI (25308) TWR: #78 [0000000000000002] -> [0000000000000001]: 31 cm [0m
+[0;32mI (25648) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=3 speed=0.400 heading=30.0 seq=50[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (25808) TWR: Sent Report to [0000000000000002]: distance 40 cm[0m
+[0;32mI (25808) TWR: #79 [0000000000000002] -> [0000000000000001]: 40 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.490
+heading_deg    : 105.0
+seq            : 79
+timestamp_ms   : 39816
+================================
+
+[0;32mI (26148) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=4 speed=0.410 heading=45.0 seq=51[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (26308) TWR: Sent Report to [0000000000000002]: distance 41 cm[0m
+[0;32mI (26308) TWR: #80 [0000000000000002] -> [0000000000000001]: 41 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.300
+heading_deg    : 120.0
+seq            : 80
+timestamp_ms   : 40316
+================================
+
+[0;32mI (26648) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.420 heading=60.0 seq=52[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (26808) TWR: Sent Report to [0000000000000002]: distance 34 cm[0m
+[0;32mI (26808) TWR: #81 [0000000000000002] -> [0000000000000001]: 34 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.310
+heading_deg    : 135.0
+seq            : 81
+timestamp_ms   : 40816
+================================
+
+[0;32mI (27148) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=2 speed=0.430 heading=75.0 seq=53[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (29198) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=2 speed=0.470 heading=135.0 seq=57[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (29308) TWR: Sent Report to [0000000000000002]: distance 43 cm[0m
+[0;32mI (29308) TWR: #86 [0000000000000002] -> [0000000000000001]: 43 cm [0m
+[0;32mI (29718) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=3 speed=0.480 heading=150.0 seq=58[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (29808) TWR: Sent Report to [0000000000000002]: distance 44 cm[0m
+[0;32mI (29808) TWR: #87 [0000000000000002] -> [0000000000000001]: 44 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.370
+heading_deg    : 225.0
+seq            : 87
+timestamp_ms   : 43816
+================================
+
+[0;32mI (30218) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=4 speed=0.490 heading=165.0 seq=59[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (30308) TWR: Sent Report to [0000000000000002]: distance 41 cm[0m
+[0;32mI (30308) TWR: #88 [0000000000000002] -> [0000000000000001]: 41 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.380
+heading_deg    : 240.0
+seq            : 88
+timestamp_ms   : 44316
+================================
+
+[0;32mI (30718) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.300 heading=180.0 seq=60[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (30808) TWR: Sent Report to [0000000000000002]: distance 41 cm[0m
+[0;32mI (30808) TWR: #89 [0000000000000002] -> [0000000000000001]: 41 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 0
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.390
+heading_deg    : 255.0
+seq            : 89
+timestamp_ms   : 44816
+================================
+
+[0;32mI (31218) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=2 speed=0.310 heading=195.0 seq=61[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (31308) TWR: Sent Report to [0000000000000002]: distance 41 cm[0m
+[0;32mI (31308) TWR: #90 [0000000000000002] -> [0000000000000001]: 41 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 3
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.400
+heading_deg    : 270.0
+seq            : 90
+timestamp_ms   : 45316
+================================
+
+[0;32mI (31718) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=3 speed=0.320 heading=210.0 seq=62[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (31808) TWR: Sent Report to [0000000000000002]: distance 47 cm[0m
+[0;32mI (31808) TWR: #91 [0000000000000002] -> [0000000000000001]: 47 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 4
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.410
+heading_deg    : 285.0
+seq            : 91
+timestamp_ms   : 45816
+================================
+
+[0;32mI (32218) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=4 speed=0.330 heading=225.0 seq=63[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (32308) TWR: Sent Report to [0000000000000002]: distance 43 cm[0m
+[0;32mI (32308) TWR: #92 [0000000000000002] -> [0000000000000001]: 43 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.420
+heading_deg    : 300.0
+seq            : 92
+timestamp_ms   : 46316
+================================
+
+[0;32mI (32718) espnow_manager: [TX] vehicle_id=12658316 state=1 dest=1 speed=0.340 heading=240.0 seq=64[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (32808) TWR: Sent Report to [0000000000000002]: distance 43 cm[0m
+[0;32mI (32808) TWR: #93 [0000000000000002] -> [0000000000000001]: 43 cm [0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 2
+platoon_id     : 7
+platoon_enable : 1
+platoon_role   : 1
+platoon_index  : 1
+speed_mps      : 0.430
+heading_deg    : 315.0
+seq            : 93
+timestamp_ms   : 46816
+================================
+
+[0;32mI (33218) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=2 speed=0.350 heading=255.0 seq=65[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (33308) TWR: Sent Report to [0000000000000002]: distance 43 cm[0m
+[0;32mI (33308) TWR: #94 [0000000000000002] -> [0000000000000001]: 43 cm [0m
+[0;32mI (33718) espnow_manager: [TX] vehicle_id=12658316 state=0 dest=3 speed=0.360 heading=270.0 seq=66[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS

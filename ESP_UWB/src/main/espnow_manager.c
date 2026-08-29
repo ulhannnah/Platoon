@@ -1,5 +1,7 @@
 #include "espnow_manager.h"
 
+#include <inttypes.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "app_config.h"
@@ -17,18 +19,62 @@
 static const char *TAG = "espnow_manager";
 static const uint8_t BROADCAST_MAC[ESP_NOW_ETH_ALEN] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 static uint16_t s_seq;
+static uint32_t s_self_vehicle_id;
+static uint32_t s_self_uwb_id;
+
+static void print_mac(const uint8_t *mac)
+{
+    printf("%02X:%02X:%02X:%02X:%02X:%02X",
+           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+}
+
+static uint32_t id_from_mac(const uint8_t *mac)
+{
+    uint32_t id = ((uint32_t)mac[3] << 16) | ((uint32_t)mac[4] << 8) | mac[5];
+    return id == 0 ? 1 : id;
+}
+
+static void on_send(const uint8_t *mac_addr, esp_now_send_status_t status)
+{
+    printf("[ESP-NOW TX_CB] dst=");
+    print_mac(mac_addr);
+    printf(" status=%s\n", status == ESP_NOW_SEND_SUCCESS ? "SUCCESS" : "FAIL");
+}
 
 static void on_recv(const esp_now_recv_info_t *info, const uint8_t *data, int len)
 {
-    (void)info;
-    if (data == NULL || len != sizeof(vehicle_status_packet_t)) {
+    if (info == NULL || data == NULL || len != sizeof(vehicle_status_packet_t)) {
+        ESP_LOGW(TAG, "invalid RX packet length=%d expected=%d", len, (int)sizeof(vehicle_status_packet_t));
         return;
     }
 
     vehicle_status_packet_t packet;
     memcpy(&packet, data, sizeof(packet));
+    if (packet.msg_type != V2X_MSG_BASIC_STATUS || packet.vehicle_id == s_self_vehicle_id) {
+        return;
+    }
+
     const uint32_t now_ms = (uint32_t)(esp_timer_get_time() / 1000);
     vehicle_table_update_status(&packet, now_ms);
+
+    printf("\n========== ESP-NOW RX ==========\n");
+    printf("from MAC       : ");
+    print_mac(info->src_addr);
+    printf("\n");
+    printf("msg_type       : %" PRIu8 "\n", packet.msg_type);
+    printf("vehicle_id     : %" PRIu32 "\n", packet.vehicle_id);
+    printf("uwb_id         : %" PRIu32 "\n", packet.uwb_id);
+    printf("state          : %" PRIu8 "\n", packet.state);
+    printf("destination_id : %" PRIu8 "\n", packet.destination_id);
+    printf("platoon_id     : %" PRIu32 "\n", packet.platoon_id);
+    printf("platoon_enable : %" PRIu8 "\n", packet.platoon_enable);
+    printf("platoon_role   : %" PRIu8 "\n", packet.platoon_role);
+    printf("platoon_index  : %" PRIu8 "\n", packet.platoon_index);
+    printf("speed_mps      : %.3f\n", packet.speed_mps);
+    printf("heading_deg    : %.1f\n", packet.heading_deg);
+    printf("seq            : %" PRIu16 "\n", packet.seq);
+    printf("timestamp_ms   : %" PRIu32 "\n", packet.timestamp_ms);
+    printf("================================\n\n");
 }
 
 static esp_err_t wifi_init_for_espnow(void)
@@ -50,6 +96,21 @@ static esp_err_t wifi_init_for_espnow(void)
     ESP_RETURN_ON_ERROR(esp_wifi_start(), TAG, "wifi start failed");
     ESP_RETURN_ON_ERROR(esp_wifi_set_channel(APP_ESPNOW_CHANNEL, WIFI_SECOND_CHAN_NONE), TAG, "wifi channel failed");
 
+    uint8_t mac[ESP_NOW_ETH_ALEN];
+    ESP_RETURN_ON_ERROR(esp_wifi_get_mac(WIFI_IF_STA, mac), TAG, "get STA MAC failed");
+    s_self_vehicle_id = APP_SELF_VEHICLE_ID == 0 ? id_from_mac(mac) : APP_SELF_VEHICLE_ID;
+    s_self_uwb_id = APP_SELF_UWB_ID == 0 ? s_self_vehicle_id : APP_SELF_UWB_ID;
+
+    printf("================================\n");
+    printf("ESP32-S3 ESP-NOW BASIC TEST\n");
+    printf("STA MAC        : ");
+    print_mac(mac);
+    printf("\n");
+    printf("vehicle_id     : %" PRIu32 "\n", s_self_vehicle_id);
+    printf("uwb_id         : %" PRIu32 "\n", s_self_uwb_id);
+    printf("Wi-Fi channel  : %u\n", APP_ESPNOW_CHANNEL);
+    printf("================================\n");
+
     return ESP_OK;
 }
 
@@ -57,6 +118,7 @@ esp_err_t espnow_manager_init(void)
 {
     ESP_RETURN_ON_ERROR(wifi_init_for_espnow(), TAG, "wifi init failed");
     ESP_RETURN_ON_ERROR(esp_now_init(), TAG, "esp-now init failed");
+    ESP_RETURN_ON_ERROR(esp_now_register_send_cb(on_send), TAG, "esp-now send callback failed");
     ESP_RETURN_ON_ERROR(esp_now_register_recv_cb(on_recv), TAG, "esp-now recv callback failed");
 
     esp_now_peer_info_t peer = {0};
@@ -77,18 +139,48 @@ esp_err_t espnow_manager_init(void)
 esp_err_t espnow_manager_send_self_status(void)
 {
     const uint32_t now_ms = (uint32_t)(esp_timer_get_time() / 1000);
+    const uint16_t seq = s_seq++;
+    const uint8_t state = (seq % 10u) < 5u ? V2X_STATE_SOLO : V2X_STATE_WAIT;
+    const uint8_t destination_id = (uint8_t)((seq % 4u) + 1u);
+    const float speed_mps = 0.30f + 0.01f * (float)(seq % 20u);
+    const float heading_deg = (float)((seq * 15u) % 360u);
+
     vehicle_status_packet_t packet = {
-        .vehicle_id = APP_SELF_VEHICLE_ID,
-        .uwb_id = APP_SELF_UWB_ID,
+        .msg_type = V2X_MSG_BASIC_STATUS,
+        .state = state,
+        .destination_id = destination_id,
+        .vehicle_id = s_self_vehicle_id,
+        .uwb_id = s_self_uwb_id,
         .platoon_id = APP_PLATOON_ID,
         .platoon_enable = APP_PLATOON_ENABLE,
         .platoon_role = APP_PLATOON_ROLE,
         .platoon_index = APP_PLATOON_INDEX,
-        .speed_mps = 0.0f,
-        .heading_deg = 0.0f,
+        .speed_mps = speed_mps,
+        .heading_deg = heading_deg,
         .timestamp_ms = now_ms,
-        .seq = s_seq++,
+        .seq = seq,
     };
 
-    return esp_now_send(BROADCAST_MAC, (const uint8_t *)&packet, sizeof(packet));
+    esp_err_t err = esp_now_send(BROADCAST_MAC, (const uint8_t *)&packet, sizeof(packet));
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "[TX] vehicle_id=%" PRIu32 " state=%" PRIu8 " dest=%" PRIu8
+                 " speed=%.3f heading=%.1f seq=%" PRIu16,
+                 packet.vehicle_id,
+                 packet.state,
+                 packet.destination_id,
+                 packet.speed_mps,
+                 packet.heading_deg,
+                 packet.seq);
+    }
+    return err;
+}
+
+uint32_t espnow_manager_get_self_vehicle_id(void)
+{
+    return s_self_vehicle_id;
+}
+
+uint32_t espnow_manager_get_self_uwb_id(void)
+{
+    return s_self_uwb_id;
 }

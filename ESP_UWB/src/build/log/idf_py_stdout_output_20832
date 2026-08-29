@@ -1,0 +1,2857 @@
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0x8 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4037abfa
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2810,len:0x15a0
+load:0x403c8700,len:0x4
+load:0x403c8704,len:0xd20
+load:0x403cb700,len:0x2ee4
+entry 0x403c8928
+[0;32mI (26) boot: ESP-IDF v5.4 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Aug 17 2026 02:35:33[0m
+[0;32mI (27) boot: Multicore bootloader[0m
+[0;32mI (27) boot: chip revision: v0.2[0m
+[0;32mI (29) boot: efuse block revision: v1.4[0m
+[0;32mI (33) boot.esp32s3: Boot SPI Speed : 80MHz[0m
+[0;32mI (37) boot.esp32s3: SPI Mode       : DIO[0m
+[0;32mI (41) boot.esp32s3: SPI Flash Size : 4MB[0m
+[0;32mI (44) boot: Enabling RNG early entropy source...[0m
+[0;32mI (49) boot: Partition Table:[0m
+[0;32mI (52) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (58) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (64) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (71) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (77) boot: End of partition table[0m
+[0;32mI (81) esp_image: segment 0: paddr=00010020 vaddr=3c080020 size=18ce4h (101604) map[0m
+[0;32mI (106) esp_image: segment 1: paddr=00028d0c vaddr=3fc99a00 size=04948h ( 18760) load[0m
+[0;32mI (110) esp_image: segment 2: paddr=0002d65c vaddr=40374000 size=029bch ( 10684) load[0m
+[0;32mI (113) esp_image: segment 3: paddr=00030020 vaddr=42000020 size=7e5c0h (517568) map[0m
+[0;32mI (209) esp_image: segment 4: paddr=000ae5e8 vaddr=403769bc size=12f88h ( 77704) load[0m
+[0;32mI (226) esp_image: segment 5: paddr=000c1578 vaddr=600fe100 size=0001ch (    28) load[0m
+[0;32mI (235) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (235) boot: Disabling RNG early entropy source...[0m
+[0;32mI (245) cpu_start: Multicore app[0m
+[0;32mI (254) cpu_start: Pro cpu start user code[0m
+[0;32mI (254) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (254) app_init: Application information:[0m
+[0;32mI (254) app_init: Project name:     esp32s3_uwb_v2v_gateway[0m
+[0;32mI (259) app_init: App version:      d30bcc4-dirty[0m
+[0;32mI (264) app_init: Compile time:     Aug 17 2026 02:35:18[0m
+[0;32mI (269) app_init: ELF file SHA256:  322ce1f6d...[0m
+[0;32mI (273) app_init: ESP-IDF:          v5.4[0m
+[0;32mI (277) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (281) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (285) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (289) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (295) heap_init: At 3FCA2318 len 000473F8 (284 KiB): RAM[0m
+[0;32mI (300) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM[0m
+[0;32mI (305) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM[0m
+[0;32mI (310) heap_init: At 600FE11C len 00001ECC (7 KiB): RTCRAM[0m
+[0;32mI (317) spi_flash: detected chip: boya[0m
+[0;32mI (319) spi_flash: flash io: dio[0m
+[0;33mW (322) spi_flash: Detected size(16384k) larger than the size in the binary image header(4096k). Using the size in the binary image header.[0m
+[0;32mI (335) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (341) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (348) main_task: Started on CPU0[0m
+[0;32mI (358) main_task: Calling app_main()[0m
+[0;32mI (358) app_main: ESP32-S3 V2V gateway boot[0m
+[0;32mI (358) app_main: UWB disabled, running ESP-NOW only[0m
+[0;32mI (368) pp: pp rom version: e7ae62f[0m
+[0;32mI (368) net80211: net80211 rom version: e7ae62f[0m
+[0;32mI (388) wifi:wifi driver task: 3fcac084, prio:23, stack:6656, core=0[0m
+[0;32mI (388) wifi:wifi firmware version: 48ea317a7[0m
+[0;32mI (388) wifi:wifi certification version: v7.0[0m
+[0;32mI (388) wifi:config NVS flash: enabled[0m
+[0;32mI (388) wifi:config nano formatting: disabled[0m
+[0;32mI (398) wifi:Init data frame dynamic rx buffer num: 32[0m
+[0;32mI (398) wifi:Init static rx mgmt buffer num: 5[0m
+[0;32mI (408) wifi:Init management short buffer num: 32[0m
+[0;32mI (408) wifi:Init dynamic tx buffer num: 32[0m
+[0;32mI (408) wifi:Init static tx FG buffer num: 2[0m
+[0;32mI (418) wifi:Init static rx buffer size: 1600[0m
+[0;32mI (418) wifi:Init static rx buffer num: 10[0m
+[0;32mI (428) wifi:Init dynamic rx buffer num: 32[0m
+[0;32mI (428) wifi_init: rx ba win: 6[0m
+[0;32mI (428) wifi_init: accept mbox: 6[0m
+[0;32mI (438) wifi_init: tcpip mbox: 32[0m
+[0;32mI (438) wifi_init: udp mbox: 6[0m
+[0;32mI (438) wifi_init: tcp mbox: 6[0m
+[0;32mI (438) wifi_init: tcp tx win: 5760[0m
+[0;32mI (448) wifi_init: tcp rx win: 5760[0m
+[0;32mI (448) wifi_init: tcp mss: 1440[0m
+[0;32mI (448) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (458) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (458) phy_init: phy_version 680,a6008b2,Jun  4 2024,16:41:10[0m
+[0;32mI (498) wifi:mode : sta (14:c1:9f:c1:26:8c)[0m
+[0;32mI (498) wifi:enable tsf[0m
+================================
+ESP32-S3 ESP-NOW BASIC TEST
+STA MAC        : 14:C1:9F:C1:26:8C
+vehicle_id     : 12658316
+uwb_id         : 12658316
+Wi-Fi channel  : 1
+================================
+[0;32mI (508) ESPNOW: espnow [version: 2.0] init[0m
+[0;32mI (518) espnow_manager: ESP-NOW ready on channel 1[0m
+[0;32mI (518) espnow_manager: [TX] vehicle_id=12658316 seq=0 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (528) main_task: Returned from app_main()[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 196
+timestamp_ms   : 98256
+================================
+
+[0;32mI (1028) espnow_manager: [TX] vehicle_id=12658316 seq=1 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 197
+timestamp_ms   : 98756
+================================
+
+[0;32mI (1528) espnow_manager: [TX] vehicle_id=12658316 seq=2 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 198
+timestamp_ms   : 99256
+================================
+
+[0;32mI (2028) espnow_manager: [TX] vehicle_id=12658316 seq=3 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 199
+timestamp_ms   : 99756
+================================
+
+[0;32mI (2528) espnow_manager: [TX] vehicle_id=12658316 seq=4 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 200
+timestamp_ms   : 100256
+================================
+
+[0;32mI (3028) espnow_manager: [TX] vehicle_id=12658316 seq=5 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 201
+timestamp_ms   : 100756
+================================
+
+[0;32mI (3528) espnow_manager: [TX] vehicle_id=12658316 seq=6 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 202
+timestamp_ms   : 101256
+================================
+
+[0;32mI (4028) espnow_manager: [TX] vehicle_id=12658316 seq=7 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 203
+timestamp_ms   : 101756
+================================
+
+[0;32mI (4528) espnow_manager: [TX] vehicle_id=12658316 seq=8 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 204
+timestamp_ms   : 102256
+================================
+
+[0;32mI (5028) espnow_manager: [TX] vehicle_id=12658316 seq=9 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 205
+timestamp_ms   : 102756
+================================
+
+[0;32mI (5528) espnow_manager: [TX] vehicle_id=12658316 seq=10 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 206
+timestamp_ms   : 103256
+================================
+
+[0;32mI (6028) espnow_manager: [TX] vehicle_id=12658316 seq=11 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 207
+timestamp_ms   : 103756
+================================
+
+[0;32mI (6528) espnow_manager: [TX] vehicle_id=12658316 seq=12 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 208
+timestamp_ms   : 104256
+================================
+
+[0;32mI (7028) espnow_manager: [TX] vehicle_id=12658316 seq=13 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 209
+timestamp_ms   : 104756
+================================
+
+[0;32mI (7528) espnow_manager: [TX] vehicle_id=12658316 seq=14 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 210
+timestamp_ms   : 105256
+================================
+
+[0;32mI (8028) espnow_manager: [TX] vehicle_id=12658316 seq=15 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 211
+timestamp_ms   : 105756
+================================
+
+[0;32mI (8528) espnow_manager: [TX] vehicle_id=12658316 seq=16 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (9028) espnow_manager: [TX] vehicle_id=12658316 seq=17 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 0
+timestamp_ms   : 204
+================================
+
+[0;32mI (9528) espnow_manager: [TX] vehicle_id=12658316 seq=18 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 1
+timestamp_ms   : 706
+================================
+
+[0;32mI (10028) espnow_manager: [TX] vehicle_id=12658316 seq=19 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 2
+timestamp_ms   : 1206
+================================
+
+[0;32mI (10528) espnow_manager: [TX] vehicle_id=12658316 seq=20 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 3
+timestamp_ms   : 1706
+================================
+
+[0;32mI (11028) espnow_manager: [TX] vehicle_id=12658316 seq=21 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 4
+timestamp_ms   : 2206
+================================
+
+[0;32mI (11528) espnow_manager: [TX] vehicle_id=12658316 seq=22 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 5
+timestamp_ms   : 2706
+================================
+
+[0;32mI (12028) espnow_manager: [TX] vehicle_id=12658316 seq=23 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 6
+timestamp_ms   : 3206
+================================
+
+[0;32mI (12528) espnow_manager: [TX] vehicle_id=12658316 seq=24 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 7
+timestamp_ms   : 3706
+================================
+
+[0;32mI (13028) espnow_manager: [TX] vehicle_id=12658316 seq=25 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 8
+timestamp_ms   : 4206
+================================
+
+[0;32mI (13528) espnow_manager: [TX] vehicle_id=12658316 seq=26 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 9
+timestamp_ms   : 4706
+================================
+
+[0;32mI (14028) espnow_manager: [TX] vehicle_id=12658316 seq=27 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 10
+timestamp_ms   : 5206
+================================
+
+[0;32mI (14528) espnow_manager: [TX] vehicle_id=12658316 seq=28 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 11
+timestamp_ms   : 5706
+================================
+
+[0;32mI (15028) espnow_manager: [TX] vehicle_id=12658316 seq=29 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 12
+timestamp_ms   : 6206
+================================
+
+[0;32mI (15528) espnow_manager: [TX] vehicle_id=12658316 seq=30 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 13
+timestamp_ms   : 6706
+================================
+
+[0;32mI (16028) espnow_manager: [TX] vehicle_id=12658316 seq=31 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 14
+timestamp_ms   : 7206
+================================
+
+[0;32mI (16528) espnow_manager: [TX] vehicle_id=12658316 seq=32 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 15
+timestamp_ms   : 7706
+================================
+
+[0;32mI (17028) espnow_manager: [TX] vehicle_id=12658316 seq=33 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 16
+timestamp_ms   : 8206
+================================
+
+[0;32mI (17528) espnow_manager: [TX] vehicle_id=12658316 seq=34 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 17
+timestamp_ms   : 8706
+================================
+
+[0;32mI (18028) espnow_manager: [TX] vehicle_id=12658316 seq=35 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 18
+timestamp_ms   : 9206
+================================
+
+[0;32mI (18528) espnow_manager: [TX] vehicle_id=12658316 seq=36 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 19
+timestamp_ms   : 9706
+================================
+
+[0;32mI (19028) espnow_manager: [TX] vehicle_id=12658316 seq=37 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 20
+timestamp_ms   : 10206
+================================
+
+[0;32mI (19528) espnow_manager: [TX] vehicle_id=12658316 seq=38 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 21
+timestamp_ms   : 10706
+================================
+
+[0;32mI (20028) espnow_manager: [TX] vehicle_id=12658316 seq=39 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 22
+timestamp_ms   : 11206
+================================
+
+[0;32mI (20528) espnow_manager: [TX] vehicle_id=12658316 seq=40 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 23
+timestamp_ms   : 11706
+================================
+
+[0;32mI (21028) espnow_manager: [TX] vehicle_id=12658316 seq=41 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 24
+timestamp_ms   : 12206
+================================
+
+[0;32mI (21528) espnow_manager: [TX] vehicle_id=12658316 seq=42 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 25
+timestamp_ms   : 12706
+================================
+
+[0;32mI (22028) espnow_manager: [TX] vehicle_id=12658316 seq=43 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 26
+timestamp_ms   : 13256
+================================
+
+[0;32mI (22528) espnow_manager: [TX] vehicle_id=12658316 seq=44 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 27
+timestamp_ms   : 13756
+================================
+
+[0;32mI (23028) espnow_manager: [TX] vehicle_id=12658316 seq=45 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 28
+timestamp_ms   : 14256
+================================
+
+[0;32mI (23528) espnow_manager: [TX] vehicle_id=12658316 seq=46 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 29
+timestamp_ms   : 14756
+================================
+
+[0;32mI (24028) espnow_manager: [TX] vehicle_id=12658316 seq=47 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 30
+timestamp_ms   : 15256
+================================
+
+[0;32mI (24528) espnow_manager: [TX] vehicle_id=12658316 seq=48 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 31
+timestamp_ms   : 15756
+================================
+
+[0;32mI (25028) espnow_manager: [TX] vehicle_id=12658316 seq=49 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+ larger than the size in the binary image header(4096k). Using the size in the binary image header.
+[0;32mI (340) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (346) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (353) main_task: Started on CPU0[0m
+[0;32mI (363) main_task: Calling app_main()[0m
+[0;32mI (363) app_main: ESP32-S3 V2V gateway boot[0m
+[0;32mI (363) app_main: UWB disabled, running ESP-NOW only[0m
+[0;32mI (373) pp: pp rom version: e7ae62f[0m
+[0;32mI (373) net80211: net80211 rom version: e7ae62f[0m
+[0;32mI (393) wifi:wifi driver task: 3fcac084, prio:23, stack:6656, core=0[0m
+[0;32mI (393) wifi:wifi firmware version: 48ea317a7[0m
+[0;32mI (393) wifi:wifi certification version: v7.0[0m
+[0;32mI (393) wifi:config NVS flash: enabled[0m
+[0;32mI (393) wifi:config nano formatting: disabled[0m
+[0;32mI (403) wifi:Init data frame dynamic rx buffer num: 32[0m
+[0;32mI (403) wifi:Init static rx mgmt buffer num: 5[0m
+[0;32mI (413) wifi:Init management short buffer num: 32[0m
+[0;32mI (413) wifi:Init dynamic tx buffer num: 32[0m
+[0;32mI (413) wifi:Init static tx FG buffer num: 2[0m
+[0;32mI (423) wifi:Init static rx buffer size: 1600[0m
+[0;32mI (423) wifi:Init static rx buffer num: 10[0m
+[0;32mI (433) wifi:Init dynamic rx buffer num: 32[0m
+[0;32mI (433) wifi_init: rx ba win: 6[0m
+[0;32mI (433) wifi_init: accept mbox: 6[0m
+[0;32mI (443) wifi_init: tcpip mbox: 32[0m
+[0;32mI (443) wifi_init: udp mbox: 6[0m
+[0;32mI (443) wifi_init: tcp mbox: 6[0m
+[0;32mI (443) wifi_init: tcp tx win: 5760[0m
+[0;32mI (453) wifi_init: tcp rx win: 5760[0m
+[0;32mI (453) wifi_init: tcp mss: 1440[0m
+[0;32mI (453) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (463) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (463) phy_init: phy_version 680,a6008b2,Jun  4 2024,16:41:10[0m
+[0;32mI (503) wifi:mode : sta (14:c1:9f:c1:26:8c)[0m
+[0;32mI (503) wifi:enable tsf[0m
+================================
+ESP32-S3 ESP-NOW BASIC TEST
+STA MAC        : 14:C1:9F:C1:26:8C
+vehicle_id     : 12658316
+uwb_id         : 12658316
+Wi-Fi channel  : 1
+================================
+[0;32mI (513) ESPNOW: espnow [version: 2.0] init[0m
+[0;32mI (523) espnow_manager: ESP-NOW ready on channel 1[0m
+[0;32mI (523) espnow_manager: [TX] vehicle_id=12658316 seq=0 speed=0.300[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 33
+timestamp_ms   : 16756
+================================
+
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (563) main_task: Returned from app_main()[0m
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 34
+timestamp_ms   : 17256
+[0;32mI (1033) espnow_manager: [TX] vehicle_id=12658316 seq=1 speed=0.300[0m
+================================
+
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 35
+timestamp_ms   : 17756
+================================
+
+[0;32mI (1543) espnow_manager: [TX] vehicle_id=12658316 seq=2 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 36
+timestamp_ms   : 18256
+================================
+
+[0;32mI (2053) espnow_manager: [TX] vehicle_id=12658316 seq=3 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 37
+timestamp_ms   : 18756
+================================
+
+[0;32mI (2553) espnow_manager: [TX] vehicle_id=12658316 seq=4 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 38
+timestamp_ms   : 19256
+================================
+
+[0;32mI (3053) espnow_manager: [TX] vehicle_id=12658316 seq=5 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 39
+timestamp_ms   : 19756
+================================
+
+[0;32mI (3553) espnow_manager: [TX] vehicle_id=12658316 seq=6 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 40
+timestamp_ms   : 20256
+================================
+
+[0;32mI (4053) espnow_manager: [TX] vehicle_id=12658316 seq=7 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 41
+timestamp_ms   : 20756
+================================
+
+[0;32mI (4553) espnow_manager: [TX] vehicle_id=12658316 seq=8 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 42
+timestamp_ms   : 21256
+================================
+
+[0;32mI (5053) espnow_manager: [TX] vehicle_id=12658316 seq=9 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 43
+timestamp_ms   : 21756
+================================
+
+[0;32mI (5553) espnow_manager: [TX] vehicle_id=12658316 seq=10 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 44
+timestamp_ms   : 22256
+================================
+
+[0;32mI (6053) espnow_manager: [TX] vehicle_id=12658316 seq=11 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 45
+timestamp_ms   : 22756
+================================
+
+[0;32mI (6553) espnow_manager: [TX] vehicle_id=12658316 seq=12 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 46
+timestamp_ms   : 23256
+================================
+
+[0;32mI (7053) espnow_manager: [TX] vehicle_id=12658316 seq=13 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 47
+timestamp_ms   : 23756
+================================
+
+[0;32mI (7553) espnow_manager: [TX] vehicle_id=12658316 seq=14 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 48
+timestamp_ms   : 24256
+================================
+
+[0;32mI (8053) espnow_manager: [TX] vehicle_id=12658316 seq=15 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 49
+timestamp_ms   : 24756
+================================
+
+[0;32mI (8553) espnow_manager: [TX] vehicle_id=12658316 seq=16 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 50
+timestamp_ms   : 25256
+================================
+
+[0;32mI (9053) espnow_manager: [TX] vehicle_id=12658316 seq=17 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 51
+timestamp_ms   : 25756
+================================
+
+[0;32mI (9553) espnow_manager: [TX] vehicle_id=12658316 seq=18 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 52
+timestamp_ms   : 26256
+================================
+
+[0;32mI (10053) espnow_manager: [TX] vehicle_id=12658316 seq=19 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 53
+timestamp_ms   : 26756
+================================
+
+[0;32mI (10553) espnow_manager: [TX] vehicle_id=12658316 seq=20 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 54
+timestamp_ms   : 27256
+================================
+
+[0;32mI (11053) espnow_manager: [TX] vehicle_id=12658316 seq=21 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 55
+timestamp_ms   : 27756
+================================
+
+[0;32mI (11553) espnow_manager: [TX] vehicle_id=12658316 seq=22 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 56
+timestamp_ms   : 28256
+================================
+
+[0;32mI (12053) espnow_manager: [TX] vehicle_id=12658316 seq=23 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 57
+timestamp_ms   : 28756
+================================
+
+[0;32mI (12553) espnow_manager: [TX] vehicle_id=12658316 seq=24 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 58
+timestamp_ms   : 29256
+================================
+
+[0;32mI (13053) espnow_manager: [TX] vehicle_id=12658316 seq=25 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 59
+timestamp_ms   : 29756
+================================
+
+[0;32mI (13553) espnow_manager: [TX] vehicle_id=12658316 seq=26 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 60
+timestamp_ms   : 30256
+================================
+
+[0;32mI (14053) espnow_manager: [TX] vehicle_id=12658316 seq=27 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 61
+timestamp_ms   : 30756
+================================
+
+[0;32mI (14553) espnow_manager: [TX] vehicle_id=12658316 seq=28 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 62
+timestamp_ms   : 31256
+================================
+
+[0;32mI (15053) espnow_manager: [TX] vehicle_id=12658316 seq=29 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 63
+timestamp_ms   : 31756
+================================
+
+[0;32mI (15553) espnow_manager: [TX] vehicle_id=12658316 seq=30 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 64
+timestamp_ms   : 32256
+================================
+
+[0;32mI (16053) espnow_manager: [TX] vehicle_id=12658316 seq=31 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 65
+timestamp_ms   : 32756
+================================
+
+[0;32mI (16553) espnow_manager: [TX] vehicle_id=12658316 seq=32 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 66
+timestamp_ms   : 33256
+================================
+
+[0;32mI (17053) espnow_manager: [TX] vehicle_id=12658316 seq=33 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 67
+timestamp_ms   : 33756
+================================
+
+[0;32mI (17553) espnow_manager: [TX] vehicle_id=12658316 seq=34 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 68
+timestamp_ms   : 34256
+================================
+
+[0;32mI (18053) espnow_manager: [TX] vehicle_id=12658316 seq=35 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 69
+timestamp_ms   : 34756
+================================
+
+[0;32mI (18553) espnow_manager: [TX] vehicle_id=12658316 seq=36 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 70
+timestamp_ms   : 35256
+================================
+
+[0;32mI (19053) espnow_manager: [TX] vehicle_id=12658316 seq=37 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 71
+timestamp_ms   : 35756
+================================
+
+[0;32mI (19553) espnow_manager: [TX] vehicle_id=12658316 seq=38 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 72
+timestamp_ms   : 36256
+================================
+
+[0;32mI (20053) espnow_manager: [TX] vehicle_id=12658316 seq=39 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 73
+timestamp_ms   : 36756
+================================
+
+[0;32mI (20553) espnow_manager: [TX] vehicle_id=12658316 seq=40 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 74
+timestamp_ms   : 37256
+================================
+
+[0;32mI (21053) espnow_manager: [TX] vehicle_id=12658316 seq=41 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 75
+timestamp_ms   : 37756
+================================
+
+[0;32mI (21553) espnow_manager: [TX] vehicle_id=12658316 seq=42 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (22053) espnow_manager: [TX] vehicle_id=12658316 seq=43 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (22553) espnow_manager: [TX] vehicle_id=12658316 seq=44 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 0
+timestamp_ms   : 210
+================================
+
+[0;32mI (23053) espnow_manager: [TX] vehicle_id=12658316 seq=45 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 1
+timestamp_ms   : 716
+================================
+
+[0;32mI (23553) espnow_manager: [TX] vehicle_id=12658316 seq=46 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 2
+timestamp_ms   : 1216
+================================
+
+[0;32mI (24053) espnow_manager: [TX] vehicle_id=12658316 seq=47 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 3
+timestamp_ms   : 1716
+================================
+
+[0;32mI (24553) espnow_manager: [TX] vehicle_id=12658316 seq=48 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 4
+timestamp_ms   : 2216
+================================
+
+[0;32mI (25053) espnow_manager: [TX] vehicle_id=12658316 seq=49 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 5
+timestamp_ms   : 2716
+================================
+
+[0;32mI (25553) espnow_manager: [TX] vehicle_id=12658316 seq=50 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 6
+timestamp_ms   : 3216
+================================
+
+[0;32mI (26053) espnow_manager: [TX] vehicle_id=12658316 seq=51 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 7
+timestamp_ms   : 3716
+================================
+
+[0;32mI (26553) espnow_manager: [TX] vehicle_id=12658316 seq=52 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 8
+timestamp_ms   : 4216
+================================
+
+[0;32mI (27053) espnow_manager: [TX] vehicle_id=12658316 seq=53 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 9
+timestamp_ms   : 4716
+================================
+
+[0;32mI (27553) espnow_manager: [TX] vehicle_id=12658316 seq=54 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 10
+timestamp_ms   : 5216
+================================
+
+[0;32mI (28053) espnow_manager: [TX] vehicle_id=12658316 seq=55 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 11
+timestamp_ms   : 5716
+================================
+
+[0;32mI (28553) espnow_manager: [TX] vehicle_id=12658316 seq=56 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 12
+timestamp_ms   : 6216
+================================
+
+[0;32mI (29053) espnow_manager: [TX] vehicle_id=12658316 seq=57 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 13
+timestamp_ms   : 6766
+================================
+
+[0;32mI (29553) espnow_manager: [TX] vehicle_id=12658316 seq=58 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 14
+timestamp_ms   : 7266
+================================
+
+[0;32mI (30053) espnow_manager: [TX] vehicle_id=12658316 seq=59 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (30553) espnow_manager: [TX] vehicle_id=12658316 seq=60 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (31053) espnow_manager: [TX] vehicle_id=12658316 seq=61 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 17
+timestamp_ms   : 8816
+================================
+
+[0;32mI (31553) espnow_manager: [TX] vehicle_id=12658316 seq=62 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 18
+timestamp_ms   : 9316
+================================
+
+[0;32mI (32053) espnow_manager: [TX] vehicle_id=12658316 seq=63 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 19
+timestamp_ms   : 9816
+================================
+
+[0;32mI (32553) espnow_manager: [TX] vehicle_id=12658316 seq=64 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 20
+timestamp_ms   : 10316
+================================
+
+[0;32mI (33053) espnow_manager: [TX] vehicle_id=12658316 seq=65 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 21
+timestamp_ms   : 10816
+================================
+
+[0;32mI (33553) espnow_manager: [TX] vehicle_id=12658316 seq=66 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 22
+timestamp_ms   : 11316
+================================
+
+[0;32mI (34053) espnow_manager: [TX] vehicle_id=12658316 seq=67 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 23
+timestamp_ms   : 11816
+================================
+
+[0;32mI (34553) espnow_manager: [TX] vehicle_id=12658316 seq=68 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 24
+timestamp_ms   : 12316
+================================
+
+[0;32mI (35053) espnow_manager: [TX] vehicle_id=12658316 seq=69 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 25
+timestamp_ms   : 12816
+================================
+
+[0;32mI (35553) espnow_manager: [TX] vehicle_id=12658316 seq=70 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 26
+timestamp_ms   : 13316
+================================
+
+[0;32mI (36053) espnow_manager: [TX] vehicle_id=12658316 seq=71 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 27
+timestamp_ms   : 13816
+================================
+
+[0;32mI (36553) espnow_manager: [TX] vehicle_id=12658316 seq=72 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 28
+timestamp_ms   : 14316
+================================
+
+[0;32mI (37053) espnow_manager: [TX] vehicle_id=12658316 seq=73 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 29
+timestamp_ms   : 14816
+================================
+
+[0;32mI (37553) espnow_manager: [TX] vehicle_id=12658316 seq=74 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 30
+timestamp_ms   : 15316
+================================
+
+[0;32mI (38053) espnow_manager: [TX] vehicle_id=12658316 seq=75 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 31
+timestamp_ms   : 15816
+================================
+
+[0;32mI (38553) espnow_manager: [TX] vehicle_id=12658316 seq=76 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 32
+timestamp_ms   : 16316
+================================
+
+[0;32mI (39053) espnow_manager: [TX] vehicle_id=12658316 seq=77 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 33
+timestamp_ms   : 16816
+================================
+
+[0;32mI (39553) espnow_manager: [TX] vehicle_id=12658316 seq=78 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 34
+timestamp_ms   : 17316
+================================
+
+[0;32mI (40053) espnow_manager: [TX] vehicle_id=12658316 seq=79 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 35
+timestamp_ms   : 17816
+================================
+
+[0;32mI (40553) espnow_manager: [TX] vehicle_id=12658316 seq=80 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 36
+timestamp_ms   : 18316
+================================
+
+[0;32mI (41053) espnow_manager: [TX] vehicle_id=12658316 seq=81 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 37
+timestamp_ms   : 18816
+================================
+
+[0;32mI (41553) espnow_manager: [TX] vehicle_id=12658316 seq=82 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 38
+timestamp_ms   : 19316
+================================
+
+[0;32mI (42053) espnow_manager: [TX] vehicle_id=12658316 seq=83 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 39
+timestamp_ms   : 19816
+================================
+
+[0;32mI (42553) espnow_manager: [TX] vehicle_id=12658316 seq=84 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 40
+timestamp_ms   : 20316
+================================
+
+[0;32mI (43053) espnow_manager: [TX] vehicle_id=12658316 seq=85 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 41
+timestamp_ms   : 20816
+================================
+
+[0;32mI (43553) espnow_manager: [TX] vehicle_id=12658316 seq=86 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 42
+timestamp_ms   : 21316
+================================
+
+[0;32mI (44053) espnow_manager: [TX] vehicle_id=12658316 seq=87 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 43
+timestamp_ms   : 21816
+================================
+
+[0;32mI (44553) espnow_manager: [TX] vehicle_id=12658316 seq=88 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 44
+timestamp_ms   : 22316
+================================
+
+[0;32mI (45053) espnow_manager: [TX] vehicle_id=12658316 seq=89 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 45
+timestamp_ms   : 22816
+================================
+
+[0;32mI (45553) espnow_manager: [TX] vehicle_id=12658316 seq=90 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 46
+timestamp_ms   : 23316
+================================
+
+[0;32mI (46053) espnow_manager: [TX] vehicle_id=12658316 seq=91 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 47
+timestamp_ms   : 23816
+================================
+
+[0;32mI (46553) espnow_manager: [TX] vehicle_id=12658316 seq=92 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 48
+timestamp_ms   : 24316
+================================
+
+[0;32mI (47053) espnow_manager: [TX] vehicle_id=12658316 seq=93 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 49
+timestamp_ms   : 24816
+================================
+
+[0;32mI (47553) espnow_manager: [TX] vehicle_id=12658316 seq=94 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 50
+timestamp_ms   : 25316
+================================
+
+[0;32mI (48053) espnow_manager: [TX] vehicle_id=12658316 seq=95 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 51
+timestamp_ms   : 25816
+================================
+
+[0;32mI (48553) espnow_manager: [TX] vehicle_id=12658316 seq=96 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 52
+timestamp_ms   : 26316
+================================
+
+[0;32mI (49053) espnow_manager: [TX] vehicle_id=12658316 seq=97 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 53
+timestamp_ms   : 26816
+================================
+
+[0;32mI (49553) espnow_manager: [TX] vehicle_id=12658316 seq=98 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 54
+timestamp_ms   : 27316
+================================
+
+[0;32mI (50053) espnow_manager: [TX] vehicle_id=12658316 seq=99 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 55
+timestamp_ms   : 27816
+================================
+
+[0;32mI (50553) espnow_manager: [TX] vehicle_id=12658316 seq=100 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (51053) espnow_manager: [TX] vehicle_id=12658316 seq=101 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+[0;32mI (51553) espnow_manager: [TX] vehicle_id=12658316 seq=102 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 58
+timestamp_ms   : 29366
+================================
+
+[0;32mI (52053) espnow_manager: [TX] vehicle_id=12658316 seq=103 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 59
+timestamp_ms   : 29866
+================================
+
+[0;32mI (52553) espnow_manager: [TX] vehicle_id=12658316 seq=104 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 60
+timestamp_ms   : 30366
+================================
+
+[0;32mI (53053) espnow_manager: [TX] vehicle_id=12658316 seq=105 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 61
+timestamp_ms   : 30866
+================================
+
+[0;32mI (53553) espnow_manager: [TX] vehicle_id=12658316 seq=106 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 62
+timestamp_ms   : 31366
+================================
+
+[0;32mI (54053) espnow_manager: [TX] vehicle_id=12658316 seq=107 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 63
+timestamp_ms   : 31866
+================================
+
+[0;32mI (54553) espnow_manager: [TX] vehicle_id=12658316 seq=108 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 64
+timestamp_ms   : 32366
+================================
+
+[0;32mI (55053) espnow_manager: [TX] vehicle_id=12658316 seq=109 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 65
+timestamp_ms   : 32866
+================================
+
+[0;32mI (55553) espnow_manager: [TX] vehicle_id=12658316 seq=110 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 66
+timestamp_ms   : 33366
+================================
+
+[0;32mI (56053) espnow_manager: [TX] vehicle_id=12658316 seq=111 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 67
+timestamp_ms   : 33866
+================================
+
+[0;32mI (56553) espnow_manager: [TX] vehicle_id=12658316 seq=112 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 68
+timestamp_ms   : 34366
+================================
+
+[0;32mI (57053) espnow_manager: [TX] vehicle_id=12658316 seq=113 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 69
+timestamp_ms   : 34866
+================================
+
+[0;32mI (57553) espnow_manager: [TX] vehicle_id=12658316 seq=114 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 70
+timestamp_ms   : 35366
+================================
+
+[0;32mI (58053) espnow_manager: [TX] vehicle_id=12658316 seq=115 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 71
+timestamp_ms   : 35866
+================================
+
+[0;32mI (58553) espnow_manager: [TX] vehicle_id=12658316 seq=116 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 72
+timestamp_ms   : 36366
+================================
+
+[0;32mI (59053) espnow_manager: [TX] vehicle_id=12658316 seq=117 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 73
+timestamp_ms   : 36866
+================================
+
+[0;32mI (59553) espnow_manager: [TX] vehicle_id=12658316 seq=118 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 74
+timestamp_ms   : 37366
+================================
+
+[0;32mI (60053) espnow_manager: [TX] vehicle_id=12658316 seq=119 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 75
+timestamp_ms   : 37866
+================================
+
+[0;32mI (60553) espnow_manager: [TX] vehicle_id=12658316 seq=120 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 76
+timestamp_ms   : 38366
+================================
+
+[0;32mI (61053) espnow_manager: [TX] vehicle_id=12658316 seq=121 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 77
+timestamp_ms   : 38866
+================================
+
+[0;32mI (61553) espnow_manager: [TX] vehicle_id=12658316 seq=122 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 78
+timestamp_ms   : 39366
+================================
+
+[0;32mI (62053) espnow_manager: [TX] vehicle_id=12658316 seq=123 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 79
+timestamp_ms   : 39866
+================================
+
+[0;32mI (62553) espnow_manager: [TX] vehicle_id=12658316 seq=124 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 80
+timestamp_ms   : 40366
+================================
+
+[0;32mI (63053) espnow_manager: [TX] vehicle_id=12658316 seq=125 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 81
+timestamp_ms   : 40866
+================================
+
+[0;32mI (63553) espnow_manager: [TX] vehicle_id=12658316 seq=126 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 82
+timestamp_ms   : 41366
+================================
+
+[0;32mI (64053) espnow_manager: [TX] vehicle_id=12658316 seq=127 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 83
+timestamp_ms   : 41866
+================================
+
+[0;32mI (64553) espnow_manager: [TX] vehicle_id=12658316 seq=128 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 84
+timestamp_ms   : 42366
+================================
+
+[0;32mI (65053) espnow_manager: [TX] vehicle_id=12658316 seq=129 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 85
+timestamp_ms   : 42866
+================================
+
+[0;32mI (65553) espnow_manager: [TX] vehicle_id=12658316 seq=130 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 86
+timestamp_ms   : 43366
+================================
+
+[0;32mI (66053) espnow_manager: [TX] vehicle_id=12658316 seq=131 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 87
+timestamp_ms   : 43866
+================================
+
+[0;32mI (66553) espnow_manager: [TX] vehicle_id=12658316 seq=132 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 88
+timestamp_ms   : 44366
+================================
+
+[0;32mI (67053) espnow_manager: [TX] vehicle_id=12658316 seq=133 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 89
+timestamp_ms   : 44866
+================================
+
+[0;32mI (67553) espnow_manager: [TX] vehicle_id=12658316 seq=134 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 90
+timestamp_ms   : 45366
+================================
+
+[0;32mI (68053) espnow_manager: [TX] vehicle_id=12658316 seq=135 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 91
+timestamp_ms   : 45866
+================================
+
+[0;32mI (68553) espnow_manager: [TX] vehicle_id=12658316 seq=136 speed=0.300[0m
+[ESP-NOW TX_CB] dst=FF:FF:FF:FF:FF:FF status=SUCCESS
+
+========== ESP-NOW RX ==========
+from MAC       : 14:C1:9F:C1:2F:18
+msg_type       : 1
+vehicle_id     : 12660504
+uwb_id         : 12660504
+state          : 1
+destination_id : 1
+speed_mps      : 0.300
+seq            : 92
+timestamp_ms   : 46366
+================================
+
