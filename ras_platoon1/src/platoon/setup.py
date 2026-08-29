@@ -34,8 +34,8 @@ setup(
             'lane_detector_node = platoon.lane_detector_node:main',
 
             # 플래툰 주행할때는 이 코드로 (v2x_node도 같이 켜야 함 — nearby_vehicles 공급원)
-            #'fsm_decision_node = platoon.fsm_decision_node:main',
-            #'v2x_node = platoon.v2x_node:main',
+            'fsm_decision_node = platoon.fsm_decision_node:main',
+            'v2x_node = platoon.v2x_node:main',
 
             # 그냥 단독주행 할 때는 이 코드로
             'decision_node = platoon.decision_node:main',
