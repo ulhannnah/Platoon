@@ -75,6 +75,10 @@ static void task_monitor(void *arg)
 
 void app_main(void)
 {
+#if APP_ENABLE_PI_BRIDGE && !APP_ENABLE_DEBUG_SERIAL_LOGS
+    esp_log_level_set("*", ESP_LOG_NONE);
+#endif
+
     ESP_LOGI(TAG, "ESP32-S3 V2V gateway boot");
 
     vehicle_table_init();
@@ -96,7 +100,8 @@ void app_main(void)
     xTaskCreate(task_uwb, "uwb", 4096, NULL, 5, NULL);
 #endif
 #if APP_ENABLE_PI_BRIDGE
-    xTaskCreate(task_pi_tx, "pi_tx", 4096, NULL, 4, NULL);
+    ESP_ERROR_CHECK(pi_serial_bridge_init());
+    xTaskCreate(task_pi_tx, "pi_tx", 8192, NULL, 4, NULL);
     xTaskCreate(task_pi_rx, "pi_rx", 4096, NULL, 4, NULL);
 #endif
     xTaskCreate(task_monitor, "monitor", 3072, NULL, 3, NULL);

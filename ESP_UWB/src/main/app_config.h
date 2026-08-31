@@ -26,6 +26,7 @@
 #define APP_ENABLE_UWB_MOCK        0
 #define APP_ENABLE_UWB_PDOA_TEST   1
 #define APP_ENABLE_PI_BRIDGE       1
+#define APP_ENABLE_DEBUG_SERIAL_LOGS 0
 
 #define APP_UWB_SPI_HOST           SPI2_HOST
 #define APP_UWB_PIN_SPI_CLK        10

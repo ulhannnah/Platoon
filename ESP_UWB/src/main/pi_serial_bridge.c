@@ -1,19 +1,81 @@
 #include "pi_serial_bridge.h"
 
 #include <inttypes.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "app_config.h"
 #include "cJSON.h"
+#include "driver/usb_serial_jtag.h"
+#include "driver/usb_serial_jtag_vfs.h"
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "espnow_manager.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "packet_defs.h"
 #include "vehicle_table.h"
 
 static const char *TAG = "pi_serial_bridge";
 static uint32_t s_pi_tx_seq;
+static char s_tx_line[4096];
+
+esp_err_t pi_serial_bridge_init(void)
+{
+    if (!usb_serial_jtag_is_driver_installed()) {
+        usb_serial_jtag_driver_config_t cfg = {
+            .tx_buffer_size = 4096,
+            .rx_buffer_size = 1024,
+        };
+        esp_err_t err = usb_serial_jtag_driver_install(&cfg);
+        if (err != ESP_OK) {
+            return err;
+        }
+    }
+
+    usb_serial_jtag_vfs_set_rx_line_endings(ESP_LINE_ENDINGS_LF);
+    usb_serial_jtag_vfs_set_tx_line_endings(ESP_LINE_ENDINGS_LF);
+    usb_serial_jtag_vfs_use_driver();
+    return ESP_OK;
+}
+
+static void pi_serial_write_all(const char *data, size_t len)
+{
+    size_t sent = 0;
+    while (sent < len) {
+        const int n = usb_serial_jtag_write_bytes(data + sent, len - sent, pdMS_TO_TICKS(100));
+        if (n > 0) {
+            sent += (size_t)n;
+            continue;
+        }
+        vTaskDelay(pdMS_TO_TICKS(1));
+    }
+    usb_serial_jtag_wait_tx_done(pdMS_TO_TICKS(100));
+}
+
+static void appendf(char *buf, size_t buf_size, size_t *pos, const char *fmt, ...)
+{
+    if (*pos >= buf_size) {
+        return;
+    }
+
+    va_list args;
+    va_start(args, fmt);
+    const int n = vsnprintf(buf + *pos, buf_size - *pos, fmt, args);
+    va_end(args);
+
+    if (n < 0) {
+        return;
+    }
+
+    const size_t available = buf_size - *pos;
+    if ((size_t)n >= available) {
+        *pos = buf_size - 1;
+    } else {
+        *pos += (size_t)n;
+    }
+}
 
 static uint32_t json_u32(const cJSON *root, const char *name, uint32_t fallback)
 {
@@ -64,11 +126,13 @@ void pi_serial_bridge_send_snapshot(void)
     const size_t count = vehicle_table_snapshot(snapshot, APP_MAX_VEHICLES);
     const uint32_t now_ms = (uint32_t)(esp_timer_get_time() / 1000);
     const uint32_t self_vehicle_id = espnow_manager_get_self_vehicle_id();
+    size_t pos = 0;
 
-    printf("{\"type\":\"v2x_targets\",\"seq\":%" PRIu32 ",\"timestamp_ms\":%" PRIu32 ",\"self_vehicle_id\":%" PRIu32 ",\"targets\":[",
-           s_pi_tx_seq++,
-           now_ms,
-           self_vehicle_id);
+    appendf(s_tx_line, sizeof(s_tx_line), &pos,
+            "{\"type\":\"v2x_targets\",\"seq\":%" PRIu32 ",\"timestamp_ms\":%" PRIu32 ",\"self_vehicle_id\":%" PRIu32 ",\"targets\":[",
+            s_pi_tx_seq++,
+            now_ms,
+            self_vehicle_id);
 
     size_t written = 0;
     for (size_t i = 0; i < count; ++i) {
@@ -79,33 +143,35 @@ void pi_serial_bridge_send_snapshot(void)
 
         const uint8_t uwb_valid = v->last_uwb_ms != 0;
         const uint8_t espnow_valid = v->last_espnow_ms != 0;
-        printf("%s{\"vehicle_id\":%" PRIu32 ",\"uwb_id\":%" PRIu32 ",\"distance_m\":%.2f,\"angle_deg\":%.2f,"
-               "\"rel_x_m\":%.2f,\"rel_y_m\":%.2f,\"speed_mps\":%.2f,\"heading_deg\":%.2f,"
-               "\"driving_state\":%" PRIu8 ",\"platoon_state\":%" PRIu8 ",\"platoon_id\":%" PRIu32 ","
-               "\"platoon_enable\":%" PRIu8 ",\"platoon_role\":%" PRIu8 ",\"platoon_index\":%" PRIu8 ","
-               "\"uwb_valid\":%" PRIu8 ",\"espnow_valid\":%" PRIu8 ",\"confidence\":%.2f}",
-               written == 0 ? "" : ",",
-               (uint32_t)v->vehicle_id,
-               (uint32_t)v->uwb_id,
-               v->distance_m,
-               v->angle_deg,
-               v->rel_x_m,
-               v->rel_y_m,
-               v->speed_mps,
-               v->heading_deg,
-               v->driving_state,
-               v->platoon_state,
-               (uint32_t)v->platoon_id,
-               v->platoon_enable,
-               v->platoon_role,
-               v->platoon_index,
-               uwb_valid,
-               espnow_valid,
-               v->confidence);
+        appendf(s_tx_line, sizeof(s_tx_line), &pos,
+                "%s{\"vehicle_id\":%" PRIu32 ",\"uwb_id\":%" PRIu32 ",\"distance_m\":%.2f,\"angle_deg\":%.2f,"
+                "\"rel_x_m\":%.2f,\"rel_y_m\":%.2f,\"speed_mps\":%.2f,\"heading_deg\":%.2f,"
+                "\"driving_state\":%" PRIu8 ",\"platoon_state\":%" PRIu8 ",\"platoon_id\":%" PRIu32 ","
+                "\"platoon_enable\":%" PRIu8 ",\"platoon_role\":%" PRIu8 ",\"platoon_index\":%" PRIu8 ","
+                "\"uwb_valid\":%" PRIu8 ",\"espnow_valid\":%" PRIu8 ",\"confidence\":%.2f}",
+                written == 0 ? "" : ",",
+                (uint32_t)v->vehicle_id,
+                (uint32_t)v->uwb_id,
+                v->distance_m,
+                v->angle_deg,
+                v->rel_x_m,
+                v->rel_y_m,
+                v->speed_mps,
+                v->heading_deg,
+                v->driving_state,
+                v->platoon_state,
+                (uint32_t)v->platoon_id,
+                v->platoon_enable,
+                v->platoon_role,
+                v->platoon_index,
+                uwb_valid,
+                espnow_valid,
+                v->confidence);
         ++written;
     }
 
-    printf("]}\n");
+    appendf(s_tx_line, sizeof(s_tx_line), &pos, "]}\n");
+    pi_serial_write_all(s_tx_line, pos);
 }
 
 void pi_serial_bridge_rx_loop(void)

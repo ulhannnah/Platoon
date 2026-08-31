@@ -42,9 +42,14 @@ static uint32_t id_from_mac(const uint8_t *mac)
 
 static void on_send(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
+#if APP_ENABLE_DEBUG_SERIAL_LOGS
     printf("[ESP-NOW TX_CB] dst=");
     print_mac(mac_addr);
     printf(" status=%s\n", status == ESP_NOW_SEND_SUCCESS ? "SUCCESS" : "FAIL");
+#else
+    (void)mac_addr;
+    (void)status;
+#endif
 }
 
 static void on_recv(const esp_now_recv_info_t *info, const uint8_t *data, int len)
@@ -63,6 +68,7 @@ static void on_recv(const esp_now_recv_info_t *info, const uint8_t *data, int le
     const uint32_t now_ms = (uint32_t)(esp_timer_get_time() / 1000);
     vehicle_table_update_status(&packet, now_ms);
 
+#if APP_ENABLE_DEBUG_SERIAL_LOGS
     printf("\n========== ESP-NOW RX ==========\n");
     printf("from MAC       : ");
     print_mac(info->src_addr);
@@ -82,6 +88,7 @@ static void on_recv(const esp_now_recv_info_t *info, const uint8_t *data, int le
     printf("seq            : %" PRIu16 "\n", packet.seq);
     printf("timestamp_ms   : %" PRIu32 "\n", packet.timestamp_ms);
     printf("================================\n\n");
+#endif
 }
 
 static esp_err_t wifi_init_for_espnow(void)
@@ -108,6 +115,7 @@ static esp_err_t wifi_init_for_espnow(void)
     s_self_vehicle_id = APP_SELF_VEHICLE_ID == 0 ? id_from_mac(mac) : APP_SELF_VEHICLE_ID;
     s_self_uwb_id = APP_SELF_UWB_ID == 0 ? s_self_vehicle_id : APP_SELF_UWB_ID;
 
+#if APP_ENABLE_DEBUG_SERIAL_LOGS
     printf("================================\n");
     printf("ESP32-S3 ESP-NOW BASIC TEST\n");
     printf("STA MAC        : ");
@@ -117,6 +125,9 @@ static esp_err_t wifi_init_for_espnow(void)
     printf("uwb_id         : %" PRIu32 "\n", s_self_uwb_id);
     printf("Wi-Fi channel  : %u\n", APP_ESPNOW_CHANNEL);
     printf("================================\n");
+#else
+    (void)print_mac;
+#endif
 
     return ESP_OK;
 }
