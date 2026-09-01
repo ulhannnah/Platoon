@@ -95,7 +95,7 @@ class V2XNode(Node):
         self._rx_thread = threading.Thread(target=self._rx_loop, daemon=True)
         self._rx_thread.start()
 
-        #self.create_timer(1.0 / rate, self._send_self_status)
+        self.create_timer(1.0 / rate, self._send_self_status)
         self.get_logger().info(f"V2X 노드 시작 (포트: {self.port_path} @ {self.baud})")
 
     # ── 시리얼 열기/닫기 ─────────────────────────────────────────────
