@@ -11,14 +11,17 @@ ESP32-S3 V2X 통신 전용 ROS2 노드.
 ★ 포트 번호(ttyACM0/1)는 재부팅 때마다 USB 열거 순서에 따라 ESP32/STM32끼리
   뒤바뀔 수 있다(실측으로 확인됨). 그래서 기본값을 /dev/serial/by-id/의 고정
   경로로 잡는다 — 이 경로는 이 ESP32 보드의 시리얼번호에 매여 있어 재부팅해도
-  안 바뀐다. 보드를 교체하면 `ls /dev/serial/by-id/`로 새 이름 확인 후 이
-  기본값 또는 serial_port 파라미터를 갱신할 것.
+  안 바뀐다. 게다가 정확한 시리얼번호 대신 제조사 접두어 패턴으로 자동
+  탐색하므로(ESP32_BY_ID_GLOB), 차량마다 보드가 달라도 코드/기본값을 안
+  고쳐도 된다 — 한 차량에 ESP32가 1개만 꽂혀있는 게 전제. 여러 개거나 특정
+  보드를 강제로 쓰려면 serial_port 파라미터로 직접 지정할 것.
 
 토픽:
     발행 /v2x/targets      V2xTargets  (ESP32가 준 주변 차량 목록)
     구독 /v2x/self_status  SelfStatus  (fsm_decision_node.py가 주는 내 상태)
 """
 
+import glob
 import json
 import threading
 import time
@@ -28,6 +31,17 @@ from rclpy.node import Node
 import serial
 
 from platoon_interfaces.msg import V2xTarget, V2xTargets, SelfStatus
+
+# 차량마다 ESP32 보드의 정확한 시리얼번호(by-id)는 다르지만, 제조사 접두어는
+# 항상 같다. 한 차량엔 ESP32가 1개만 꽂혀있으므로 이 패턴으로 자동 탐색하면
+# 차량마다 값을 안 바꿔도 된다 (여러 개 꽂혀있으면 첫 번째 것을 씀 — 그럴 땐
+# serial_port 파라미터로 직접 지정할 것).
+ESP32_BY_ID_GLOB = "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_*-if00"
+
+
+def _autodetect_port(pattern: str, fallback: str) -> str:
+    matches = glob.glob(pattern)
+    return matches[0] if matches else fallback
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 상태 정상 정의 (fsm_decision_node.py도 이 값과 맞춰야 함)
@@ -66,11 +80,14 @@ class V2XNode(Node):
     
     def __init__(self):
         super().__init__("v2x_node")
-        # ESP32-S3 시리얼 포트 경로
-        # by-id 경로 사용: 재부팅 후에도 USB 열거 순서 변경 대비
+        # ESP32-S3 시리얼 포트 경로 — 기본값은 제조사 접두어로 자동 탐색
+        # (ESP32_BY_ID_GLOB). 못 찾으면 마지막으로 확인됐던 값으로 폴백.
         self.declare_parameter(
             "serial_port",
-            "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_14:C1:9F:C1:2F:18-if00",
+            _autodetect_port(
+                ESP32_BY_ID_GLOB,
+                "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_14:C1:9F:C1:2F:18-if00",
+            ),
         )
         self.declare_parameter("baud", 115200)
         # self_status 송신 주기 (Hz 단위, 기본 10Hz = 100ms)

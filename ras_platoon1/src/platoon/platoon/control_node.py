@@ -1,3 +1,4 @@
+import glob
 import os
 import math
 import rclpy
@@ -21,6 +22,18 @@ TX_FOOTER = 0x55    # STM32가 보낼 때의 푸터
 CMD_FRAME_LEN = 4   # Jetson -> STM32 제어 명령 프레임 길이 (4바이트)
 TELE_FRAME_LEN = 9  # STM32 -> Jetson 텔레메트리 프레임 길이 (기존 10에서 9로 수정)
 
+# 차량마다 STM32 보드의 정확한 시리얼번호(by-id)는 다르지만, 제조사 접두어는
+# 항상 같다. 한 차량엔 STM32가 1개만 꽂혀있으므로 이 패턴으로 자동 탐색하면
+# 차량마다 값을 안 바꿔도 된다 (여러 개 꽂혀있으면 첫 번째 것을 씀 — 그럴 땐
+# stm32_port 파라미터로 직접 지정할 것).
+STM32_BY_ID_GLOB = "/dev/serial/by-id/usb-STMicroelectronics_STM32_STLink_*-if02"
+
+
+def _autodetect_port(pattern: str, fallback: str) -> str:
+    matches = glob.glob(pattern)
+    return matches[0] if matches else fallback
+
+
 class ControlNode(Node):
     """
     ROS 2 제어 노드 클래스 (PID 속도 제어 적용)
@@ -36,13 +49,15 @@ class ControlNode(Node):
         self.stop_duty = 0
 
         # 1-1. 파라미터 선언
-        # STM32 시리얼 포트 — /dev/ttyACM0 대신 by-id 고정 경로를 기본값으로 쓴다.
-        # ttyACM 번호는 재부팅 때마다 USB 열거 순서에 따라 ESP32/STM32끼리
-        # 뒤바뀔 수 있다(실제로 겪은 문제). 차량마다 꽂힌 보드가 다르므로
-        # 실행할 때 --ros-args -p stm32_port:=/dev/serial/by-id/... 로 넣어줄 것.
+        # STM32 시리얼 포트 — 기본값은 제조사 접두어로 자동 탐색(STM32_BY_ID_GLOB).
+        # 못 찾으면 마지막으로 확인됐던 값으로 폴백. 값이 여러 개거나 특정 보드를
+        # 강제로 쓰고 싶으면 --ros-args -p stm32_port:=/dev/serial/by-id/... 로 지정.
         self.declare_parameter(
             'stm32_port',
-            '/dev/serial/by-id/usb-STMicroelectronics_STM32_STLink_066AFF485775495067181954-if02',
+            _autodetect_port(
+                STM32_BY_ID_GLOB,
+                '/dev/serial/by-id/usb-STMicroelectronics_STM32_STLink_066AFF485775495067181954-if02',
+            ),
         )
         self.port = self.get_parameter('stm32_port').get_parameter_value().string_value
         self.declare_parameter('target_slow_speed', 15.0)
