@@ -2,6 +2,16 @@
 platoon_fsm.py
 플래툰(군집주행) 알고리즘 FSM 골격 코드
 따로 노드로 돌리지 않고 다른곳에서 import해서 사용하도록 설계.
+
+★ 결합/이탈 판단 단순화 (2026-09-01):
+  원래는 여러 후보 중 적합도 점수(거리/경로중첩/속도차/통신품질/각도 가중합)로
+  최고점을 골라 5회 중 4회 안정적으로 통과해야 결합 요청을 보내는 구조였다.
+  실차 시나리오는 역할이 이미 고정(젯슨=항상 리더, 라즈베리파이=항상 팔로워)이고
+  근처에 있을 차량 수도 통제돼 있어서, 점수 매기기 대신 "거리·각도·긴급상태
+  조건만 맞으면 바로 결합 요청"으로 단순화했다. 이탈(EXIT)도 상대와 경로를
+  비교하는 대신, 각자 알고 있는 목적지 체크포인트(EgoState.destination)에
+  자기 체크포인트 카운트가 도달하면 바로 시작하도록 바꿨다 — 상대 차량의
+  체크포인트를 V2X로 알려줄 필요 자체가 없어진다.
 """
 
 import math
@@ -31,11 +41,10 @@ class PlatoonState(Enum):
     PLATOON_EXIT = auto()
 
 
-# ── SOLO_DRIVE 동안의 매칭 파이프라인 서브상태 (§12) ───────────────
+# ── SOLO_DRIVE 동안의 매칭 파이프라인 서브상태 ──────────────────────
 class MatchState(Enum):
     IDLE = auto()
-    V2X_SEARCH = auto()
-    EVALUATE = auto()
+    SEARCHING = auto()      # 절대조건 통과하는 후보 탐색 (점수 계산 없음)
     JOIN_REQUEST = auto()    # 요청 보내고 응답 대기 (요청 측)
     AWAIT_SETUP = auto()     # 승인 보내고 PLATOON_SETUP 대기 (수신 측)
     PLATOON_SETUP = auto()
@@ -49,29 +58,9 @@ class JoinSubState(Enum):
     JOIN_STABILIZE = auto()
 
 
-# ── 적합도 계산 파라미터 (§6 "초기 기준값 예시", §7 "초기 가중치") ──
-# 문서에 구체 수치가 없는 항목(D_SAFE_M, MAX_SPEED_DIFF, RSSI 범위,
-# CHECKPOINT_ADJACENT_RANGE)은 §15.5 "파라미터 실험 및 튜닝" 대상이라
-# 임시값으로 채워뒀습니다 — 실차 시험 전에 반드시 교체하세요.
-MIN_ROUTE_OVERLAP = 2                      # §6 최소 경로 중첩 (연속 체크포인트 개수)
-MAX_HEADING_DIFF_RAD = math.radians(30)    # §6 최대 진행 방향 차이
-MAX_JOIN_DISTANCE_M = 5.0                  # §6 최대 후보 거리 (= §7.1 d_max)
-D_SAFE_M = 0.5                             # TODO: 실측값으로 교체 (§7.1 d_safe, 문서에 예시 없음)
-MAX_SPEED_DIFF = 1.0                       # TODO: 실제 최대속도 기준으로 교체 (§7.3 Δv_max)
-RSSI_MIN = -90.0                           # TODO: 실제 ESP-NOW RSSI 범위로 교체 (§7.4)
-RSSI_MAX = -30.0
-PDR_WEIGHT = 0.7                           # §7.4 alpha
-CHECKPOINT_ADJACENT_RANGE = 1              # TODO: "인접" 체크포인트 판정 기준 확정 필요 (§5)
-
-W_DISTANCE = 0.25   # S_d
-W_ROUTE = 0.35       # S_r
-W_SPEED = 0.20       # S_v
-W_COMM = 0.10        # S_q
-W_ANGLE = 0.10       # S_a
-
-T_JOIN = 0.70                # §8 결합 기준점수
-STABILITY_WINDOW = 5         # §8 최근 5회 평가
-STABILITY_PASS_REQUIRED = 4  # §8 그 중 4회 이상 통과
+# ── 결합 조건 파라미터 ───────────────────────────────────────────
+MAX_HEADING_DIFF_RAD = math.radians(30)    # 최대 진행 방향 차이
+MAX_JOIN_DISTANCE_M = 5.0                  # 최대 후보 거리
 
 # 응답이 오지 않을 때 무한 대기하지 않도록 (문서에 명시 없음, 실측 후 조정)
 JOIN_RESPONSE_TIMEOUT_S = 2.0
@@ -92,8 +81,7 @@ OBSTACLE_SLOW_FACTOR = 0.5        # 감속 시 목표속도 배율
 # §10.2 거절 사유 코드
 REJECT_NOT_ALLOWED = 1      # 플래툰 참여 비허용 / 긴급·고장 상태
 REJECT_BUSY = 2             # 이미 다른 결합 절차 진행 중
-REJECT_CONDITION_FAIL = 3   # 절대조건 미달 (경로·방향·거리)
-REJECT_LOW_SCORE = 4        # 자체 적합도가 기준점수 미달
+REJECT_CONDITION_FAIL = 3   # 절대조건 미달 (방향·거리)
 REJECT_UNKNOWN_VEHICLE = 5  # 요청 차량을 주변 목록에서 못 찾음
 
 
@@ -107,7 +95,6 @@ MAX_CLOSING_SPEED = 0.3        # §19.5 최대 접근속도
 MAX_SPEED_STEP = 0.05          # §19.5 한 주기 속도 변화량 제한
 
 D_RELEASE_M = 2.0              # §21.4 플래툰 해제 완료 거리
-EXIT_REMAINING_CHECKPOINTS = 1 # §21.1 공통경로 마지막보다 1개 앞선 체크포인트에서 EXIT 시작
 
 # 제어 이득 — 문서에 "실제 적용 전 결정해야 한다"고만 되어 있어 임시값 (§20.2)
 K_D = 0.4     # TODO: 거리 제어 이득, 실차 튜닝 필요
@@ -129,10 +116,10 @@ LANE_ALIGN_OFFSET_TOLERANCE = 0.15  # TODO: 실측 튜닝 필요
 @dataclass
 class EgoState:
     """자차 주행 정보 — 주행 알고리즘(라인트레이싱 모듈)에서 받아옴"""
-    checkpoint: int = 0
+    checkpoint: int = 0           # 표지판(종이컵) 인식 누적 카운트
     next_checkpoint: int = 0
-    route: list = field(default_factory=list)   # 현재 위치 이후 예정 체크포인트 리스트
-    destination: int = 0
+    route: list = field(default_factory=list)   # (현재 미사용 — 이전 경로중첩 매칭용, 남겨둠)
+    destination: int = 0          # 내가 이탈할 목표 체크포인트 번호 (checkpoint가 여기 도달하면 EXIT)
     speed: float = 0.0
     accel: float = 0.0
     heading: float = 0.0
@@ -152,7 +139,7 @@ class NearbyVehicle:
     vehicle_id: int
     checkpoint: int = 0
     next_checkpoint: int = 0
-    route: list = field(default_factory=list)
+    route: list = field(default_factory=list)   # (현재 미사용)
     destination: int = 0
     lane: int = 0
     speed: float = 0.0
@@ -162,7 +149,7 @@ class NearbyVehicle:
     platoon_state: str = "SOLO"
     platoon_id: Optional[int] = None
     leader_id: Optional[int] = None
-    pdr: float = 1.0          # 0~1, S_PDR로 그대로 사용
+    pdr: float = 1.0
     rssi: float = 0.0
     emergency: bool = False
     uwb_distance: Optional[float] = None
@@ -211,10 +198,6 @@ class PlatoonFSM:
         self._pending_candidate: Optional[NearbyVehicle] = None  # JOIN_REQUEST 보낸 상대 캐시
         self._platoon_seq = 1  # TODO: 여러 대 동시 결합 시 전역 고유성 보장 필요 (지금은 단순 카운터)
 
-        # §20.4~20.5 플래툰 공통 경로 / EXIT 시작점
-        self.platoon_route: list = []
-        self.exit_start_checkpoint: Optional[int] = None
-
         # 조건이 "일정 시간 유지"되었는지 재는 타이머 (§19.4, §19.7, §21.4)
         self._stable_since: Optional[float] = None
         self._last_target_speed: Optional[float] = None  # 한 주기 속도 변화량 제한용 (§19.5)
@@ -227,9 +210,6 @@ class PlatoonFSM:
         self.partner_lost = False                    # 통신 두절로 안전 이탈 중인지
         self._hazard_slow = False                    # 전방 위험으로 감속 중인지
         self.emergency_reason: Optional[str] = None  # 마지막 비상정지 사유 (로깅용)
-
-        # vehicle_id -> 최근 평가 결과(bool) 리스트, 최대 STABILITY_WINDOW개 (§8)
-        self._score_history: dict = {}
 
     # ── 메인 루프에서 매 주기 호출 ──────────────────────────────────
     def update(self, ego: EgoState, nearby: list) -> DrivingCommand:
@@ -327,7 +307,7 @@ class PlatoonFSM:
         self.emergency_reason = reason
         return DrivingCommand(mode="SOLO_DRIVE", target_speed=0.0, emergency=True)
 
-    # ── SOLO_DRIVE + 매칭 파이프라인 (§4~§13) ───────────────────────
+    # ── SOLO_DRIVE + 매칭 파이프라인 ─────────────────────────────────
     def _run_solo_drive(self, ego: EgoState, nearby: list) -> DrivingCommand:
         if self.is_designated_leader:
             # 젯슨(리더)은 능동적으로 결합 상대를 찾지 않는다 — 항상 리더이므로,
@@ -336,23 +316,16 @@ class PlatoonFSM:
             return DrivingCommand(mode="SOLO_DRIVE")
 
         if self.match_state == MatchState.IDLE:
-            self.match_state = MatchState.V2X_SEARCH
+            self.match_state = MatchState.SEARCHING
 
-        if self.match_state == MatchState.V2X_SEARCH:
-            candidates = self._prefilter(ego, nearby)   # §5 1차 선별
-            if candidates:
-                self.match_state = MatchState.EVALUATE
-            # else: SOLO_DRIVE 유지, 계속 탐색
-
-        elif self.match_state == MatchState.EVALUATE:
+        if self.match_state == MatchState.SEARCHING:
             candidates = self._prefilter(ego, nearby)
-            best, score = self._evaluate_candidates(ego, candidates)  # §6~§8
-            if best is not None and self._is_score_stable(best.vehicle_id):
+            best = self._find_join_candidate(ego, candidates)
+            if best is not None:
                 self.candidate_id = best.vehicle_id
-                self._send_join_request(ego, best, score)
+                self._send_join_request(ego, best)
                 self.match_state = MatchState.JOIN_REQUEST
-            else:
-                self.match_state = MatchState.V2X_SEARCH
+            # else: SOLO_DRIVE 유지, 계속 탐색
 
         elif self.match_state == MatchState.JOIN_REQUEST:
             # 승인/거절 확인 (실제 수신은 _handle_incoming에서 처리됨)
@@ -414,7 +387,6 @@ class PlatoonFSM:
                 self.join_sub_state = None
                 self._stable_since = None
                 self.state = PlatoonState.PLATOON_MAINTAIN
-                self._remember_platoon_route(ego, partner)   # §20.4
 
         target_speed, accel_request = self._join_target_speed(ego, partner)
 
@@ -436,7 +408,7 @@ class PlatoonFSM:
             return self._abort_to_exit("MAINTAIN 중 상대 차량 정보 두절")
 
         # TODO: §20.6 신규 차량 지속 탐색 및 맨 뒤 합류 처리 (2대 결합 안정화 후 확장)
-        if self._exit_condition_met(ego):                    # §21.1
+        if self._exit_condition_met(ego):                    # 내 체크포인트가 목적지에 도달했는지
             self.comm.send(LeaveMessage(
                 sender_id=self.vehicle_id,
                 platoon_id=self.platoon_id or 0,
@@ -493,8 +465,6 @@ class PlatoonFSM:
         self.partner_id = None
         self.successor_id = None
         self.candidate_id = None
-        self.platoon_route = []
-        self.exit_start_checkpoint = None
         self._pending_candidate = None
         self._stable_since = None
         self._join_response = None
@@ -502,7 +472,6 @@ class PlatoonFSM:
         self._peer_join_complete = False
         self._partner_last_seen = None
         self._last_target_speed = None
-        self._score_history.clear()
 
     # ── PLATOON_EXIT (§21) ──────────────────────────────────────────
     def _run_platoon_exit(self, ego: EgoState, nearby: list) -> DrivingCommand:
@@ -534,121 +503,40 @@ class PlatoonFSM:
         )
 
     # ══════════════════════════════════════════════════════════════
-    # §5 주변 차량 1차 선별
+    # 주변 차량 1차 선별 (단순화판 — 거리·각도 정보 있는 차량만 추림)
     # ══════════════════════════════════════════════════════════════
     def _prefilter(self, ego: EgoState, nearby: list) -> list:
         candidates = []
         for v in nearby:
-            checkpoint_close = abs(v.checkpoint - ego.checkpoint) <= CHECKPOINT_ADJACENT_RANGE
-            same_direction = (v.next_checkpoint == ego.next_checkpoint)
-            lane_ok = True  # TODO: 차선 인접 규칙 아직 미정 (도로 차선 구조 확정되면 채우기)
             within_range = v.uwb_distance is not None and v.uwb_distance <= MAX_JOIN_DISTANCE_M
             has_bearing = v.uwb_angle is not None  # 앞/뒤 판단 가능 여부
-
-            if checkpoint_close and same_direction and lane_ok and within_range and has_bearing:
+            if within_range and has_bearing:
                 candidates.append(v)
         return candidates
 
     # ══════════════════════════════════════════════════════════════
-    # §6 절대조건 (C_join)
+    # 결합 절대조건 (단순화판 — 점수 계산 없이 이 4개만 확인)
     # ══════════════════════════════════════════════════════════════
     def _check_absolute_conditions(self, ego: EgoState, v: "NearbyVehicle") -> bool:
         c_p = bool(ego.platoon_allow and v.platoon_allow)
-        c_r = self._route_overlap_count(ego, v) >= MIN_ROUTE_OVERLAP
         c_h = abs(ego.heading - v.heading) <= MAX_HEADING_DIFF_RAD
         c_d = v.uwb_distance is not None and v.uwb_distance <= MAX_JOIN_DISTANCE_M
         c_s = (not ego.emergency) and (not v.emergency)
-        return c_p and c_r and c_h and c_d and c_s
+        return c_p and c_h and c_d and c_s
 
-    def _route_overlap_count(self, ego: EgoState, v: "NearbyVehicle") -> int:
+    def _find_join_candidate(self, ego: EgoState, candidates: list) -> Optional["NearbyVehicle"]:
         """
-        §7.2: 현재 위치 이후 동일한 순서로 연속해서 겹치는 체크포인트 개수(N_common).
-        ego.route / v.route는 "현재 위치 이후의 예정 체크포인트 리스트"로 가정.
-        """
-        common = 0
-        for a, b in zip(ego.route, v.route):
-            if a != b:
-                break
-            common += 1
-        return common
-
-    # ══════════════════════════════════════════════════════════════
-    # §7 플래툰 적합도 계산 (S_platoon)
-    # ══════════════════════════════════════════════════════════════
-    def _distance_score(self, d: Optional[float]) -> float:
-        if d is None or d < D_SAFE_M or d > MAX_JOIN_DISTANCE_M:
-            return 0.0
-        return 1 - (d - D_SAFE_M) / (MAX_JOIN_DISTANCE_M - D_SAFE_M)
-
-    def _route_score(self, ego: EgoState, v: "NearbyVehicle") -> float:
-        n_common = self._route_overlap_count(ego, v)
-        n_i = len(ego.route) or 1
-        n_j = len(v.route) or 1
-        return n_common / min(n_i, n_j)
-
-    def _speed_score(self, ego: EgoState, v: "NearbyVehicle") -> float:
-        return max(0.0, 1 - abs(ego.speed - v.speed) / MAX_SPEED_DIFF)
-
-    def _normalize_rssi(self, rssi: float) -> float:
-        span = RSSI_MAX - RSSI_MIN
-        if span <= 0:
-            return 0.0
-        return max(0.0, min(1.0, (rssi - RSSI_MIN) / span))
-
-    def _comm_score(self, v: "NearbyVehicle") -> float:
-        s_pdr = max(0.0, min(1.0, v.pdr))
-        s_rssi = self._normalize_rssi(v.rssi)
-        return PDR_WEIGHT * s_pdr + (1 - PDR_WEIGHT) * s_rssi
-
-    def _angle_score(self, ego: EgoState, v: "NearbyVehicle") -> float:
-        return max(0.0, 1 - abs(ego.heading - v.heading) / MAX_HEADING_DIFF_RAD)
-
-    def _score_platoon(self, ego: EgoState, v: "NearbyVehicle") -> float:
-        s_d = self._distance_score(v.uwb_distance)
-        s_r = self._route_score(ego, v)
-        s_v = self._speed_score(ego, v)
-        s_q = self._comm_score(v)
-        s_a = self._angle_score(ego, v)
-        return (W_DISTANCE * s_d + W_ROUTE * s_r + W_SPEED * s_v
-                + W_COMM * s_q + W_ANGLE * s_a)
-
-    def _evaluate_candidates(self, ego: EgoState, candidates: list):
-        """
-        절대조건을 통과한 후보 중 최고 적합도 차량을 고른다 (§8 arg max, 동점 시 §8 우선순위 일부 반영).
-        반환값: (best: NearbyVehicle | None, score: float)
+        절대조건을 통과한 후보 중 가장 가까운 차량을 고른다.
+        점수 계산·안정성 이력 없이, 조건만 맞으면 바로 이번 주기에 요청 대상으로 선정.
         """
         best = None
-        best_score = -1.0
+        best_distance = None
         for v in candidates:
             if not self._check_absolute_conditions(ego, v):
                 continue
-            score = self._score_platoon(ego, v)
-            if score > best_score:
-                best, best_score = v, score
-            elif score == best_score and best is not None:
-                # 동점 시 우선순위: 경로 중첩 > 속도차 작음 > 통신품질 > ID 작음
-                if self._route_overlap_count(ego, v) > self._route_overlap_count(ego, best):
-                    best, best_score = v, score
-                elif v.vehicle_id < best.vehicle_id:
-                    best, best_score = v, score
-
-        if best is not None:
-            self._record_score(best.vehicle_id, best_score >= T_JOIN)
-
-        return best, best_score
-
-    # ══════════════════════════════════════════════════════════════
-    # §8 최종 결합 판단 — 5회 중 4회 이상 통과해야 결합 요청 (순간값 방지)
-    # ══════════════════════════════════════════════════════════════
-    def _record_score(self, vehicle_id: int, passed: bool) -> None:
-        history = self._score_history.setdefault(vehicle_id, [])
-        history.append(passed)
-        if len(history) > STABILITY_WINDOW:
-            history.pop(0)
-
-    def _is_score_stable(self, vehicle_id: int) -> bool:
-        history = self._score_history.get(vehicle_id, [])
-        return len(history) >= STABILITY_WINDOW and sum(history) >= STABILITY_PASS_REQUIRED
+            if best_distance is None or v.uwb_distance < best_distance:
+                best, best_distance = v, v.uwb_distance
+        return best
 
     # ══════════════════════════════════════════════════════════════
     # 수신 패킷 처리 — 매 주기 update() 맨 앞에서 한 번만 실행
@@ -717,7 +605,7 @@ class PlatoonFSM:
             reject(REJECT_BUSY)
             return
 
-        # 4. 요청 차량을 주변 목록에서 찾아 경로·방향·거리 재확인
+        # 4. 요청 차량을 주변 목록에서 찾아 방향·거리 재확인
         requester = None
         for v in nearby:
             if v.vehicle_id == req.requester_id:
@@ -731,13 +619,7 @@ class PlatoonFSM:
             reject(REJECT_CONDITION_FAIL)
             return
 
-        # 5. 자체 적합도 계산 — C_agreement = J_ij ∧ J_ji (양쪽 다 통과해야 결합)
-        score = self._score_platoon(ego, requester)
-        if score < T_JOIN:
-            reject(REJECT_LOW_SCORE)
-            return
-
-        # 6. 승인. 플래툰 ID는 요청 차량이 생성해서 PLATOON_SETUP으로 내려주므로 대기한다.
+        # 5. 승인. 플래툰 ID는 요청 차량이 생성해서 PLATOON_SETUP으로 내려주므로 대기한다.
         self.candidate_id = req.requester_id
         self._pending_candidate = requester
         self.match_state = MatchState.AWAIT_SETUP
@@ -745,7 +627,7 @@ class PlatoonFSM:
         self.comm.send(PlatoonJoinAccept(
             responder_id=self.vehicle_id,
             requester_id=req.requester_id,
-            suitability=int(round(max(0.0, min(1.0, score)) * 100)),
+            suitability=100,  # 점수 계산 없어짐 — 절대조건 통과만으로 승인하므로 고정값
             timestamp=time.time(),
         ))
 
@@ -756,10 +638,6 @@ class PlatoonFSM:
     def _on_join_reject(self, pkt: PlatoonJoinReject) -> None:
         if pkt.requester_id == self.vehicle_id and pkt.responder_id == self.candidate_id:
             self._join_response = False
-            # 거절당한 상대에게 매 주기 재요청하지 않도록 안정성 이력을 비운다.
-            # 이력이 남아 있으면 _is_score_stable()이 계속 True라서 거절→재요청을
-            # 제어주기마다 반복한다. 비워두면 §8대로 5회 재평가 후에나 다시 시도한다.
-            self._score_history.pop(pkt.responder_id, None)
 
     # ── §10.3 PLATOON_SETUP 수신 → 역할·플래툰 ID 채택 ──────────────
     def _on_platoon_setup(self, pkt: PlatoonSetup) -> None:
@@ -881,12 +759,12 @@ class PlatoonFSM:
         self._pending_candidate = None
         self._join_response = None
         self._wait_since = None
-        self.match_state = MatchState.V2X_SEARCH
+        self.match_state = MatchState.SEARCHING
 
     # ══════════════════════════════════════════════════════════════
     # §10 플래툰 결합 통신 절차 (JOIN_REQUEST → ACCEPT/REJECT → SETUP)
     # ══════════════════════════════════════════════════════════════
-    def _send_join_request(self, ego: EgoState, candidate: "NearbyVehicle", score: float) -> None:
+    def _send_join_request(self, ego: EgoState, candidate: "NearbyVehicle") -> None:
         """§10.1 — 결합 요청 전송. 응답 대기 중 candidate 정보를 캐시해둔다."""
         self._pending_candidate = candidate
         self._join_response = None
@@ -894,7 +772,7 @@ class PlatoonFSM:
         packet = PlatoonJoinRequest(
             requester_id=self.vehicle_id,
             target_id=candidate.vehicle_id,
-            suitability=int(round(max(0.0, min(1.0, score)) * 100)),
+            suitability=100,  # 점수 계산 없어짐 — 절대조건 통과만으로 요청하므로 고정값
             checkpoint_id=ego.checkpoint,
             destination_id=ego.destination,
             speed=ego.speed,
@@ -1075,6 +953,11 @@ class PlatoonFSM:
         라인트레이싱을 계속 수행하므로 카메라 오프셋을 그대로 쓸 수 있다.
         리더·팔로워가 각자 자기 차선 중앙에 정렬돼 있고 차선 ID가 같으면
         서로 정렬된 것이므로, 앞/뒤 위치와 무관하게 같은 기준이 적용된다.
+
+        TODO: 2차선 환경 — 상대와 차선(lane)이 다르면 실제로 차선을 변경하는
+              조향 동작이 필요한데, 아직 그 조향 로직 자체가 없다. 지금은
+              "이미 같은 차선일 때"만 통과하고, 차선을 넘어가는 능동적 조작은
+              별도로 설계해야 한다.
         """
         if partner is None:
             return self._hold(False)
@@ -1100,29 +983,17 @@ class PlatoonFSM:
               and abs(partner.speed - ego.speed) <= SPEED_TOLERANCE)
         return self._hold(ok)
 
-    def _remember_platoon_route(self, ego: EgoState, partner: Optional["NearbyVehicle"]) -> None:
-        """§20.4 공통 경로와 EXIT 시작 체크포인트를 결합 시점에 저장"""
-        if partner is None:
-            return
-        common = []
-        for a, b in zip(ego.route, partner.route):
-            if a != b:
-                break
-            common.append(a)
-        self.platoon_route = common
-        if len(common) >= 2:
-            self.exit_start_checkpoint = common[-2]  # 마지막보다 하나 앞선 체크포인트 (§21.1)
-        elif common:
-            self.exit_start_checkpoint = common[-1]
-
     def _exit_condition_met(self, ego: EgoState) -> bool:
-        """§21.1 EXIT 진입 조건 — 남은 공통 체크포인트 수 기준"""
-        if not self.platoon_route:
-            return False
-        if ego.checkpoint not in self.platoon_route:
-            return False
-        remaining = len(self.platoon_route) - 1 - self.platoon_route.index(ego.checkpoint)
-        return remaining <= EXIT_REMAINING_CHECKPOINTS
+        """
+        이탈(EXIT) 진입 조건 — 단순화판.
+
+        예전엔 결합 시점에 상대와 공통 경로(체크포인트 리스트)를 비교해서 저장해두고
+        그 경로의 끝 근처에서 이탈을 시작했다. GPS가 없어 정확한 위치를 모르고,
+        체크포인트도 표지판(종이컵) 인식 카운트로만 알 수 있어서, 상대 경로 비교
+        대신 "내 체크포인트 카운트가 내가 원래 알고 있던 목적지에 도달했는지"만
+        본다 — 상대의 체크포인트를 V2X로 알려받을 필요가 없어진다.
+        """
+        return ego.checkpoint >= ego.destination
 
     def _exit_complete(self, distance: Optional[float]) -> bool:
         """§21.4 EXIT 완료 조건 — 해제거리 이상이 1초 이상 유지"""
@@ -1140,13 +1011,12 @@ if __name__ == "__main__":
             print(f"  [SEND] {packet}")
 
     fsm = PlatoonFSM(vehicle_id=1, comm=PrintComm())
-    ego = EgoState(checkpoint=1, next_checkpoint=2, route=[2, 3, 4], speed=0.5, heading=0.0)
+    ego = EgoState(checkpoint=1, destination=5, speed=0.5, heading=0.0)
     candidate = NearbyVehicle(
-        vehicle_id=2, checkpoint=1, next_checkpoint=2, route=[2, 3, 4],
-        speed=0.5, heading=0.02, pdr=0.95, rssi=-50.0,
+        vehicle_id=2, checkpoint=1, speed=0.5, heading=0.02,
         uwb_distance=1.2, uwb_angle=0.1,
     )
 
     for i in range(12):
         cmd = fsm.update(ego, [candidate])
-        print(f"cycle {i}: {fsm.state} / {fsm.match_state} / history={fsm._score_history} / {cmd}")
+        print(f"cycle {i}: {fsm.state} / {fsm.match_state} / {cmd}")
