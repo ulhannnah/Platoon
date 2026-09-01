@@ -41,8 +41,11 @@ class FsmDecisionNode(Node):
         self.pub_fsm_state = self.create_publisher(String, '/fsm_state_debug', 10)
 
         # 1. 파라미터 선언
-        self.declare_parameter('vehicle_id', 1)
-        self.declare_parameter('is_designated_leader', False)
+        # 기본값은 이 차량(리더)을 기준으로 잡아둔다. 팔로워 차량은 실행할 때
+        # --ros-args -p vehicle_id:=102 -p is_designated_leader:=false ... 로
+        # 덮어써서 쓴다 (docs/250901_차량별_설정값_정리.md 참고).
+        self.declare_parameter('vehicle_id', 101)
+        self.declare_parameter('is_designated_leader', True)
         self.declare_parameter('uwb_id', 0)          # self_status 송신용 — ESP32와 맞는 값으로 지정 필요
         self.declare_parameter('destination_id', 0)  # 목적지 인식 방법 미정이라 당분간 고정값
 
