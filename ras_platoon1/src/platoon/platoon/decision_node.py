@@ -36,8 +36,7 @@ class DecisionNode(Node):
         self.declare_parameter('offset_gain', 0.15)          # 카메라 offset -> 목표 조향각 변환 게인
         self.declare_parameter('target_recovery_deg', 25.0)  # 한쪽 차선 유실 시 복귀 조향 각도(deg)
         self.declare_parameter('is_running', False) 
-        self.declare_parameter('backlash_comp', 5.0)
-        self.declare_parameter('curve_slope_threshold', 1) # 곡선 감지 임계값
+        self.declare_parameter('backlash_comp', 5.0)  
 
         # 2. 파라미터 값 클래스 변수로 로드
         self.lost_stop = bool(self.get_parameter('lost_stop').value)
@@ -45,14 +44,12 @@ class DecisionNode(Node):
         self.target_recovery_deg = float(self.get_parameter('target_recovery_deg').value)
         self.is_running = bool(self.get_parameter('is_running').value)
         self.backlash_comp = float(self.get_parameter('backlash_comp').value)
-        self.curve_slope_threshold = self.get_parameter('curve_slope_threshold').value
 
         # --- 파라미터 로드 확인용 로그 출력 ---
         self.get_logger().info('=============== Decision Node Parameters ===============')
         self.get_logger().info(f' 1. 상태 : is_running={self.is_running}, lost_stop={self.lost_stop}')
         self.get_logger().info(f' 2. 조향 : offset_gain={self.offset_gain}, target_recovery_deg={self.target_recovery_deg}')
         self.get_logger().info(f' 3. 유격 : backlash_comp={self.backlash_comp}')
-        self.get_logger().info(f' 4. 곡선 : curve_slope_threshold={self.curve_slope_threshold}')
         self.get_logger().info('========================================================')
         # -------------------------------------------------------------------
 
@@ -107,9 +104,6 @@ class DecisionNode(Node):
         left_style = msg.left_style
         right_style = msg.right_style
 
-        left_slope = msg.left_slope
-        right_slope = msg.right_slope
-
         # 2. 조향각(Steering Angle) 판단 로직
         is_recovering = False
         target_steer = 0.0
@@ -142,19 +136,12 @@ class DecisionNode(Node):
         cmd.steering_deg = int(target_steer)
 
         # 4. 속도 모드 결정 (정지 조건 우선 처리)
-        total_slope = left_slope + right_slope
         if not self.is_running:
             cmd.speed_mode = 0  # 주행 허용 스위치 OFF 시 정지
-            cmd.steering_deg = 0
         elif not lane_detected and self.lost_stop:
             cmd.speed_mode = 0  # 차선 완전 유실 시 정지
-        
-        # --- 분기점 대신 곡률을 기준으로 감속 ---
-        elif abs(total_slope) > self.curve_slope_threshold:
-            cmd.speed_mode = 1  # 곡선 구간 진입 시 감속
-            
         else:
-            cmd.speed_mode = 2  # 일반 직진 주행
+            cmd.speed_mode = self.cruise_speed  # 일반 주행
 
         # 5. 최종 결정된 제어 명령 메시지 발행
         self.pub.publish(cmd)

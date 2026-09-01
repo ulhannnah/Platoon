@@ -1,5 +1,4 @@
 import os
-import math
 import rclpy
 from rclpy.node import Node
 import serial
@@ -23,42 +22,44 @@ TELE_FRAME_LEN = 9  # STM32 -> Jetson 텔레메트리 프레임 길이 (기존 1
 
 class ControlNode(Node):
     """
-    ROS 2 제어 노드 클래스
-    - ROS 2 토픽(/vehicle_cmd)을 수신하여 STM32로 UART 제어 명령을 전송합니다.
+    ROS 2 제어 노드 클래스 (PID 속도 제어 적용)
+    - ROS 2 토픽(/vehicle_cmd)을 수신하여 PID 연산 후 STM32로 UART 제어 명령을 전송합니다.
     - 백그라운드 스레드에서 STM32의 센서/상태 데이터를 지속적으로 수신하여 /telemetry 토픽으로 발행합니다.
     """
     def __init__(self):
         super().__init__('control')
 
         # 1. 내부 고정변수
-        # /dev/ttyACM0 대신 by-id 고정 경로 사용 — ttyACM 번호는 재부팅 때마다
-        # USB 열거 순서에 따라 ESP32/STM32끼리 뒤바뀔 수 있다(실제로 겪은 문제).
-        # 이 경로는 이 STM32 보드의 시리얼번호에 매여 있어 재부팅해도 안 바뀐다.
-        # 보드를 교체하면 `ls /dev/serial/by-id/`로 새 이름 확인 후 갱신 필요.
-        self.port = '/dev/serial/by-id/usb-STMicroelectronics_STM32_STLink_066AFF485775495067181954-if02'
+        self.port = '/dev/ttyACM0'
         self.baud = 115200
         self.steer_offset = 70
         self.stop_duty = 0
 
-        # 1-1. 파라미터 선언 및 초기값 할당
-        self.declare_parameter('slow_duty', 80)
-        self.declare_parameter('cruise_duty', 130)
-        # PID 제거하면서 같이 없어졌던 값들. speed_mps 계산에만 다시 쓴다
-        # (모터 제어엔 안 씀 — duty는 여전히 고정값). TODO: 실측 필요.
-        self.declare_parameter('enc_cpr', 1560.0)       # 바퀴 1회전당 엔코더 펄스 수
-        self.declare_parameter('wheel_dia_mm', 65.0)    # 바퀴 지름(mm)
+        # 1-1. 파라미터 선언
+        self.declare_parameter('target_slow_speed', 15.0) 
+        self.declare_parameter('target_cruise_speed', 40.0) 
+        self.declare_parameter('kp', 1.5)
+        self.declare_parameter('ki', 0.1)
+        self.declare_parameter('kd', 0.05)
 
-        self.slow_duty = self.get_parameter('slow_duty').value
-        self.cruise_duty = self.get_parameter('cruise_duty').value
-        self.enc_cpr = self.get_parameter('enc_cpr').value
-        self.wheel_circ_m = (math.pi * self.get_parameter('wheel_dia_mm').value) / 1000.0
+        # 1-2. 파라미터 값 가져오기
+        self.target_slow_speed = self.get_parameter('target_slow_speed').value
+        self.target_cruise_speed = self.get_parameter('target_cruise_speed').value
+        self.kp = self.get_parameter('kp').value
+        self.ki = self.get_parameter('ki').value
+        self.kd = self.get_parameter('kd').value
 
-        self.get_logger().info('=============== Decision Node Parameters ===============')
-        self.get_logger().info(f'초기 파라미터 로드 - slow_duty: {self.slow_duty}, cruise_duty: {self.cruise_duty}')
-        self.get_logger().info('========================================================')
-        # 2. 상태 저장용 변수 초기화
+        # --- 파라미터 로드 확인용 로그 출력 ---
+        self.get_logger().info('============= Control Node Parameters =============')
+        self.get_logger().info(f' PID : Kp={self.kp}, Ki={self.ki}, Kd={self.kd}')
+        self.get_logger().info('===================================================')
+        # -------------------------------------------------------------------
+
+        # 2. PID 상태 저장용 변수 초기화
+        self.prev_error = 0.0
+        self.integral_error = 0.0
+        self.prev_time = self.get_clock().now()
         self.current_speed = 0.0  # 텔레메트리에서 지속적으로 갱신됨
-        self.last_tele_time = time.time()  # speed_mps 계산용 dt 기준
 
         # 3. 시리얼 스레드 락 및 통신 포트 초기화
         self.serial_lock = threading.Lock()
@@ -80,7 +81,20 @@ class ControlNode(Node):
 
     # 터미널에서 값이 변경되면 자동으로 호출되는 함수
     def parameter_callback(self, params):
-        # PID 파라미터가 제거되어 파라미터 변경 시 특별 처리 없음
+        for param in params:
+            if param.name == 'kp':
+                self.kp = param.value
+                self.get_logger().info(f'실시간 적용 완료: Kp = {self.kp}')
+            elif param.name == 'ki':
+                self.ki = param.value
+                self.get_logger().info(f'실시간 적용 완료: Ki = {self.ki}')
+            elif param.name == 'kd':
+                self.kd = param.value
+                self.get_logger().info(f'실시간 적용 완료: Kd = {self.kd}')
+            elif param.name == 'target_cruise_speed':
+                self.target_cruise_speed = param.value
+                self.get_logger().info(f'실시간 적용 완료: target_cruise_speed = {self.target_cruise_speed}')
+                
         return SetParametersResult(successful=True)
     
     def open_serial(self):
@@ -97,25 +111,50 @@ class ControlNode(Node):
                 self.ser = None
                 return False
 
-    # PID 제어 제거: 듀티는 메시지에서 직접 받거나 고정값을 사용합니다.
+    def calculate_pid(self, target_speed, current_speed):
+        """목표 속도와 현재 속도를 바탕으로 모터 Duty 제어값을 계산합니다."""
+        current_time = self.get_clock().now()
+        dt = (current_time - self.prev_time).nanoseconds / 1e9
+
+        if dt <= 0.0:
+            dt = 0.01 
+
+        error = target_speed - current_speed
+        p_term = self.kp * error
+
+        # 적분 누적 및 안티 와인드업(Anti-Windup) 처리 (과도한 누적 방지)
+        self.integral_error += error * dt
+        self.integral_error = max(min(self.integral_error, 100.0), -100.0) 
+        i_term = self.ki * self.integral_error
+
+        d_term = self.kd * (error - self.prev_error) / dt
+
+        control_output = p_term + i_term + d_term
+
+        self.prev_error = error
+        self.prev_time = current_time
+
+        # 최종 듀티값을 0~255 사이로 클램핑 (후진이 없다면 0이 최소)
+        return max(0, min(255, int(control_output)))
 
     # ---- 명령 수신 콜백 → STM32로 UART 송신 ----
     def on_cmd(self, msg: VehicleCmd):
-        """/vehicle_cmd 수신 시 듀티/조향을 STM32로 전송 (PID 미사용)"""
-
-        # 우선 메시지에 `duty` 필드가 있으면 그대로 사용 (0~255 클램프)
-        if hasattr(msg, 'duty'):
-            duty = int(getattr(msg, 'duty')) & 0xFF
+        """/vehicle_cmd 수신 시 PID를 계산하여 송신 패킷 전송"""
+        
+        # 1. speed_mode에 따른 타겟 속도 설정 및 PID 계산
+        if msg.speed_mode == 0:
+            duty_val = self.stop_duty
+            # 정지 상태일 때는 적분 오차를 초기화하여 갑자기 튀어나가는 것을 방지합니다.
+            self.integral_error = 0.0
+            self.prev_error = 0.0
+        elif msg.speed_mode == 1:
+            duty_val = self.calculate_pid(self.target_slow_speed, self.current_speed)
+        elif msg.speed_mode >= 2:
+            duty_val = self.calculate_pid(self.target_cruise_speed, self.current_speed)
         else:
-            # 메시지에 듀티가 없을 경우 speed_mode 기준의 고정 듀티 사용
-            if msg.speed_mode == 0:
-                duty = int(self.stop_duty) & 0xFF
-            elif msg.speed_mode == 1:
-                duty = 100  # 기본 저속 듀티
-            elif msg.speed_mode >= 2:
-                duty = 200  # 기본 크루즈 듀티
-            else:
-                duty = int(self.stop_duty) & 0xFF
+            duty_val = self.stop_duty
+
+        duty = int(duty_val) & 0xFF
         
         # 2. 조향각 변환 (+70 오프셋 적용 및 0~140 범위 클램핑)
         steer_byte = int(msg.steering_deg) + self.steer_offset
@@ -185,17 +224,8 @@ class ControlNode(Node):
         msg.right_delta = struct.unpack('>h', frame[4:6])[0]
         msg.dist_cm = struct.unpack('>H', frame[6:8])[0]
 
-        # 좌우 엔코더 변화량의 평균 펄스 수 (PID 제거 이후 duty 제어엔 안 쓰지만,
-        # 다른 노드가 "지금 실제 속도"를 알아야 할 때 필요해서 m/s로 환산해 내보낸다)
-        now = time.time()
-        dt = now - self.last_tele_time
-        self.last_tele_time = now
-        if dt <= 0.0 or dt > 0.5:  # 패킷 누락/최초 수신 시 비정상 dt 방지
-            dt = 0.02
-
-        avg_delta = (msg.left_delta + msg.right_delta) / 2.0
-        self.current_speed = (avg_delta / self.enc_cpr) * self.wheel_circ_m / dt
-        msg.speed_mps = self.current_speed
+        # [핵심] 좌우 엔코더 변화량의 평균을 '현재 속도'로 저장하여 PID 계산에 활용
+        self.current_speed = (msg.left_delta + msg.right_delta) / 2.0
 
         self.tele_pub.publish(msg)
 
