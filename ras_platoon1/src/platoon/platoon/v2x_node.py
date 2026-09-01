@@ -70,7 +70,7 @@ class V2XNode(Node):
         # by-id 경로 사용: 재부팅 후에도 USB 열거 순서 변경 대비
         self.declare_parameter(
             "serial_port",
-            "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_14:C1:9F:C1:26:8C-if00",
+            "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_14:C1:9F:C1:2F:18-if00",
         )
         self.declare_parameter("baud", 115200)
         # self_status 송신 주기 (Hz 단위, 기본 10Hz = 100ms)
