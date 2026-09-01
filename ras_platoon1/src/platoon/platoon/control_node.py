@@ -31,17 +31,21 @@ class ControlNode(Node):
         super().__init__('control')
 
         # 1. 내부 고정변수
-        # /dev/ttyACM0 대신 by-id 고정 경로 사용 — ttyACM 번호는 재부팅 때마다
-        # USB 열거 순서에 따라 ESP32/STM32끼리 뒤바뀔 수 있다(실제로 겪은 문제).
-        # 이 경로는 이 STM32 보드의 시리얼번호에 매여 있어 재부팅해도 안 바뀐다.
-        # 보드를 교체하면 `ls /dev/serial/by-id/`로 새 이름 확인 후 갱신 필요.
-        self.port = '/dev/serial/by-id/usb-STMicroelectronics_STM32_STLink_066AFF485775495067181954-if02'
         self.baud = 115200
         self.steer_offset = 70
         self.stop_duty = 0
 
         # 1-1. 파라미터 선언
-        self.declare_parameter('target_slow_speed', 15.0) 
+        # STM32 시리얼 포트 — /dev/ttyACM0 대신 by-id 고정 경로를 기본값으로 쓴다.
+        # ttyACM 번호는 재부팅 때마다 USB 열거 순서에 따라 ESP32/STM32끼리
+        # 뒤바뀔 수 있다(실제로 겪은 문제). 차량마다 꽂힌 보드가 다르므로
+        # 실행할 때 --ros-args -p stm32_port:=/dev/serial/by-id/... 로 넣어줄 것.
+        self.declare_parameter(
+            'stm32_port',
+            '/dev/serial/by-id/usb-STMicroelectronics_STM32_STLink_066AFF485775495067181954-if02',
+        )
+        self.port = self.get_parameter('stm32_port').get_parameter_value().string_value
+        self.declare_parameter('target_slow_speed', 15.0)
         self.declare_parameter('target_cruise_speed', 40.0) 
         self.declare_parameter('kp', 1.5)
         self.declare_parameter('ki', 0.1)
