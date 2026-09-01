@@ -1,4 +1,5 @@
 import os
+import math
 import rclpy
 from rclpy.node import Node
 import serial
@@ -30,7 +31,11 @@ class ControlNode(Node):
         super().__init__('control')
 
         # 1. 내부 고정변수
-        self.port = '/dev/ttyACM0'
+        # /dev/ttyACM0 대신 by-id 고정 경로 사용 — ttyACM 번호는 재부팅 때마다
+        # USB 열거 순서에 따라 ESP32/STM32끼리 뒤바뀔 수 있다(실제로 겪은 문제).
+        # 이 경로는 이 STM32 보드의 시리얼번호에 매여 있어 재부팅해도 안 바뀐다.
+        # 보드를 교체하면 `ls /dev/serial/by-id/`로 새 이름 확인 후 갱신 필요.
+        self.port = '/dev/serial/by-id/usb-STMicroelectronics_STM32_STLink_066AFF485775495067181954-if02'
         self.baud = 115200
         self.steer_offset = 70
         self.stop_duty = 0
@@ -41,6 +46,10 @@ class ControlNode(Node):
         self.declare_parameter('kp', 1.5)
         self.declare_parameter('ki', 0.1)
         self.declare_parameter('kd', 0.05)
+        # V2X로 다른 차량에 실제 속도(m/s)를 알려주는 데만 쓴다 (PID 입력엔 안 씀).
+        # TODO: 실측 필요
+        self.declare_parameter('enc_cpr', 1560.0)       # 바퀴 1회전당 엔코더 펄스 수
+        self.declare_parameter('wheel_dia_mm', 65.0)    # 바퀴 지름(mm)
 
         # 1-2. 파라미터 값 가져오기
         self.target_slow_speed = self.get_parameter('target_slow_speed').value
@@ -48,6 +57,8 @@ class ControlNode(Node):
         self.kp = self.get_parameter('kp').value
         self.ki = self.get_parameter('ki').value
         self.kd = self.get_parameter('kd').value
+        self.enc_cpr = self.get_parameter('enc_cpr').value
+        self.wheel_circ_m = (math.pi * self.get_parameter('wheel_dia_mm').value) / 1000.0
 
         # --- 파라미터 로드 확인용 로그 출력 ---
         self.get_logger().info('============= Control Node Parameters =============')
@@ -59,7 +70,8 @@ class ControlNode(Node):
         self.prev_error = 0.0
         self.integral_error = 0.0
         self.prev_time = self.get_clock().now()
-        self.current_speed = 0.0  # 텔레메트리에서 지속적으로 갱신됨
+        self.current_speed = 0.0  # 텔레메트리에서 지속적으로 갱신됨 (PID 입력용, 엔코더 펄스 그대로)
+        self.last_tele_time = time.time()  # speed_mps(m/s) 계산용 dt 기준
 
         # 3. 시리얼 스레드 락 및 통신 포트 초기화
         self.serial_lock = threading.Lock()
@@ -226,6 +238,16 @@ class ControlNode(Node):
 
         # [핵심] 좌우 엔코더 변화량의 평균을 '현재 속도'로 저장하여 PID 계산에 활용
         self.current_speed = (msg.left_delta + msg.right_delta) / 2.0
+
+        # speed_mps(실제 m/s)는 PID엔 안 쓰지만, V2X로 다른 차량에 내 속도를
+        # 알려줄 때(self_status) 필요해서 별도로 환산해 Telemetry에 실어 보낸다.
+        now = time.time()
+        dt = now - self.last_tele_time
+        self.last_tele_time = now
+        if dt <= 0.0 or dt > 0.5:  # 패킷 누락/최초 수신 시 비정상 dt 방지
+            dt = 0.02
+        avg_delta = (msg.left_delta + msg.right_delta) / 2.0
+        msg.speed_mps = (avg_delta / self.enc_cpr) * self.wheel_circ_m / dt
 
         self.tele_pub.publish(msg)
 
