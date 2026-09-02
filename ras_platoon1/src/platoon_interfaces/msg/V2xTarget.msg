@@ -1,15 +1,14 @@
 # V2xTarget.msg
-# ESP32-S3가 보내는 v2x_targets 패킷의 targets[] 배열 원소 하나 (문서 §7.2 그대로).
+# ESP32-S3가 보내는 v2x_targets 패킷의 targets[] 배열 원소 하나.
 #
-# leader_vehicle_id는 ESP32 원본 패킷엔 없는 필드다. v2x_node.py가 같은 패킷 안
-# 다른 타겟 중 platoon_role==LEADER(1)인 걸 찾아서 채워 넣는 Pi 쪽 보강값이다 —
-# platoon_fsm.py의 3대 이상 체인 로직(_setup_platoon)이 NearbyVehicle.leader_id를
-# 요구하는데 원본 문서 스펙엔 이 필드가 없어서다. 같은 패킷 안에 리더가 안 잡히면
-# -1(모름)로 남는다 — 이 경우 3대째 결합 판단이 부정확해질 수 있으니, ESP32 쪽에
-# 타겟별 leader_vehicle_id 필드 추가를 요청하는 게 근본 해결책이다.
+# leader_vehicle_id/front_vehicle_id는 이제 ESP32가 직접 계산해서 보내준다
+# ("ESP32-S3 ↔ Raspberry Pi 통신 데이터 정리.md" §10.2 최신 정책). 예전엔
+# v2x_node.py가 같은 패킷 안에서 리더를 추론하는 임시 보강 로직을 썼는데,
+# 이제 그 필드를 그대로 받으면 된다 (혹시 구버전 펌웨어라 필드가 없으면
+# v2x_node.py가 예전 추론 로직으로 폴백한다).
+# uwb_id는 최신 정책상 Pi로 안 보내므로 이 메시지에 없다.
 
 int32 vehicle_id
-int32 uwb_id
 
 float32 distance_m
 float32 angle_deg
@@ -31,4 +30,5 @@ int32 espnow_valid
 float32 confidence
 
 int32 leader_vehicle_id
-# Pi 쪽 보강값. -1이면 이번 패킷만으로는 알 수 없음 (위 설명 참고).
+int32 front_vehicle_id
+# 둘 다 -1이면 이번 패킷만으로는 알 수 없음 (구버전 펌웨어 폴백 실패 등).

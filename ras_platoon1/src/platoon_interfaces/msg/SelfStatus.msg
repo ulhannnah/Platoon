@@ -2,7 +2,6 @@ int32 seq
 int64 timestamp_ms
 
 int32 vehicle_id
-int32 uwb_id
 int32 destination_id
 
 int32 driving_state

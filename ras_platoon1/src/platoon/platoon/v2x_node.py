@@ -220,8 +220,10 @@ class V2XNode(Node):
         # 원본 targets 배열 추출
         raw_targets = data.get("targets", [])
 
-        # 플래툰 ID별 리더 차량 ID 매핑
-        # 같은 platoon_id를 쓰는 LEADER가 있으면 그 vehicle_id를 기록
+        # leader_vehicle_id는 이제 ESP32가 타겟별로 직접 계산해서 보내준다
+        # ("ESP32-S3 ↔ Raspberry Pi 통신 데이터 정리.md" §10.2). 혹시 구버전
+        # 펌웨어라 이 필드가 없으면(0/누락), 예전처럼 같은 패킷 안 LEADER를
+        # 찾아 채워주는 방식으로 폴백한다.
         leader_by_platoon = {
             t.get("platoon_id"): t.get("vehicle_id")
             for t in raw_targets
@@ -240,8 +242,7 @@ class V2XNode(Node):
             v = V2xTarget()
             # 신원 정보
             v.vehicle_id = int(t.get("vehicle_id", 0))
-            v.uwb_id = int(t.get("uwb_id", 0))
-            
+
             # 거리/각도 정보 (극좌표)
             v.distance_m = float(t.get("distance_m", 0.0))
             v.angle_deg = float(t.get("angle_deg", 0.0))
@@ -267,11 +268,18 @@ class V2XNode(Node):
             v.espnow_valid = int(t.get("espnow_valid", 0))
             v.confidence = float(t.get("confidence", 0.0))
 
-            # leader_vehicle_id 채우기 (리더는 자신의 ID, 팔로워는 리더의 ID 또는 -1)
-            if v.platoon_role == PLATOON_ROLE_LEADER:
+            # leader_vehicle_id: ESP32가 직접 준 값을 우선 사용, 없으면(구버전
+            # 펌웨어) 같은 패킷 안 추론으로 폴백
+            direct_leader = t.get("leader_vehicle_id")
+            if direct_leader:
+                v.leader_vehicle_id = int(direct_leader)
+            elif v.platoon_role == PLATOON_ROLE_LEADER:
                 v.leader_vehicle_id = v.vehicle_id
             else:
                 v.leader_vehicle_id = leader_by_platoon.get(t.get("platoon_id"), -1)
+
+            # front_vehicle_id: ESP32가 직접 계산해서 주는 값, 그대로 사용
+            v.front_vehicle_id = int(t.get("front_vehicle_id", 0))
 
             targets.append(v)
 
@@ -295,7 +303,6 @@ class V2XNode(Node):
             "seq": self._tx_seq,
             "timestamp_ms": int(time.time() * 1000),  # 현재 시간(ms)
             "vehicle_id": s.vehicle_id,
-            "uwb_id": s.uwb_id,
             "destination_id": s.destination_id,
             "driving_state": s.driving_state,
             "platoon_state": s.platoon_state,
