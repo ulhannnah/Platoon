@@ -532,6 +532,8 @@ class PlatoonFSM:
         best = None
         best_distance = None
         for v in candidates:
+            if v.vehicle_id == self.vehicle_id:
+                continue
             if not self._check_absolute_conditions(ego, v):
                 continue
             if best_distance is None or v.uwb_distance < best_distance:

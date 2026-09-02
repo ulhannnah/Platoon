@@ -20,7 +20,12 @@ def generate_launch_description():
     camera_less_arg = DeclareLaunchArgument('allow_camera_less_join', default_value='true')
     control_node_arg = DeclareLaunchArgument('enable_control_node', default_value='false')
     lane_detector_arg = DeclareLaunchArgument('enable_lane_detector', default_value='false')
-    v2x_fallback_arg = DeclareLaunchArgument('enable_ros_peer_fallback', default_value='true')
+    # 기본은 false — V2X는 ESP32(UWB+ESP-NOW)로만 한다. 이 폴백을 켜면 ESP32가
+    # 실제 타깃을 못 줄 때 같은 ROS 네트워크의 상대 차량 /v2x/self_status를 직접
+    # 봐서 가짜 타깃을 합성하는데, 그러려면 두 차량이 ROS_DOMAIN_ID를 공유해야
+    # 해서 /vehicle_cmd 등 다른 토픽까지 같이 새는 위험이 있다 (모터 연결 전까지
+    # 보류). 데모에서 의도적으로 필요할 때만 true로 켤 것.
+    v2x_fallback_arg = DeclareLaunchArgument('enable_ros_peer_fallback', default_value='false')
 
     # STM32 제어 / UART 통신 노드 (포트 자동탐색)
     control = Node(

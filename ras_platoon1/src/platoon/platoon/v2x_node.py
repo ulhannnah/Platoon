@@ -143,8 +143,15 @@ class V2XNode(Node):
                     self.ser.close()
                 
                 # 새 시리얼 포트 열기
-                # timeout=0.5: 수신 시 0.5초 대기 후 타임아웃 (블로킹 방지)
-                self.ser = serial.Serial(self.port_path, self.baud, timeout=0.5)
+                # 수신은 최대 0.5초, 송신은 최대 0.2초로 제한한다. ESP32가 USB
+                # 데이터를 읽지 않을 때 write()가 무기한 막히면 self_status 송신
+                # 타이머까지 같이 멈춘다 (ras_platoon2에서 먼저 발견/적용된 수정).
+                self.ser = serial.Serial(
+                    self.port_path,
+                    self.baud,
+                    timeout=0.5,
+                    write_timeout=0.2,
+                )
                 self.get_logger().info(f"ESP32-S3 시리얼 연결 성공: {self.port_path}")
                 return True
             except serial.SerialException as e:

@@ -178,7 +178,7 @@ ESP32 팀원에게 UWB 모듈의 신뢰 가능한 최대 측정거리를 확인�
 | `LANE_ALIGN_OFFSET_TOLERANCE` | `platoon_fsm.py` | 0.15 기준(정규화 오프셋). 카메라 차선 중앙 오프셋 허용치 |
 | `vehicle_id` | `main.py` `main()` 내부 | 차량별 고유 ID 부여 방식 |
 | 시리얼 포트 경로 | `main.py` `open_stm32_port()` | `/dev/ttyAMA0` vs `/dev/ttyUSB0` |
-| `reason_code` 체계 | `v2x_protocol.py` `PlatoonJoinReject` | 거절 사유 코드 정의 |
+| `reason_code` 체계 | `platoon_fsm.py` `PlatoonJoinReject` | 거절 사유 코드 정의 |
 | 조향 부호 방향 | `stm32_protocol.md` §5.2 | 좌회전=양수가 실제 서보와 맞는지 |
 | Baudrate | `stm32_protocol.md` §2 | 115200 유지 여부 |
 | 초음파 연결 위치 | `stm32_protocol.md` §5.3 | STM32 직결 vs RPi 직결 |
@@ -230,3 +230,42 @@ ESP32 팀원에게 UWB 모듈의 신뢰 가능한 최대 측정거리를 확인�
 **주의**: 이 값들은 다른 항목들과 달리 실측으로 정해지는 "하나의 정답"이 없고,
 **카메라 해상도·높이·각도·바닥 재질이 바뀔 때마다 다시 잡아야** 합니다. 최종
 하드웨어가 고정되기 전까지는 튜닝을 미뤄도 되는 항목입니다.
+
+---
+
+## 10. 카메라 백엔드 (`camera.py`, `lane_detector_node.py`) — 라즈베리파이 picamera2 지원
+
+**[확정]** `CameraCapture(camera_type="auto")`는 `picamera2 → usb → csi` 순으로
+시도합니다. 라즈베리파이 공식 카메라 모듈이면 보통 손댈 것 없이 `auto`로 충분합니다.
+카메라를 여는 건 이제 `lane_detector_node.py`(별도 노드)이고, 아래 `camera_type`/
+`calibration_file` ROS2 파라미터도 이 노드에 선언돼 있습니다 —
+`platoon_control_node`가 아닙니다.
+
+**설치 시 주의 — `pip install`로 안 잡힙니다.**
+`picamera2`는 `libcamera` C++ 바인딩이 필요한 시스템 패키지라 아래처럼 apt로
+설치해야 합니다. `pip3 install picamera2`로 시도하면 실패하거나 반쪽짜리로 깔립니다.
+
+```bash
+sudo apt install -y python3-picamera2
+```
+
+젯슨에는 애초에 `picamera2`가 없으므로 (import 실패 시 자동으로 usb/csi로
+넘어감), 젯슨 쪽에서 이것 때문에 걸릴 일은 없습니다.
+
+| 파라미터 | 기본값 | 의미 |
+|---|---|---|
+| `camera_type` (ROS2 파라미터) | `"auto"` | `picamera2`/`usb`/`csi` 중 확정 지정 가능 |
+| `calibration_file` (ROS2 파라미터) | `""` (없음) | 렌즈 왜곡보정 npz 경로. 비워두면 보정 없이 진행 |
+
+**캘리브레이션 파일(`calibration_file`)**: `cv2.calibrateCamera()`로 만든
+`mtx`(카메라 행렬), `dist`(왜곡계수) 배열을 담은 `.npz`. 체커보드로 캘리브레이션한
+뒤 경로를 지정하면 `CameraCapture.read()`가 매 프레임 왜곡보정을 자동 적용합니다.
+없으면(기본) 원본 프레임을 그대로 씁니다 — 라인트레이싱 자체는 보정 없이도
+동작하지만, 화면 가장자리 왜곡이 심한 광각 렌즈라면 오프셋 계산이 부정확해질 수
+있습니다.
+
+**웹 디버그 스트림(선택 사항)**: `lane_detector_node.py`는 `flask`가 설치돼
+있으면 `web_port`(기본 5000) 파라미터로 지정한 포트에서 인식 화면을 실시간
+스트리밍합니다. `flask`가 없으면 조용히 건너뛰고 `/lane_info` 발행은 정상
+동작합니다 — `pip3 install flask`로 설치하면 됩니다 (선택 사항이라
+`install_requires`에는 안 넣었습니다).

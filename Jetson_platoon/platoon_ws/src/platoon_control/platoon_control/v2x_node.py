@@ -7,7 +7,8 @@ FSM 노드(platoon_control_node)에서 분리했다 — 이제 ESP32 실제 시�
 그대로 둔다. 이 노드가 하는 일은 platoon_control_node.py에 있던
 read_esp32_packet() 스텁을 그대로 옮겨와서 토픽으로 내보내는 것뿐이다.
 
-토픽: ros_v2x_comm.py 참고.
+토픽: ros_v2x_comm.py 참고. 타입 있는 메시지(platoon_interfaces)를 쓴다 — JSON을
+std_msgs/String에 싣던 예전 방식에서 전환했다.
 
 실행:
     ros2 run platoon_control v2x_node
@@ -16,9 +17,10 @@ read_esp32_packet() 스텁을 그대로 옮겨와서 토픽으로 내보내는 �
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String
 
-from .ros_v2x_comm import encode_esp32_data, decode_packet
+from platoon_interfaces.msg import V2xPacket, Esp32Data
+
+from .ros_v2x_comm import esp32_data_to_msg, msg_to_packet
 
 
 def read_esp32_packet():
@@ -50,29 +52,27 @@ class V2XNode(Node):
         self.declare_parameter("publish_rate_hz", 50.0)
         rate = self.get_parameter("publish_rate_hz").value
 
-        self._data_pub = self.create_publisher(String, "/v2x/esp32_data", 10)
-        self._incoming_pub = self.create_publisher(String, "/v2x/incoming", 10)
-        self.create_subscription(String, "/v2x/outgoing", self._on_outgoing, 10)
+        self._data_pub = self.create_publisher(Esp32Data, "/v2x/esp32_data", 10)
+        self._incoming_pub = self.create_publisher(V2xPacket, "/v2x/incoming", 10)
+        self.create_subscription(V2xPacket, "/v2x/outgoing", self._on_outgoing, 10)
 
         self.timer = self.create_timer(1.0 / rate, self._tick)
         self.get_logger().info("V2X 노드 시작 (ESP32 미연결 — 스텁으로 진행)")
 
     def _tick(self):
         esp32_data = read_esp32_packet()
-        msg = String()
-        msg.data = encode_esp32_data(esp32_data)
-        self._data_pub.publish(msg)
+        self._data_pub.publish(esp32_data_to_msg(esp32_data))
 
-    def _on_outgoing(self, msg: String) -> None:
+    def _on_outgoing(self, msg: V2xPacket) -> None:
         """
         이 차량이 보낸 패킷 — 실제로는 ESP-NOW로 다른 차량에 중계해야 한다.
 
-        TODO: ESP32 시리얼이 붙으면 여기서 JSON을 바이트 프레임으로 바꿔 송신하고,
+        TODO: ESP32 시리얼이 붙으면 여기서 메시지를 바이트 프레임으로 바꿔 송신하고,
               ESP32가 수신한 패킷은 별도 콜백에서 파싱해 /v2x/incoming으로 발행한다.
               지금은 시리얼이 없어 로그만 남긴다 — 실차 2대 이상 동시 테스트 전까지는
               tools/sim_two_vehicles.py의 LoopbackBus가 이 역할을 대신한다.
         """
-        packet = decode_packet(msg.data)
+        packet = msg_to_packet(msg)
         self.get_logger().debug(f"[v2x] 송신 요청(중계 미구현): {packet}")
 
 

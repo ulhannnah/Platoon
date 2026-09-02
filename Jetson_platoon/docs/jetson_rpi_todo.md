@@ -63,7 +63,7 @@ STM32는 자체적으로 정지하지만, Jetson의 FSM/제어 로직은 이 사
 
 ### 1.4 `EMERGENCY` 패킷 **송신 경로가 없음** (추가)
 
-`v2x_protocol.py`에 `EmergencyMessage`가 정의돼 있고, `platoon_fsm.py`에 수신 처리
+`platoon_fsm.py`에 `EmergencyMessage`가 정의돼 있고, 같은 파일에 수신 처리
 (`_on_emergency`)도 구현돼 있습니다. 그런데 **보내는 코드가 어디에도 없습니다.**
 
 즉 현재는 다음 상황에서 뒤차에게 아무 경고도 못 보냅니다.
@@ -159,7 +159,7 @@ STM32 쪽은 현재 구프로토콜(ASCII, `PWM:...`/`M:...`)을 쓰고 있고, 
 `parameters.md` §7에 정리된 것 중 코드/문서에 직접 걸리는 것들:
 
 - `vehicle_id` — `main.py`의 하드코딩된 `1`을 차량별 고유 ID 부여 방식으로 교체
-- `reason_code` 체계 — `v2x_protocol.py`의 `PlatoonJoinReject` 거절 사유 코드 정의
+- `reason_code` 체계 — `platoon_fsm.py`의 `PlatoonJoinReject` 거절 사유 코드 정의
   (현재 5종 정의됨: 참여 비허용 / 이미 결합 중 / 절대조건 미달 / 적합도 미달 / 차량 미발견)
 - `CHECKPOINT_ADJACENT_RANGE`, `lane_ok`(현재 항상 True) — 체크포인트/트랙 차선 구조 확정 후 값 결정
 - `LANE_ALIGN_OFFSET_TOLERANCE` (0.15, 정규화 오프셋 기준) — 설계 변경으로 **UWB 횡방향

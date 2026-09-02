@@ -13,31 +13,23 @@ lane_tracing.py
      (NORMAL_LANE_WIDTH=320, 640px 화면 전제)를 썼는데, 여기서는 위 3번과 같은
      이유로 화면 폭 대비 비율로 바꿨습니다.
 
-PerceptionTracker는 카메라를 백그라운드 스레드에서 계속 돌리고, 메인 루프는
-get_lane()으로 "가장 최근 결과"만 논블로킹으로 읽습니다. 이렇게 나눈 이유는
-이 알고리즘(Canny + 슬라이딩 윈도우 9개 + 허프 변환 2회)이 라즈베리파이5에서
-50Hz(20ms)를 못 맞출 가능성이 있어서입니다 — 카메라 처리 속도와 제어 루프
-주기를 분리해두면, 영상처리가 느려져도 메인 루프(STM32 송신 등)는 멈추지 않습니다.
+이 파일은 순수 함수(detect_lane)만 담는다 — 카메라 캡처·스레딩·ROS2는 전부
+lane_detector_node.py 쪽 책임이다. 예전엔 PerceptionTracker가 여기서 카메라를
+백그라운드 스레드로 돌렸는데, 카메라가 별도 ROS2 노드(lane_detector_node)로
+분리되면서 그 역할(캡처 주기 분리, get_lane() 논블로킹 읽기)을 ROS2의
+타이머+토픽 구독이 대신하게 되어 제거했다.
 
-표지판 인식을 붙일 때는 sign_detection.py에 detect_signs(frame) 함수만 채우면
-PerceptionTracker가 같은 프레임을 그쪽에도 자동으로 넘겨줍니다 (카메라를 새로 열
-필요 없음).
+표지판 인식(sign_detection.py)도 이제 lane_detector_node.py가 detect_lane()과
+같은 프레임으로 호출한다 (카메라를 새로 열 필요 없음).
 """
 
-import threading
 from dataclasses import dataclass
 from typing import Optional
 
 import cv2
 import numpy as np
 
-from .camera import CameraCapture
 from .driving_control import LaneTracingResult
-
-try:
-    from .sign_detection import detect_signs
-except ImportError:
-    detect_signs = None  # 표지판 모듈이 아직 없으면 그냥 안 돌림
 
 
 # ── 튜닝 파라미터 (전부 임시값 — 하드웨어 확정 후 parameters.md 절차대로 재조정) ──
@@ -256,84 +248,3 @@ def detect_lane(frame: np.ndarray):
 
     result = LaneTracingResult(offset=offset_norm, detected=detected)
     return result, debug_img, info
-
-
-class PerceptionTracker:
-    """
-    카메라 한 대를 백그라운드 스레드에서 계속 캡처하며, 붙어있는 인식기(들)를
-    같은 프레임에 돌린다. 메인 루프는 get_lane()으로 최신 결과만 논블로킹으로 읽는다.
-
-    표지판 인식을 붙일 때: sign_detection.py의 detect_signs(frame)만 구현하면
-    이 클래스가 자동으로 같은 프레임을 넘겨준다 — 카메라를 새로 열 필요 없음.
-    """
-
-    def __init__(self):
-        self._lane_result = LaneTracingResult(offset=0.0, detected=False)
-        self._lane_info = LaneDebugInfo()
-        self._sign_result = None
-        self._debug_frame: Optional[np.ndarray] = None
-        self._lock = threading.Lock()
-        self._running = False
-        self._thread: Optional[threading.Thread] = None
-        self.camera: Optional[CameraCapture] = None
-
-        try:
-            self.camera = CameraCapture()
-        except Exception as e:
-            print(f"[warn] 카메라 초기화 실패, 라인트레이싱 없이 진행: {e}")
-            return
-
-        self._running = True
-        self._thread = threading.Thread(target=self._loop, daemon=True)
-        self._thread.start()
-
-    @property
-    def available(self) -> bool:
-        return self.camera is not None
-
-    def _loop(self):
-        while self._running:
-            try:
-                frame = self.camera.read()
-                lane_result, debug_img, lane_info = detect_lane(frame)
-                sign_result = detect_signs(frame) if detect_signs is not None else None
-            except Exception as e:
-                print(f"[warn] 프레임 처리 중 오류: {e}")
-                continue
-
-            with self._lock:
-                self._lane_result = lane_result
-                self._lane_info = lane_info
-                self._sign_result = sign_result
-                self._debug_frame = debug_img
-
-    def get_lane(self) -> LaneTracingResult:
-        with self._lock:
-            return self._lane_result
-
-    def get_lane_info(self) -> LaneDebugInfo:
-        """
-        차선 형태(실선/점선), 기울기, 분기점 감지 결과 등 부가 정보.
-        제어에는 안 쓰이고 로깅·디버그용이다.
-
-        TODO: junction("FORK_RIGHT")을 EgoState.checkpoint 갱신에 쓸지 검토.
-              체크포인트 인식 방식(표지판 / 바닥마커 / 주행거리)이 아직 팀
-              미정이라 지금은 FSM에 연결하지 않았다 (docs/jetson_rpi_todo.md §1.7).
-        """
-        with self._lock:
-            return self._lane_info
-
-    def get_sign(self):
-        with self._lock:
-            return self._sign_result
-
-    def get_debug_frame(self) -> Optional[np.ndarray]:
-        with self._lock:
-            return self._debug_frame
-
-    def stop(self):
-        self._running = False
-        if self._thread is not None:
-            self._thread.join(timeout=1.0)
-        if self.camera is not None:
-            self.camera.close()

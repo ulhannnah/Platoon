@@ -1,3 +1,5 @@
+from glob import glob
+
 from setuptools import find_packages, setup
 
 package_name = "platoon_control"
@@ -10,6 +12,8 @@ setup(
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
         ("share/" + package_name + "/launch", ["launch/platoon_control_launch.py"]),
+        ("share/" + package_name + "/launch/jetson", glob("launch/jetson/*.py")),
+        ("share/" + package_name + "/launch/rpi", glob("launch/rpi/*.py")),
     ],
     install_requires=["setuptools", "opencv-python", "numpy", "pyserial", "pynput"],
     zip_safe=True,
@@ -22,6 +26,7 @@ setup(
         "console_scripts": [
             "platoon_control_node = platoon_control.platoon_control_node:main",
             "v2x_node = platoon_control.v2x_node:main",
+            "lane_detector_node = platoon_control.lane_detector_node:main",
         ],
     },
 )

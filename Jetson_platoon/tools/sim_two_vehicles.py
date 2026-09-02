@@ -25,8 +25,7 @@ from pathlib import Path
 # platoon_ws 안의 실제 코드(패키지)를 그대로 가져다 쓴다 — 사본을 따로 안 둔다.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "platoon_ws" / "src" / "platoon_control"))
 
-from platoon_control.platoon_fsm import PlatoonFSM, EgoState, NearbyVehicle, PlatoonState
-from platoon_control.v2x_protocol import LoopbackBus
+from platoon_control.platoon_fsm import PlatoonFSM, EgoState, NearbyVehicle, PlatoonState, LoopbackBus
 
 ROUTE = [2, 3, 4, 5]
 AHEAD_ANGLE = 0.02      # 상대가 내 앞 (UWB AoA 정면 부근)

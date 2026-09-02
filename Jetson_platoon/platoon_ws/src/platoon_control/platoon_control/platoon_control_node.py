@@ -9,20 +9,29 @@ main.py를 ROS2 노드로 재작성한 버전.
           자리는 이제 _on_esp32_data() 구독 콜백이 최신값을 저장해두는 방식으로
           바뀌었을 뿐, merge_link_into_nearby()/find_partner() 등 나머지 로직은
           전혀 안 바뀌었다 (esp32_data의 dict 구조가 동일하므로).
+바뀐 것 3: V2X 토픽이 std_msgs/String(JSON) 대신 platoon_interfaces의 타입 있는
+          메시지(Esp32Data 등)를 쓴다. _on_esp32_data()가 msg_to_esp32_data()로
+          역직렬화하는 부분만 바뀌었고, 그 이후(merge_link_into_nearby 등)는 동일.
+바뀐 것 4: 카메라(라인트레이싱)를 lane_detector_node.py로 분리했다. 이제 이 노드는
+          카메라를 직접 안 열고 /lane_info(platoon_interfaces/LaneInfo, 준호님
+          레포와 동일 메시지 설계) 구독으로만 차선 정보를 받는다.
+          LaneInfo.offset은 픽셀 정수라서 _on_lane_info()에서 정규화(-1~1)로
+          변환한다 — lane_image_width 파라미터가 lane_detector_node 쪽 캡처
+          해상도와 일치해야 한다(기본 640, 둘 다 CameraCapture 기본값과 같음).
 안 바뀐 것: fsm.update(), compute_control() 등 판단/제어 로직은 전부 그대로
-           (platoon_fsm.py는 v2x_node.py의 존재 자체를 모른다 — PlatoonComm
-           인터페이스만 알면 되므로 이번 노드 분리로 1줄도 안 고쳤다)
-
-지금은 카메라(라인트레이싱)만 이 노드 안에 남아 있습니다. 나중에 그것도 별도
-프로세스/노드로 분리되면, 그때는 perception.get_lane() 호출을 /lane_tracing
-토픽 구독으로 바꾸면 됩니다 — fsm.update() 이후 로직은 안 바뀝니다.
+           (platoon_fsm.py는 v2x_node.py/lane_detector_node.py의 존재 자체를
+           모른다 — PlatoonComm 인터페이스와 LaneTracingResult 모양만 알면
+           되므로 이번 노드 분리로 1줄도 안 고쳤다)
+           WASD 수동조종(manual_control.py)도 카메라와 무관하게 STM32를 직접
+           잡는 경로라 이번 분리로 전혀 안 바뀌었다.
 
 실행:
     ros2 launch platoon_control platoon_control_launch.py is_leader:=true
-    (v2x_node를 platoon_control_node와 함께 띄워준다 — 런치 파일 참고)
+    (v2x_node, lane_detector_node를 platoon_control_node와 함께 띄워준다)
 
-    개별 실행(디버깅용, v2x_node를 따로 띄워야 함):
+    개별 실행(디버깅용, 다른 노드들을 따로 띄워야 함):
     ros2 run platoon_control v2x_node
+    ros2 run platoon_control lane_detector_node
     ros2 run platoon_control platoon_control_node --ros-args -p mode:=manual
 
 실행 중 Q로 자동/수동 전환 가능 (이전과 동일).
@@ -32,12 +41,13 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 
+from platoon_interfaces.msg import Esp32Data, LaneInfo
+
 from .platoon_fsm import PlatoonFSM, EgoState, V_MAX
-from .driving_control import compute_control, LaneFollower, MAX_STEERING_RAD
+from .driving_control import compute_control, LaneFollower, MAX_STEERING_RAD, LaneTracingResult
 from .stm32_interface import STM32Interface
 from .manual_control import ManualController
-from .lane_tracing import PerceptionTracker
-from .ros_v2x_comm import RosPlatoonComm, decode_esp32_data
+from .ros_v2x_comm import RosPlatoonComm, msg_to_esp32_data
 
 
 def open_stm32_port():
@@ -111,12 +121,17 @@ class PlatoonControlNode(Node):
             "nearby": [], "link_partner_id": None,
             "link_distance": None, "link_angle": None, "link_speed": None,
         }
-        self.create_subscription(String, "/v2x/esp32_data", self._on_esp32_data, 10)
+        self.create_subscription(Esp32Data, "/v2x/esp32_data", self._on_esp32_data, 10)
         self.stm32 = STM32Interface(open_stm32_port())
         self.lane_follower = LaneFollower()
-        self.perception = PerceptionTracker()
-        if not self.perception.available:
-            self.get_logger().warn("카메라를 못 열어서 라인트레이싱 없이 진행합니다.")
+
+        # lane_detector_node.py가 올려주는 값. LaneInfo.offset은 픽셀 정수라서
+        # 정규화(-1~1)로 변환해서 저장한다 — driving_control.py의 게인(LANE_KP 등)이
+        # 정규화 오프셋 기준으로 튜닝돼 있으므로.
+        self.declare_parameter("lane_image_width", 640)
+        self._lane_image_width = self.get_parameter("lane_image_width").value
+        self._lane = LaneTracingResult(offset=0.0, detected=False)
+        self.create_subscription(LaneInfo, "/lane_info", self._on_lane_info, 10)
 
         self.manual = ManualController(max_steering_rad=MAX_STEERING_RAD, max_speed=V_MAX)
         self.manual_mode = (start_mode == "manual")
@@ -135,8 +150,12 @@ class PlatoonControlNode(Node):
 
         self.timer = self.create_timer(self.loop_dt, self._tick)
 
-    def _on_esp32_data(self, msg: String) -> None:
-        self._esp32_data = decode_esp32_data(msg.data)
+    def _on_esp32_data(self, msg: Esp32Data) -> None:
+        self._esp32_data = msg_to_esp32_data(msg)
+
+    def _on_lane_info(self, msg: LaneInfo) -> None:
+        offset_norm = msg.offset / (self._lane_image_width / 2)
+        self._lane = LaneTracingResult(offset=offset_norm, detected=bool(msg.lane_detected))
 
     # ── 매 주기 호출되는 콜백 — main.py의 while문 안 내용과 동일 ──────
     def _tick(self):
@@ -166,7 +185,7 @@ class PlatoonControlNode(Node):
 
         nearby = merge_link_into_nearby(esp32_data, self.fsm.partner_id)
 
-        lane = self.perception.get_lane()  # 논블로킹
+        lane = self._lane  # lane_detector_node가 /lane_info로 올려준 최신값
 
         self.ego.speed = current_speed
         self.ego.lane_offset = lane.offset
@@ -206,8 +225,7 @@ class PlatoonControlNode(Node):
         self.status_pub.publish(msg)
 
     def destroy_node(self):
-        # Ctrl+C 등으로 종료될 때 카메라/키보드 리스너를 깔끔히 정리
-        self.perception.stop()
+        # Ctrl+C 등으로 종료될 때 키보드 리스너를 깔끔히 정리 (카메라는 lane_detector_node 소관)
         self.manual.stop()
         self.stm32.send_command(mode="EMERGENCY_STOP", target_speed=0.0, target_steer=0.0)
         super().destroy_node()
