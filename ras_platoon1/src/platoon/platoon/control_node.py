@@ -4,6 +4,7 @@
 - 백그라운드 스레드에서 STM32의 텔레메트리 데이터를 수신하여 /telemetry 토픽으로 발행합니다.
 - 속도 PID 연산을 제외하고 명령 전달 및 통신에만 집중하도록 경량화되었습니다.
 """
+import glob
 import os
 import rclpy
 from rclpy.node import Node
@@ -26,6 +27,18 @@ TX_FOOTER = 0x55    # STM32 -> Jetson 푸터
 CMD_FRAME_LEN = 4   # 제어 명령 프레임 길이 (4바이트)
 TELE_FRAME_LEN = 9  # 텔레메트리 프레임 길이 (9바이트)
 
+# 차량마다 STM32 보드의 정확한 시리얼번호(by-id)는 다르지만, 제조사 접두어는
+# 항상 같다. 한 차량엔 STM32가 1개만 꽂혀있으므로 이 패턴으로 자동 탐색하면
+# 차량마다 값을 안 바꿔도 된다 (여러 개 꽂혀있으면 첫 번째 것을 씀 — 그럴 땐
+# stm32_port 파라미터로 직접 지정할 것).
+STM32_BY_ID_GLOB = "/dev/serial/by-id/usb-STMicroelectronics_STM32_STLink_*-if02"
+
+
+def _autodetect_port(pattern: str, fallback: str) -> str:
+    matches = glob.glob(pattern)
+    return matches[0] if matches else fallback
+
+
 class ControlNode(Node):
     def __init__(self):
         super().__init__('control')
@@ -38,7 +51,10 @@ class ControlNode(Node):
         # 1-1. 파라미터 선언
         self.declare_parameter(
             'stm32_port',
-            '/dev/serial/by-id/usb-STMicroelectronics_STM32_STLink_066AFF485775495067181954-if02',
+            _autodetect_port(
+                STM32_BY_ID_GLOB,
+                '/dev/serial/by-id/usb-STMicroelectronics_STM32_STLink_066AFF485775495067181954-if02',
+            ),
         )
         self.port = self.get_parameter('stm32_port').get_parameter_value().string_value
         

@@ -19,6 +19,7 @@ ESP32-S3 V2X 통신 전용 ROS2 노드.
     구독 /v2x/self_status  SelfStatus  (fsm_decision_node.py가 주는 내 상태)
 """
 
+import glob
 import json
 import threading
 import time
@@ -28,6 +29,17 @@ from rclpy.node import Node
 import serial
 
 from platoon_interfaces.msg import V2xTarget, V2xTargets, SelfStatus
+
+# 차량마다 ESP32 보드의 정확한 시리얼번호(by-id)는 다르지만, 제조사 접두어는
+# 항상 같다. 한 차량엔 ESP32가 1개만 꽂혀있으므로 이 패턴으로 자동 탐색하면
+# 차량마다 값을 안 바꿔도 된다 (여러 개 꽂혀있으면 첫 번째 것을 씀 — 그럴 땐
+# serial_port 파라미터로 직접 지정할 것).
+ESP32_BY_ID_GLOB = "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_*-if00"
+
+
+def _autodetect_port(pattern: str, fallback: str) -> str:
+    matches = glob.glob(pattern)
+    return matches[0] if matches else fallback
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 상태 정상 정의 (fsm_decision_node.py도 이 값과 맞춰야 함)
@@ -70,7 +82,10 @@ class V2XNode(Node):
         # by-id 경로 사용: 재부팅 후에도 USB 열거 순서 변경 대비
         self.declare_parameter(
             "serial_port",
-            "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_14:C1:9F:C1:2F:18-if00",
+            _autodetect_port(
+                ESP32_BY_ID_GLOB,
+                "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_14:C1:9F:C1:2F:18-if00",
+            ),
         )
         self.declare_parameter("baud", 115200)
         # self_status 송신 주기 (Hz 단위, 기본 10Hz = 100ms)
