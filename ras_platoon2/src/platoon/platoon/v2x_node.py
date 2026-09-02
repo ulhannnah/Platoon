@@ -198,8 +198,16 @@ class V2XNode(Node):
                 # 시리얼 포트에서 사용 가능한 바이트 읽기
                 # in_waiting: 읽을 수 있는 바이트 개수
                 # in_waiting이 0이면 1바이트 대기 (블로킹)
+                #
+                # 위 None/is_open 체크와 이 read() 사이에 락이 없어서, 그 틈에
+                # 다른 스레드(송신 실패 시 _send_self_status)가 self.ser를
+                # None으로 바꾸면 AttributeError로 스레드가 죽는 경쟁상태가
+                # 있었다. 락 안에서 다시 한번 확인해서 원자적으로 만든다.
                 with self._serial_lock:
-                    chunk = self.ser.read(self.ser.in_waiting or 1)
+                    if self.ser is None or not self.ser.is_open:
+                        chunk = b""
+                    else:
+                        chunk = self.ser.read(self.ser.in_waiting or 1)
             except serial.SerialException as e:
                 # 시리얼 통신 오류 (예: USB 케이블 뽑음)
                 self.get_logger().error(f"시리얼 수신 오류: {e}")
