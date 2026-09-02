@@ -15,7 +15,6 @@ def generate_launch_description():
     #   팔로워: ros2 launch platoon platoon.launch.py vehicle_id:=102 is_designated_leader:=false
     vehicle_id_arg = DeclareLaunchArgument('vehicle_id', default_value='101')
     is_leader_arg = DeclareLaunchArgument('is_designated_leader', default_value='true')
-    destination_arg = DeclareLaunchArgument('destination_id', default_value='9999')
 
     # STM32 제어 / UART 통신 노드 (포트 자동탐색)
     control = Node(
@@ -46,7 +45,6 @@ def generate_launch_description():
         parameters=[{
             'vehicle_id': ParameterValue(LaunchConfiguration('vehicle_id'), value_type=int),
             'is_designated_leader': ParameterValue(LaunchConfiguration('is_designated_leader'), value_type=bool),
-            'destination_id': ParameterValue(LaunchConfiguration('destination_id'), value_type=int),
         }],
     )
 
@@ -63,7 +61,6 @@ def generate_launch_description():
     return LaunchDescription([
         vehicle_id_arg,
         is_leader_arg,
-        destination_arg,
         control,
         v2x,
         fsm_decision,

@@ -104,6 +104,7 @@ class DecisionNode(Node):
         # 주행 속도 모드 결정
         if not self.is_running or (not msg.lane_detected and self.lost_stop):
             cmd.speed_mode = 0  
+            cmd.steering_deg = 0
         else:
             cmd.speed_mode = self.cruise_speed  
 

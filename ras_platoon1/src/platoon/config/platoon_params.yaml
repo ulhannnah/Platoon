@@ -1,37 +1,30 @@
+# 비전 노드 파라미터
+lane_detector_node:
+  ros__parameters:
+    # Canny 엣지 검출 임계값
+    canny_low: 50
+    canny_high: 150
+    
+    # 슬라이딩 윈도우 튜닝
+    hist_threshold: 100
+    window_margin: 25
+    window_minpix: 20
+
+# 조향 판단 노드 파라미터
 decision_node:
   ros__parameters:
-    # go/stop 명령어로 시작/정지
-    is_running: false
+    # 주행 상태 및 안전 로직
+    is_running: false    # true로 변경해야 모터에 구동 명령이 내려집니다.
+    lost_stop: true      # 양쪽 차선을 모두 잃었을 때 정지할지 여부
+    
+    # PD + Feed-Forward 제어 게인
+    kp_gain: 0.20        # 오차 비례 제어 (클수록 핸들을 강하게 꺾음)
+    kd_gain: 0.07        # 오차 미분 제어 (진동 및 오버슈트 억제)
+    ff_gain: 10.0        # 커브 기울기 전향 보상 (예측 조향)
 
-    # 차선 감지 못했을 때 멈출지 여부
-    lost_stop: True
-    # steer = offset * offset_gain
-    offset_gain: 0.5
-    # 차선 복귀를 위한 목표 각도(degree) - 최대 조향각으로 할꺼라 vehicle_cmd 보면서 해야함.
-    target_recovery_deg: 25.0
-    # 곡선/직선 감지
-    curve_slope_threshold: 5
 
 control_node:
   ros__parameters:
     # 모터 고정 듀티 (0 ~ 255)
-    slow_duty: 80                 # speed_mode 1 (감속/코너/복귀)
-    cruise_duty: 130              # speed_mode 2 (직진 크루즈)
-
-    # speed_mps 계산용 (모터 제어엔 안 씀 — 지금은 고정 듀티라 PID 게인 없음).
-    # V2X self_status로 다른 차량에 알려줄 "지금 실제 속도"를 만드는 데만 쓰인다.
-    # TODO: 실측 필요 — 바퀴 지름 줄자로 재고, CPR은 엔코더 스펙시트 확인
-    enc_cpr: 1560.0                # 바퀴 1회전당 엔코더 펄스 수
-    wheel_dia_mm: 65.0             # 바퀴 지름 (mm)
-
-
-lane_detector_node:
-  ros__parameters:
-    canny_low: 50
-    canny_high: 150
-    hist_threshold: 100
-    window_margin: 30
-    window_minpix: 20
-    virtual_offset: 160
-
-
+    slow_duty: 30                 # speed_mode 1 (감속/코너/복귀)
+    cruise_duty: 50               # speed_mode 2 (직진 크루즈)

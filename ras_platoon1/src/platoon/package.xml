@@ -13,11 +13,6 @@
   <depend>geometry_msgs</depend>
   <depend>cv_bridge</depend>
   <depend>platoon_interfaces</depend>
-  <depend>python3-serial</depend>
-  <!-- control_node.py도 pyserial(import serial)을 쓰는데 이 파일에 선언이 안 돼
-       있었음 — v2x_node.py도 필요해서 이번에 추가. 지금까지는 시스템에 이미
-       깔려 있어서 안 걸렸을 뿐, 새 환경에서 빌드하면 rosdep이 이걸 보고 설치함 -->
-
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

@@ -1,4 +1,3 @@
- 
 """
 비전 노드 (Lane Detector Node)
 - Picamera2 영상 캡처 및 전처리 (ROI Remap, Canny)
@@ -86,9 +85,6 @@ class LaneDetectorNode(Node):
         full_map_x, full_map_y = cv2.initUndistortRectifyMap(mtx, dist, None, mtx, (640, 480), cv2.CV_16SC2)
         self.map_x_roi = full_map_x[240:, :]
         self.map_y_roi = full_map_y[240:, :]
-        # 💡 [추가] 스트리밍용 전체 프레임(640x480) 리맵 맵 보존
-        self.map_x_full = full_map_x
-        self.map_y_full = full_map_y
 
         # -------------------------------------------------------------
         # 1. Picamera2 설정
@@ -128,7 +124,7 @@ class LaneDetectorNode(Node):
     def setup_web_routes(self):
         @app.route('/')
         def index():
-            return '<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><style>body{margin:0;background:#222;display:flex;justify-content:center;align-items:center;height:100vh;}img{width:640px;height:480px;object-fit:contain;border-radius:8px;}</style></head><body><img src="/video_feed"></body></html>'
+            return '<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><style>body{margin:0;background:#222;display:flex;justify-content:center;align-items:center;height:100vh;}img{width:640px;height:240px;object-fit:contain;border-radius:8px;}</style></head><body><img src="/video_feed"></body></html>'
         
         @app.route('/video_feed')
         def video_feed():
@@ -357,12 +353,13 @@ class LaneDetectorNode(Node):
         if left_detected and right_detected:
             lane_center = int((left_bottom_x + right_bottom_x) / 2)
             self.dynamic_virtual_offset = int((right_bottom_x - left_bottom_x) / 2)
+            cv2.putText(display_img, f"Dynamic Offset Updated: {self.dynamic_virtual_offset}", (10, 145), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
         elif left_detected:
             lane_center = left_bottom_x + self.dynamic_virtual_offset
-            
+            cv2.putText(display_img, f"Using Dynamic Offset (Left only): +{self.dynamic_virtual_offset}", (10, 145), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
         elif right_detected:
             lane_center = right_bottom_x - self.dynamic_virtual_offset
-            
+            cv2.putText(display_img, f"Using Dynamic Offset (Right only): -{self.dynamic_virtual_offset}", (10, 145), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
         else:
             lane_center = roi_W // 2
 
@@ -403,13 +400,7 @@ class LaneDetectorNode(Node):
         processed_img, lane_info = self.process_frame(undistorted_roi)
         self.lane_info_pub.publish(lane_info)
         
-        # 💡 [수정] 검출은 하단 240 ROI에서만 수행하되, 스트림은 전체 640x480 프레임으로 제공합니다.
-        # 상단 240px = 원본(보정된) 영상, 하단 240px = 처리 결과(오버레이 포함)
-        undistorted_full = cv2.remap(raw_frame, self.map_x_full, self.map_y_full, interpolation=cv2.INTER_LINEAR)
-        display_full = undistorted_full.copy()
-        display_full[240:480, :] = processed_img
-        
-        ret, buffer = cv2.imencode('.jpg', display_full, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+        ret, buffer = cv2.imencode('.jpg', processed_img, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
         if ret:
             with self.frame_lock:
                 self.latest_jpg_bytes = buffer.tobytes()

@@ -66,7 +66,6 @@ class FsmDecisionNode(Node):
 
         # 자차 상태(EgoState) 및 주변 차량 정보 저장용 변수
         self.ego_state = EgoState()
-        self.ego_state.destination = self.destination_id
         self.nearby_vehicles = []  # /v2x/targets 수신 시 on_v2x_targets()가 채움
 
         # 3. 구독 및 발행

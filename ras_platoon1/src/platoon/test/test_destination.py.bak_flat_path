@@ -1,0 +1,17 @@
+import unittest
+from pathlib import Path
+
+
+class DestinationWiringTest(unittest.TestCase):
+    def test_launch_exposes_nonzero_demo_destination(self):
+        source = (Path(__file__).resolve().parents[1] / "platoon.launch.py").read_text()
+        self.assertIn("DeclareLaunchArgument('destination_id', default_value='9999')", source)
+        self.assertIn("'destination_id': ParameterValue(LaunchConfiguration('destination_id'), value_type=int)", source)
+
+    def test_fsm_ego_uses_destination_parameter(self):
+        source = (Path(__file__).resolve().parents[1] / "fsm_decision_node.py").read_text()
+        self.assertIn("self.ego_state.destination = self.destination_id", source)
+
+
+if __name__ == "__main__":
+    unittest.main()
