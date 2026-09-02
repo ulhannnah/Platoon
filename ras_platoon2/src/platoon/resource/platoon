@@ -1,0 +1,24 @@
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+
+def generate_launch_description():
+
+    lane_detector = Node(
+        package='platoon',
+        executable='lane_detector_node',
+        name='lane_detector_node',
+        output='screen'
+    )
+
+    decision = Node(
+        package='platoon',
+        executable='decision_node',
+        name='decision_node',
+        output='screen'
+    )
+
+    return LaunchDescription([
+        lane_detector,
+        decision
+    ])
