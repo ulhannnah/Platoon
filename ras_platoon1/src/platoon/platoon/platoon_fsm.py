@@ -60,7 +60,7 @@ class JoinSubState(Enum):
 
 # ── 결합 조건 파라미터 ───────────────────────────────────────────
 MAX_HEADING_DIFF_RAD = math.radians(30)    # 최대 진행 방향 차이
-MAX_JOIN_DISTANCE_M = 5.0                  # 최대 후보 거리
+MAX_JOIN_DISTANCE_M = 1.5                  # 최대 후보 거리
 
 # 응답이 오지 않을 때 무한 대기하지 않도록 (문서에 명시 없음, 실측 후 조정)
 JOIN_RESPONSE_TIMEOUT_S = 2.0
@@ -86,7 +86,7 @@ REJECT_UNKNOWN_VEHICLE = 5  # 요청 차량을 주변 목록에서 못 찾음
 
 
 # ── JOIN / MAINTAIN / EXIT 파라미터 (§11, §19, §20, §21) ───────────
-TARGET_DISTANCE_M = 0.8        # §11.1, §20.3 초기 목표 차간거리 (고정값으로 시작)
+TARGET_DISTANCE_M = 0.5        # §11.1, §20.3 초기 목표 차간거리 (고정값으로 시작)
 DISTANCE_TOLERANCE_M = 0.1     # §19.7 |현재거리 - 목표거리| 허용오차
 SPEED_TOLERANCE = 0.1          # §19.7 |리더속도 - 팔로워속도| 허용오차
 STABLE_TIME_S = 1.0            # §19.7, §21.4 안정 상태 유지시간
