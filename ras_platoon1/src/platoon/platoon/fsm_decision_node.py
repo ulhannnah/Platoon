@@ -8,7 +8,6 @@ V2X 연동 (v2x_node.py와 토픽으로만 연결, 서로 import 안 함):
 """
 
 import math
-
 import rclpy
 from rclpy.node import Node
 
@@ -185,6 +184,7 @@ class FsmDecisionNode(Node):
         # [속도 판단]
         if cmd.emergency or (cmd.target_speed is not None and cmd.target_speed == 0.0):
             vehicle_cmd.speed_mode = 0  # 정지
+            vehicle_cmd.steering_deg = 0.0
         elif cmd.target_speed is not None and cmd.target_speed < 0.3:
             vehicle_cmd.speed_mode = 1  # 감속 / 저속
         else:

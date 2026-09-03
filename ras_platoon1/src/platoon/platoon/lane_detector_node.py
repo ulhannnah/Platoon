@@ -1,4 +1,3 @@
- 
 """
 비전 노드 (Lane Detector Node)
 - Picamera2 영상 캡처 및 전처리 (ROI Remap, Canny)
@@ -167,8 +166,8 @@ class LaneDetectorNode(Node):
         ])
 
         dst_pts = np.float32([
-            [W * 0.2, 0],
-            [W * 0.8, 0],
+            [W * 0.3, 0],
+            [W * 0.7, 0],
             [W * 0.2, H],
             [W * 0.8, H]
         ])
@@ -300,7 +299,7 @@ class LaneDetectorNode(Node):
             self.left_lost_count = 0
         else:
             self.left_lost_count += 1
-            if self.left_lost_count > 10: 
+            if self.left_lost_count > 5: 
                 self.prev_left_fit = None
                 self.prev_leftx_base = None
 
@@ -308,7 +307,7 @@ class LaneDetectorNode(Node):
             self.right_lost_count = 0
         else:
             self.right_lost_count += 1
-            if self.right_lost_count > 10:
+            if self.right_lost_count > 5:
                 self.prev_right_fit = None
                 self.prev_rightx_base = None
         
@@ -366,6 +365,22 @@ class LaneDetectorNode(Node):
         else:
             lane_center = roi_W // 2
 
+
+        # 인식된 차선이 중앙너머로 가버릴 경우
+        roi_center = roi_W // 2
+        
+        if right_detected and right_bottom_x < roi_center:
+            # 우측 차선이 중앙을 넘어 왼쪽 영역으로 침범한 경우
+            self.prev_right_fit = None
+            self.prev_rightx_base = None
+            self.right_lost_count = 999  # 강제로 유실 상태로 만들어 새 엣지를 탐색하게 유도
+
+        if left_detected and left_bottom_x > roi_center:
+            # 좌측 차선이 중앙을 넘어 오른쪽 영역으로 침범한 경우
+            self.prev_left_fit = None
+            self.prev_leftx_base = None
+            self.left_lost_count = 999
+
         offset = (roi_W // 2) - lane_center
         cv2.line(display_img, (roi_W // 2, 0), (roi_W // 2, 20), (0, 0, 255), 3)
         cv2.line(display_img, (lane_center, 0), (lane_center, 20), (255, 0, 0), 3)
@@ -377,20 +392,41 @@ class LaneDetectorNode(Node):
         msg.right_style = int(right_style)
         msg.left_slope = round(float(left_slope), 3)
         msg.right_slope = round(float(right_slope), 3)
+        msg.dynamic_virtual_offset = float(self.dynamic_virtual_offset)
+        
 
         # 색상 반전 방지를 위해 원본을 그대로 복사하여 사용합니다.
         roi_bgr = roi_img.copy()
-        
-        # 💡 [추가된 부분] 1. 우측 버드아이뷰 결과(display_img)를 원래 시점으로 역변환합니다.
-        unwarped_display = cv2.warpPerspective(display_img, Minv, (W, H), flags=cv2.INTER_LINEAR)
 
-        # 💡 [추가된 부분] 2. 왼쪽 화면(roi_bgr)에 역변환된 결과를 80% 투명도로 겹쳐서 합성합니다.
-        overlay_img = cv2.addWeighted(roi_bgr, 1.0, unwarped_display, 0.8, 0)
-        
-        # 💡 [수정된 부분] 좌측: 합성된 원근감 화면 / 우측: 버드아이뷰 화면으로 나란히 붙입니다.
-        combined_img = cv2.hconcat([overlay_img, display_img])
+        # -------------------------------------------------------------
+        # 화면에 띄울 텍스트 설정 및 합성 (상수 직접 사용)
+        # -------------------------------------------------------------
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 0.6
+        color = (255, 255, 255)  # 흰색 텍스트
+        thickness = 2
 
-        return overlay_img, msg
+        # 💡 [수정됨] 숫자가 아닌 LaneInfo 상수를 직접 비교하도록 변경
+        if msg.left_style == LaneInfo.DASHED:
+            left_style_str = "Dashed"
+        elif msg.left_style == LaneInfo.SOLID:
+            left_style_str = "Solid"
+        else:
+            left_style_str = "None"
+
+        if msg.right_style == LaneInfo.DASHED:
+            right_style_str = "Dashed"
+        elif msg.right_style == LaneInfo.SOLID:
+            right_style_str = "Solid"
+        else:
+            right_style_str = "None"
+
+        # display_img 좌측 상단에 텍스트 합성
+        cv2.putText(display_img, f"Offset: {msg.offset:.1f}", (10, 30), font, font_scale, color, thickness)
+        cv2.putText(display_img, f"L_Slope: {msg.left_slope:.2f} | R_Slope: {msg.right_slope:.2f}", (10, 60), font, font_scale, color, thickness)
+        cv2.putText(display_img, f"L_Style: {left_style_str} | R_Style: {right_style_str}", (10, 90), font, font_scale, (0, 255, 255), thickness)
+
+        return display_img, msg
 
     # -------------------------------------------------------------
     # ROS 2 타이머 콜백
