@@ -38,7 +38,12 @@ class FsmDecisionNode(Node):
         super().__init__('fsm_decision')
 
         # FSM 상태 모니터링용 토픽 퍼블리셔 추가
-        self.pub_fsm_state = self.create_publisher(String, '/fsm_state_debug', 10)
+        # (아래 구독/발행 전부 상대경로로 통일 — v2x_node/control_node/
+        #  lane_detector_node도 상대경로라, launch의 namespace=CAR_ID 안에서
+        #  같은 차량 노드끼리 실제로 연결되려면 여기도 절대경로(/...)면 안 됨.
+        #  절대경로였을 때는 fsm_decision_node만 전역 토픽을 보고 있어서 다른
+        #  3개 노드와 아예 연결이 안 되는 상태였음.)
+        self.pub_fsm_state = self.create_publisher(String, 'fsm_state_debug', 10)
 
         # 1. 파라미터 선언
         # 기본값은 이 차량(리더)을 기준으로 잡아둔다. 팔로워 차량은 실행할 때
@@ -47,11 +52,17 @@ class FsmDecisionNode(Node):
         self.declare_parameter('vehicle_id', 101)
         self.declare_parameter('is_designated_leader', True)
         self.declare_parameter('destination_id', 0)  # 목적지 인식 방법 미정이라 당분간 고정값
+        # 카메라/UWB 미연결 상태에서도 JOIN/MAINTAIN 테스트가 가능하게 하는
+        # 데모용 우회 스위치. 실제 카메라·UWB 붙으면 launch에서 false로.
+        self.declare_parameter('allow_camera_less_join', False)
+        self.declare_parameter('allow_uwb_less_join', False)
 
         vehicle_id = self.get_parameter('vehicle_id').value
         is_designated_leader = self.get_parameter('is_designated_leader').value
         self.vehicle_id = vehicle_id
         self.destination_id = self.get_parameter('destination_id').value
+        allow_camera_less_join = self.get_parameter('allow_camera_less_join').value
+        allow_uwb_less_join = self.get_parameter('allow_uwb_less_join').value
 
         # 2. FSM 객체 생성
         # RosPlatoonComm: 2차량 LAN 데모용 — JOIN 핸드셰이크 패킷을 ROS 토픽
@@ -61,6 +72,8 @@ class FsmDecisionNode(Node):
             vehicle_id=vehicle_id,
             is_designated_leader=is_designated_leader,
             comm=RosPlatoonComm(self),
+            allow_camera_less_join=allow_camera_less_join,
+            allow_uwb_less_join=allow_uwb_less_join,
         )
 
         # 자차 상태(EgoState) 및 주변 차량 정보 저장용 변수
@@ -70,19 +83,19 @@ class FsmDecisionNode(Node):
 
         # 3. 구독 및 발행
         self.sub_lane = self.create_subscription(
-            LaneInfo, '/lane_info', self.on_lane_info, 10
+            LaneInfo, 'lane_info', self.on_lane_info, 10
         )
         self.sub_tele = self.create_subscription(
-            Telemetry, '/telemetry', self.on_telemetry, 10
+            Telemetry, 'telemetry', self.on_telemetry, 10
         )
         self.sub_v2x = self.create_subscription(
-            V2xTargets, '/v2x/targets', self.on_v2x_targets, 10
+            V2xTargets, 'v2x/targets', self.on_v2x_targets, 10
         )
         self.pub_cmd = self.create_publisher(
-            VehicleCmd, '/vehicle_cmd', 10
+            VehicleCmd, 'vehicle_cmd', 10
         )
         self.pub_self_status = self.create_publisher(
-            SelfStatus, '/v2x/self_status', 10
+            SelfStatus, 'v2x/self_status', 10
         )
 
         # 4. 20Hz (0.05초) 주기로 FSM update 실행

@@ -7,8 +7,12 @@ def generate_launch_description():
     # --- [차량 1호기 설정] ---
     CAR_ID = 'car1'
     VEHICLE_ID = 101
-    IS_DESIGNATED_LEADER = False
+    IS_DESIGNATED_LEADER = True   # platoon1 = 리더
     DESTINATION_ID = 9999
+    # UWB 아직 미구현 — 거리 없어도 JOIN/MAINTAIN 테스트되게 우회
+    ALLOW_UWB_LESS_JOIN = True
+    # 카메라 정상이면 False 유지, 문제 생기면 True로
+    ALLOW_CAMERA_LESS_JOIN = False
     # -------------------------
 
     pkg_share = FindPackageShare('platoon').find('platoon')
@@ -25,15 +29,21 @@ def generate_launch_description():
         parameters=[config_file]
     )
 
-    # 단독주행 노드
-    decision = Node(
+    # 플래툰 판단(FSM) 노드 — V2X 연동, 단독주행 decision_node 대신 이걸 씀
+    fsm_decision = Node(
         package='platoon',
-        executable='decision_node',
-        name='decision_node',
+        executable='fsm_decision_node',
+        name='fsm_decision_node',
         namespace=CAR_ID,
         output='screen',
         emulate_tty=True,
-        parameters=[config_file]
+        parameters=[{
+            'vehicle_id': VEHICLE_ID,
+            'is_designated_leader': IS_DESIGNATED_LEADER,
+            'destination_id': DESTINATION_ID,
+            'allow_camera_less_join': ALLOW_CAMERA_LESS_JOIN,
+            'allow_uwb_less_join': ALLOW_UWB_LESS_JOIN,
+        }]
     )
 
     # STM32 제어 / UART 통신 노드
@@ -55,11 +65,6 @@ def generate_launch_description():
         namespace=CAR_ID,
         output='screen',
         emulate_tty=True,
-        parameters=[{
-            'vehicle_id': VEHICLE_ID,
-            'is_designated_leader': IS_DESIGNATED_LEADER,
-            'destination_id': DESTINATION_ID,
-        }]
     )
 
     # 라이다 노드
@@ -75,6 +80,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         lane_detector,
-        decision,
-        control        
+        fsm_decision,
+        v2x,
+        # control,  # STM32 뽑아놓은 상태 — 연결하면 주석 해제
     ])

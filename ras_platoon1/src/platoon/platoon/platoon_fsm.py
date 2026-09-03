@@ -171,7 +171,9 @@ class DrivingCommand:
 
 class PlatoonFSM:
     def __init__(self, vehicle_id: int = 0, comm: Optional[PlatoonComm] = None,
-                 is_designated_leader: bool = False):
+                 is_designated_leader: bool = False,
+                 allow_camera_less_join: bool = False,
+                 allow_uwb_less_join: bool = False):
         """
         vehicle_id : 자차 고유 ID (V2X 패킷에 requester_id 등으로 실림)
                      TODO: 차량마다 실제 고유 ID 부여 방식 확정되면 교체
@@ -180,10 +182,19 @@ class PlatoonFSM:
         is_designated_leader : 실차 시나리오 고정값 — 젯슨 차량은 True, 라즈베리파이
                      차량은 False. 역할이 UWB 각도 등으로 동적으로 정해지지 않고
                      보드 종류로 미리 고정된다.
+        allow_camera_less_join : 카메라 고장/미연결 시 데모·테스트용 우회.
+                     차선 검출 조건만 생략하며, 그 외 조건(거리·각도·플래툰
+                     허용)은 그대로 유지한다. 실제 카메라 붙으면 False로.
+        allow_uwb_less_join : UWB 미구현/미연결 시 데모·테스트용 우회. 거리
+                     정보가 없으면 TARGET_DISTANCE_M을 합성값으로 대신 써서
+                     JOIN/MAINTAIN 로직을 테스트할 수 있게 한다. 실제 UWB
+                     붙으면 False로.
         """
         self.vehicle_id = vehicle_id
         self.comm: PlatoonComm = comm or NullComm()
         self.is_designated_leader = is_designated_leader
+        self.allow_camera_less_join = bool(allow_camera_less_join)
+        self.allow_uwb_less_join = bool(allow_uwb_less_join)
 
         self.state = PlatoonState.SOLO_DRIVE
         self.match_state = MatchState.IDLE
@@ -309,46 +320,32 @@ class PlatoonFSM:
 
     # ── SOLO_DRIVE + 매칭 파이프라인 ─────────────────────────────────
     def _run_solo_drive(self, ego: EgoState, nearby: list) -> DrivingCommand:
-        if self.is_designated_leader:
-            # 젯슨(리더)은 능동적으로 결합 상대를 찾지 않는다 — 항상 리더이므로,
-            # 결합은 팔로워 쪽에서 보내는 JOIN_REQUEST를 받는 것으로만 시작된다
-            # (_on_join_request에서 처리). 리더는 그저 계속 SOLO_DRIVE로 주행하며 대기한다.
-            return DrivingCommand(mode="SOLO_DRIVE")
+        """
+        핸드셰이크 패킷(JOIN_REQUEST/ACCEPT) 없이, ESP32가 주기적으로 방송하는
+        상태(platoon_state/leader_id/platoon_id, §7)만 보고 스스로 결합을
+        결정한다 — ESP32 펌웨어가 실제로 주는 채널은 이 주기적 방송뿐이고,
+        임의 핸드셰이크 패킷을 릴레이하는 기능은 없기 때문이다.
 
-        if self.match_state == MatchState.IDLE:
-            self.match_state = MatchState.SEARCHING
+        리더/팔로워 어느 쪽이든 동일한 로직으로 동작한다. 어느 쪽이 리더가
+        될지는 자기소개(핸드셰이크)가 아니라 is_designated_leader(보드 종류로
+        미리 고정)로만 갈린다 — _setup_platoon()이 그 규칙으로 역할을 정한다.
 
-        if self.match_state == MatchState.SEARCHING:
-            candidates = self._prefilter(ego, nearby)
-            best = self._find_join_candidate(ego, candidates)
-            if best is not None:
-                self.candidate_id = best.vehicle_id
-                self._send_join_request(ego, best)
-                self.match_state = MatchState.JOIN_REQUEST
-            # else: SOLO_DRIVE 유지, 계속 탐색
-
-        elif self.match_state == MatchState.JOIN_REQUEST:
-            # 승인/거절 확인 (실제 수신은 _handle_incoming에서 처리됨)
-            accepted = self._check_join_response()
-            if accepted is True:
-                self.match_state = MatchState.PLATOON_SETUP
-            elif accepted is False:
-                self._reset_matching()
-
-        elif self.match_state == MatchState.AWAIT_SETUP:
-            # 승인을 보낸 쪽 — 상대가 보내줄 PLATOON_SETUP 대기.
-            # 실제 전이는 _on_platoon_setup()에서 일어나고, 여기서는 타임아웃만 본다.
-            if self._wait_since is not None and (time.time() - self._wait_since) > SETUP_TIMEOUT_S:
-                self._reset_matching()
-
-        elif self.match_state == MatchState.PLATOON_SETUP:
-            # §10.3 리더/팔로워 역할 결정 + 플래툰 ID 생성/공유
-            # TODO: §18 ESP32에 PLATOON_HIGH_RATE 통신모드 전환 명령
+        개인:개인 — 후보가 아직 어느 플래툰에도 안 속해있으면(leader_id 없음),
+            내가 리더면 내가 리더가 되고, 아니면 후보를 리더로 삼아 붙는다.
+        군집:개인 — 후보가 이미 플래툰에 속해있으면(리더 자신이든 그 플래툰의
+            팔로워든) 그 플래툰의 진짜 리더 ID를 그대로 물려받아 맨 뒤에 붙는다.
+        """
+        candidates = self._prefilter(ego, nearby)
+        best = self._find_join_candidate(ego, candidates)
+        if best is not None:
+            self.candidate_id = best.vehicle_id
+            self._pending_candidate = best
             self._setup_platoon()
-            self.match_state = MatchState.IDLE
             self.state = PlatoonState.PLATOON_JOIN
             self.join_sub_state = JoinSubState.JOIN_REQUESTED
             self._stable_since = None
+            self.match_state = MatchState.IDLE
+        # else: SOLO_DRIVE 유지, 계속 탐색
 
         return DrivingCommand(mode="SOLO_DRIVE")
 
@@ -502,14 +499,27 @@ class PlatoonFSM:
             target_distance=D_RELEASE_M,
         )
 
+    def _effective_distance(self, v: "NearbyVehicle") -> Optional[float]:
+        """
+        UWB가 아직 없거나(0.0 고정 반환) 값이 없을 때, allow_uwb_less_join이면
+        TARGET_DISTANCE_M을 합성 거리로 대신 써서 JOIN/MAINTAIN을 테스트할 수
+        있게 한다. 실제 유효한 UWB 값이 있으면 항상 그 값을 그대로 쓴다.
+        """
+        if v.uwb_distance is not None and v.uwb_distance > 0:
+            return v.uwb_distance
+        if self.allow_uwb_less_join:
+            return TARGET_DISTANCE_M
+        return v.uwb_distance
+
     # ══════════════════════════════════════════════════════════════
     # 주변 차량 1차 선별 (단순화판 — 거리·각도 정보 있는 차량만 추림)
     # ══════════════════════════════════════════════════════════════
     def _prefilter(self, ego: EgoState, nearby: list) -> list:
         candidates = []
         for v in nearby:
-            within_range = v.uwb_distance is not None and v.uwb_distance <= MAX_JOIN_DISTANCE_M
-            has_bearing = v.uwb_angle is not None  # 앞/뒤 판단 가능 여부
+            distance = self._effective_distance(v)
+            within_range = distance is not None and distance <= MAX_JOIN_DISTANCE_M
+            has_bearing = v.uwb_angle is not None or self.allow_uwb_less_join  # 앞/뒤 판단 가능 여부
             if within_range and has_bearing:
                 candidates.append(v)
         return candidates
@@ -520,7 +530,8 @@ class PlatoonFSM:
     def _check_absolute_conditions(self, ego: EgoState, v: "NearbyVehicle") -> bool:
         c_p = bool(ego.platoon_allow and v.platoon_allow)
         c_h = abs(ego.heading - v.heading) <= MAX_HEADING_DIFF_RAD
-        c_d = v.uwb_distance is not None and v.uwb_distance <= MAX_JOIN_DISTANCE_M
+        distance = self._effective_distance(v)
+        c_d = distance is not None and distance <= MAX_JOIN_DISTANCE_M
         c_s = (not ego.emergency) and (not v.emergency)
         return c_p and c_h and c_d and c_s
 
@@ -536,8 +547,9 @@ class PlatoonFSM:
                 continue
             if not self._check_absolute_conditions(ego, v):
                 continue
-            if best_distance is None or v.uwb_distance < best_distance:
-                best, best_distance = v, v.uwb_distance
+            distance = self._effective_distance(v)
+            if best_distance is None or distance < best_distance:
+                best, best_distance = v, distance
         return best
 
     # ══════════════════════════════════════════════════════════════
@@ -890,7 +902,7 @@ class PlatoonFSM:
         아직 초음파 값을 FSM으로 올려주는 경로가 없어 UWB 값만 사용한다.
         TODO: 초음파 센서 값 연동 후 근접구간에서 UWB와 교차검증
         """
-        return partner.uwb_distance if partner else None
+        return self._effective_distance(partner) if partner else None
 
     def _hold(self, condition: bool, duration: float = STABLE_TIME_S) -> bool:
         """조건이 duration초 이상 연속 유지되었는지 판정 (§19.4, §19.7, §21.4)"""
@@ -964,7 +976,11 @@ class PlatoonFSM:
         if partner is None:
             return self._hold(False)
         same_lane = (partner.lane == ego.lane)
-        centered = ego.lane_detected and abs(ego.lane_offset) <= LANE_ALIGN_OFFSET_TOLERANCE
+        camera_bypass = self.allow_camera_less_join
+        centered = camera_bypass or (
+            ego.lane_detected
+            and abs(ego.lane_offset) <= LANE_ALIGN_OFFSET_TOLERANCE
+        )
         return self._hold(same_lane and centered)
 
     def _gap_control_complete(self, partner: Optional["NearbyVehicle"]) -> bool:
