@@ -48,8 +48,8 @@ class DecisionNode(Node):
         # 실시간 파라미터 변경 콜백 등록
         self.add_on_set_parameters_callback(self.on_param_change)
         
-        self.sub = self.create_subscription(LaneInfo, '/lane_info', self.on_lane_info, 10)
-        self.pub = self.create_publisher(VehicleCmd, '/vehicle_cmd', 10)
+        self.sub = self.create_subscription(LaneInfo, 'lane_info', self.on_lane_info, 10)
+        self.pub = self.create_publisher(VehicleCmd, 'vehicle_cmd', 10)
     def on_param_change(self, params):
         for param in params:
             if param.name == 'kp_gain': self.kp_gain = float(param.value)
@@ -103,7 +103,7 @@ class DecisionNode(Node):
 
         # 주행 속도 모드 결정
         if not self.is_running or (not msg.lane_detected and self.lost_stop):
-            cmd.speed_mode = 0
+            cmd.speed_mode = 0  
             cmd.steering_deg = 0
         else:
             cmd.speed_mode = self.cruise_speed  

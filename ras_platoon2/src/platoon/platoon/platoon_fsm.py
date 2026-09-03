@@ -171,8 +171,7 @@ class DrivingCommand:
 
 class PlatoonFSM:
     def __init__(self, vehicle_id: int = 0, comm: Optional[PlatoonComm] = None,
-                 is_designated_leader: bool = False,
-                 allow_camera_less_join: bool = False):
+                 is_designated_leader: bool = False):
         """
         vehicle_id : 자차 고유 ID (V2X 패킷에 requester_id 등으로 실림)
                      TODO: 차량마다 실제 고유 ID 부여 방식 확정되면 교체
@@ -181,13 +180,10 @@ class PlatoonFSM:
         is_designated_leader : 실차 시나리오 고정값 — 젯슨 차량은 True, 라즈베리파이
                      차량은 False. 역할이 UWB 각도 등으로 동적으로 정해지지 않고
                      보드 종류로 미리 고정된다.
-        allow_camera_less_join : 카메라 고장 시 데모용 우회. 팔로워에 한해 차선
-                     검출 조건만 생략하며, 동일 차선·V2X 거리·속도 안정 조건은 유지한다.
         """
         self.vehicle_id = vehicle_id
         self.comm: PlatoonComm = comm or NullComm()
         self.is_designated_leader = is_designated_leader
-        self.allow_camera_less_join = bool(allow_camera_less_join)
 
         self.state = PlatoonState.SOLO_DRIVE
         self.match_state = MatchState.IDLE
@@ -512,8 +508,6 @@ class PlatoonFSM:
     def _prefilter(self, ego: EgoState, nearby: list) -> list:
         candidates = []
         for v in nearby:
-            if v.vehicle_id == self.vehicle_id:
-                continue
             within_range = v.uwb_distance is not None and v.uwb_distance <= MAX_JOIN_DISTANCE_M
             has_bearing = v.uwb_angle is not None  # 앞/뒤 판단 가능 여부
             if within_range and has_bearing:
@@ -538,6 +532,8 @@ class PlatoonFSM:
         best = None
         best_distance = None
         for v in candidates:
+            if v.vehicle_id == self.vehicle_id:
+                continue
             if not self._check_absolute_conditions(ego, v):
                 continue
             if best_distance is None or v.uwb_distance < best_distance:
@@ -968,11 +964,7 @@ class PlatoonFSM:
         if partner is None:
             return self._hold(False)
         same_lane = (partner.lane == ego.lane)
-        camera_bypass = self.allow_camera_less_join and not self.is_designated_leader
-        centered = camera_bypass or (
-            ego.lane_detected
-            and abs(ego.lane_offset) <= LANE_ALIGN_OFFSET_TOLERANCE
-        )
+        centered = ego.lane_detected and abs(ego.lane_offset) <= LANE_ALIGN_OFFSET_TOLERANCE
         return self._hold(same_lane and centered)
 
     def _gap_control_complete(self, partner: Optional["NearbyVehicle"]) -> bool:

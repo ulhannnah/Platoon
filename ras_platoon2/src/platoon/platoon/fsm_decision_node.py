@@ -8,7 +8,6 @@ V2X 연동 (v2x_node.py와 토픽으로만 연결, 서로 import 안 함):
 """
 
 import math
-
 import rclpy
 from rclpy.node import Node
 
@@ -47,12 +46,10 @@ class FsmDecisionNode(Node):
         # 덮어써서 쓴다 (docs/250901_차량별_설정값_정리.md 참고).
         self.declare_parameter('vehicle_id', 101)
         self.declare_parameter('is_designated_leader', True)
-        self.declare_parameter('allow_camera_less_join', False)
         self.declare_parameter('destination_id', 0)  # 목적지 인식 방법 미정이라 당분간 고정값
 
         vehicle_id = self.get_parameter('vehicle_id').value
         is_designated_leader = self.get_parameter('is_designated_leader').value
-        allow_camera_less_join = self.get_parameter('allow_camera_less_join').value
         self.vehicle_id = vehicle_id
         self.destination_id = self.get_parameter('destination_id').value
 
@@ -63,7 +60,6 @@ class FsmDecisionNode(Node):
         self.fsm = PlatoonFSM(
             vehicle_id=vehicle_id,
             is_designated_leader=is_designated_leader,
-            allow_camera_less_join=allow_camera_less_join,
             comm=RosPlatoonComm(self),
         )
 
@@ -188,6 +184,7 @@ class FsmDecisionNode(Node):
         # [속도 판단]
         if cmd.emergency or (cmd.target_speed is not None and cmd.target_speed == 0.0):
             vehicle_cmd.speed_mode = 0  # 정지
+            vehicle_cmd.steering_deg = 0.0
         elif cmd.target_speed is not None and cmd.target_speed < 0.3:
             vehicle_cmd.speed_mode = 1  # 감속 / 저속
         else:
