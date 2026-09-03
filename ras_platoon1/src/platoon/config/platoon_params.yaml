@@ -1,30 +1,31 @@
-# 비전 노드 파라미터
-lane_detector_node:
-  ros__parameters:
-    # Canny 엣지 검출 임계값
-    canny_low: 50
-    canny_high: 150
-    
-    # 슬라이딩 윈도우 튜닝
-    hist_threshold: 100
-    window_margin: 25
-    window_minpix: 20
+car1:
+  # 비전 노드 파라미터
+  lane_detector_node:
+    ros__parameters:
+      # Canny 엣지 검출 임계값
+      canny_low: 50
+      canny_high: 150
+      
+      # 슬라이딩 윈도우 튜닝
+      hist_threshold: 100
+      window_margin: 25
+      window_minpix: 20
 
-# 조향 판단 노드 파라미터
-decision_node:
-  ros__parameters:
-    # 주행 상태 및 안전 로직
-    is_running: false    # true로 변경해야 모터에 구동 명령이 내려집니다.
-    lost_stop: true      # 양쪽 차선을 모두 잃었을 때 정지할지 여부
-    
-    # PD + Feed-Forward 제어 게인
-    kp_gain: 0.20        # 오차 비례 제어 (클수록 핸들을 강하게 꺾음)
-    kd_gain: 0.07        # 오차 미분 제어 (진동 및 오버슈트 억제)
-    ff_gain: 10.0        # 커브 기울기 전향 보상 (예측 조향)
+  # 조향 판단 노드 파라미터
+  decision_node:
+    ros__parameters:
+      # 주행 상태 및 안전 로직
+      is_running: false    # true로 변경해야 모터에 구동 명령이 내려집니다.
+      lost_stop: true      # 양쪽 차선을 모두 잃었을 때 정지할지 여부
+      
+      # PD + Feed-Forward 제어 게인
+      kp_gain: 0.40        # 오차 비례 제어 (클수록 핸들을 강하게 꺾음)
+      kd_gain: 0.07        # 오차 미분 제어 (진동 및 오버슈트 억제)
+      ff_gain: 10.0        # 커브 기울기 전향 보상 (예측 조향)
 
 
-control_node:
-  ros__parameters:
-    # 모터 고정 듀티 (0 ~ 255)
-    slow_duty: 30                 # speed_mode 1 (감속/코너/복귀)
-    cruise_duty: 50               # speed_mode 2 (직진 크루즈)
+  control_node:
+    ros__parameters:
+      # 모터 고정 듀티 (0 ~ 255)
+      slow_duty: 30                 # speed_mode 1 (감속/코너/복귀)
+      cruise_duty: 80               # speed_mode 2 (직진 크루즈)

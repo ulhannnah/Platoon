@@ -1,71 +1,80 @@
 import os
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
-
+from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
-    # config 폴더의 yaml 파일 경로 (control_node / lane_detector_node 튜닝값)
-    config_file = os.path.expanduser('~/ros2_ws/src/platoon/config/platoon_params.yaml')
+    # --- [차량 1호기 설정] ---
+    CAR_ID = 'car1'
+    VEHICLE_ID = 101
+    IS_DESIGNATED_LEADER = False
+    DESTINATION_ID = 9999
+    # -------------------------
 
-    # 리더/팔로워 구분값 — 실행할 때 오버라이드
-    #   리더:   ros2 launch platoon platoon.launch.py
-    #   팔로워: ros2 launch platoon platoon.launch.py vehicle_id:=102 is_designated_leader:=false
-    vehicle_id_arg = DeclareLaunchArgument('vehicle_id', default_value='101')
-    is_leader_arg = DeclareLaunchArgument('is_designated_leader', default_value='true')
-    destination_arg = DeclareLaunchArgument('destination_id', default_value='9999')
-
-    # STM32 제어 / UART 통신 노드 (포트 자동탐색)
-    control = Node(
-        package='platoon',
-        executable='control_node',
-        name='control_node',
-        output='screen',
-        emulate_tty=True,
-        parameters=[config_file],
-    )
-
-    # ESP32-S3 V2X 통신 노드 (포트 자동탐색)
-    v2x = Node(
-        package='platoon',
-        executable='v2x_node',
-        name='v2x_node',
-        output='screen',
-        emulate_tty=True,
-    )
-
-    # 플래툰 판단(FSM) 노드
-    fsm_decision = Node(
-        package='platoon',
-        executable='fsm_decision_node',
-        name='fsm_decision_node',
-        output='screen',
-        emulate_tty=True,
-        parameters=[{
-            'vehicle_id': ParameterValue(LaunchConfiguration('vehicle_id'), value_type=int),
-            'is_designated_leader': ParameterValue(LaunchConfiguration('is_designated_leader'), value_type=bool),
-            'destination_id': ParameterValue(LaunchConfiguration('destination_id'), value_type=int),
-        }],
-    )
+    pkg_share = FindPackageShare('platoon').find('platoon')
+    config_file = os.path.join(pkg_share, 'config', 'platoon_params.yaml')
 
     # 카메라 + 차선인식 노드
     lane_detector = Node(
         package='platoon',
         executable='lane_detector_node',
         name='lane_detector_node',
+        namespace=CAR_ID,
         output='screen',
         emulate_tty=True,
-        parameters=[config_file],
+        parameters=[config_file]
+    )
+
+    # 단독주행 노드
+    decision = Node(
+        package='platoon',
+        executable='decision_node',
+        name='decision_node',
+        namespace=CAR_ID,
+        output='screen',
+        emulate_tty=True,
+        parameters=[config_file]
+    )
+
+    # STM32 제어 / UART 통신 노드
+    control = Node(
+        package='platoon',
+        executable='control_node',
+        name='control_node',
+        namespace=CAR_ID,
+        output='screen',
+        emulate_tty=True,
+        parameters=[config_file]
+    )
+
+    # ESP32-S3 V2X 통신 노드
+    v2x = Node(
+        package='platoon',
+        executable='v2x_node',
+        name='v2x_node',
+        namespace=CAR_ID,
+        output='screen',
+        emulate_tty=True,
+        parameters=[{
+            'vehicle_id': VEHICLE_ID,
+            'is_designated_leader': IS_DESIGNATED_LEADER,
+            'destination_id': DESTINATION_ID,
+        }]
+    )
+
+    # 라이다 노드
+    lidar = Node(
+        package='platoon',
+        executable='lidar_node',
+        name='lidar_node',
+        namespace=CAR_ID,
+        output='screen',
+        emulate_tty=True,
+        parameters=[config_file]
     )
 
     return LaunchDescription([
-        vehicle_id_arg,
-        is_leader_arg,
-        destination_arg,
-        control,
-        v2x,
-        fsm_decision,
         lane_detector,
+        decision,
+        control        
     ])

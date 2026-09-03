@@ -42,6 +42,9 @@ setup(
 
             # STM32 제어 / UART 통신 노드
             'control_node = platoon.control_node:main',
+
+            # 레이다
+            'lidar_node = platoon.lidar_node:main',
         ],
     },
 )

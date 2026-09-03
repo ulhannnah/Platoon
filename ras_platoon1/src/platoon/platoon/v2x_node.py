@@ -8,12 +8,6 @@ ESP32-S3 V2X 통신 전용 ROS2 노드.
     Pi  -> ESP32-S3 : self_status  (§5) — 주기적으로 송신
     ESP32-S3 -> Pi  : v2x_targets  (§7) — 수신하는 대로 파싱
 
-★ 포트 번호(ttyACM0/1)는 재부팅 때마다 USB 열거 순서에 따라 ESP32/STM32끼리
-  뒤바뀔 수 있다(실측으로 확인됨). 그래서 기본값을 /dev/serial/by-id/의 고정
-  경로로 잡는다 — 이 경로는 이 ESP32 보드의 시리얼번호에 매여 있어 재부팅해도
-  안 바뀐다. 보드를 교체하면 `ls /dev/serial/by-id/`로 새 이름 확인 후 이
-  기본값 또는 serial_port 파라미터를 갱신할 것.
-
 토픽:
     발행 /v2x/targets      V2xTargets  (ESP32가 준 주변 차량 목록)
     구독 /v2x/self_status  SelfStatus  (fsm_decision_node.py가 주는 내 상태)
@@ -30,12 +24,7 @@ import serial
 
 from platoon_interfaces.msg import V2xTarget, V2xTargets, SelfStatus
 
-# 차량마다 ESP32 보드의 정확한 시리얼번호(by-id)는 다르지만, 제조사 접두어는
-# 항상 같다. 한 차량엔 ESP32가 1개만 꽂혀있으므로 이 패턴으로 자동 탐색하면
-# 차량마다 값을 안 바꿔도 된다 (여러 개 꽂혀있으면 첫 번째 것을 씀 — 그럴 땐
-# serial_port 파라미터로 직접 지정할 것).
 ESP32_BY_ID_GLOB = "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_*-if00"
-
 
 def _autodetect_port(pattern: str, fallback: str) -> str:
     matches = glob.glob(pattern)
@@ -75,33 +64,22 @@ def _default_self_status() -> SelfStatus:
 
 
 class V2XNode(Node):
-    
     def __init__(self):
         super().__init__("v2x_node")
-        # ESP32-S3 시리얼 포트 경로
-        # by-id 경로 사용: 재부팅 후에도 USB 열거 순서 변경 대비
-        self.declare_parameter(
-            "serial_port",
-            _autodetect_port(
-                ESP32_BY_ID_GLOB,
-                "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_14:C1:9F:C1:2F:18-if00",
-            ),
+        
+        # 파라미터 대신 변수로 직접 선언
+        self.port_path = _autodetect_port(
+            ESP32_BY_ID_GLOB,
+            "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_14:C1:9F:C1:2F:18-if00"  # 이 부분을 확인된 주소로 변경
         )
-        self.declare_parameter("baud", 115200)
-        # self_status 송신 주기 (Hz 단위, 기본 10Hz = 100ms)
-        self.declare_parameter("self_status_rate_hz", 10.0)
-
-        # 파라미터값 읽기
-        self.port_path = self.get_parameter("serial_port").get_parameter_value().string_value
-        self.baud = self.get_parameter("baud").value
-        rate = self.get_parameter("self_status_rate_hz").value
+        self.baud = 115200
+        rate = 10.0  # self_status 송신 주기 (Hz 단위, 10.0 = 100ms)
 
         # 토픽 발행 및 구독
-        self._targets_pub = self.create_publisher(V2xTargets, "/v2x/targets", 10)
-        self.create_subscription(SelfStatus, "/v2x/self_status", self._on_self_status, 10)
+        self._targets_pub = self.create_publisher(V2xTargets, "v2x/targets", 10)
+        self.create_subscription(SelfStatus, "v2x/self_status", self._on_self_status, 10)
 
         # 마지막으로 받은 self_status (서브스크라이브 콜백이 갱신)
-        # fsm_decision_node가 아직 발행 안 했으면 기본값으로 시작
         self._last_self_status = _default_self_status()
         
         # 송신 시퀀스 번호 (매 송신마다 +1, 수신 확인용)
@@ -120,12 +98,10 @@ class V2XNode(Node):
         self._rx_running = True
         
         # 수신 전담 스레드 생성
-        # JSON Line 프로토콜로 들어오는 메시지들을 블로킹 방식으로 대기/처리
         self._rx_thread = threading.Thread(target=self._rx_loop, daemon=True)
         self._rx_thread.start()
 
         # ROS2 타이머: rate(Hz)에 따라 주기적으로 _send_self_status() 호출
-        # 기본 10Hz = 100ms마다 현재 상태를 ESP32-S3로 송신
         self.create_timer(1.0 / rate, self._send_self_status)
         
         # 노드 시작 로그
@@ -142,10 +118,6 @@ class V2XNode(Node):
                 if self.ser and self.ser.is_open:
                     self.ser.close()
                 
-                # 새 시리얼 포트 열기
-                # 수신은 최대 0.5초, 송신은 최대 0.2초로 제한한다. ESP32가 USB
-                # 데이터를 읽지 않을 때 write()가 무기한 막히면 self_status 송신
-                # 타이머까지 같이 멈춘다 (ras_platoon2에서 먼저 발견/적용된 수정).
                 self.ser = serial.Serial(
                     self.port_path,
                     self.baud,
@@ -174,14 +146,6 @@ class V2XNode(Node):
             
             try:
                 # 시리얼 포트에서 사용 가능한 바이트 읽기
-                # in_waiting: 읽을 수 있는 바이트 개수
-                # in_waiting이 0이면 1바이트 대기 (블로킹)
-                #
-                # 위 None/is_open 체크와 이 read() 사이에 락이 없어서, 그 틈에
-                # 다른 스레드(송신 실패 시 _send_self_status)가 self.ser를
-                # None으로 바꾸면 AttributeError로 스레드가 죽는 경쟁상태가
-                # 있었다 (ras_platoon2에서 실제 발생 확인). 락 안에서 다시
-                # 확인해서 원자적으로 만든다.
                 with self._serial_lock:
                     if self.ser is None or not self.ser.is_open:
                         chunk = b""
@@ -216,17 +180,28 @@ class V2XNode(Node):
         # JSON 파싱
         try:
             data = json.loads(line)
-        except json.JSONDecodeError:
-            # 파싱 실패 → 로그만 기록하고 무시
-            # throttle_duration_sec: 같은 메시지는 2초 이내에 1번만 출력 (로그 폭발 방지)
-            self.get_logger().warn(f"JSON 파싱 실패, 무시: {line[:100]!r}", throttle_duration_sec=2.0)
+        except json.JSONDecodeError as e:
+            # 문서 요구사항: BAD JSON 발생 시 길이(LEN), 앞부분(HEAD), 뒷부분(TAIL) 출력
+            self.get_logger().warn(
+                f"BAD JSON: {e} | LEN: {len(line)} | "
+                f"HEAD: {line[:100]!r} | TAIL: {line[-100:]!r}", 
+                throttle_duration_sec=2.0
+            )
             return
 
         # 메시지 타입별 처리
         msg_type = data.get("type")
         if msg_type == "v2x_targets":
+            # 문서 요구사항: truncated:true 발생 시 에러가 아닌 경고로 처리
+            if data.get("truncated"):
+                self.get_logger().warn(
+                    "WARN: v2x_targets truncated by ESP32 TX buffer",
+                    throttle_duration_sec=2.0
+                )
+                
             # ESP32-S3가 감지한 주변 차량 목록
             self._targets_pub.publish(self._parse_v2x_targets(data))
+            
         elif msg_type == "esp_status":
             # TODO: §13.1 — ESP32 상태 정보 (필요하면 /v2x/esp_status 토픽으로 발행)
             pass

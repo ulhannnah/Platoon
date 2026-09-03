@@ -78,8 +78,8 @@ class ControlNode(Node):
 
         # 3. ROS 2 토픽 구독 및 발행 설정
         self.sub = self.create_subscription(
-            VehicleCmd, '/vehicle_cmd', self.on_cmd, 10)
-        self.tele_pub = self.create_publisher(Telemetry, '/telemetry', 10)
+            VehicleCmd, 'vehicle_cmd', self.on_cmd, 10)
+        self.tele_pub = self.create_publisher(Telemetry, 'telemetry', 10)
 
         # 4. 백그라운드 수신 스레드 생성 및 시작
         self.rx_running = True
@@ -115,7 +115,7 @@ class ControlNode(Node):
 
     # ---- 명령 수신 콜백 → STM32로 UART 송신 ----
     def on_cmd(self, msg: VehicleCmd):
-        """/vehicle_cmd 수신 시 speed_mode에 따른 듀티와 조향각을 패킷으로 묶어 송신"""
+        """vehicle_cmd 수신 시 speed_mode에 따른 듀티와 조향각을 패킷으로 묶어 송신"""
         
         # 1. speed_mode에 따른 모터 듀티 결정 (PID 제거 버전)
         if msg.speed_mode == 0:
