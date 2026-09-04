@@ -155,13 +155,22 @@ class V2XNode(Node):
                 # (_send_self_status)의 write()가 막혀서 서로 불필요하게
                 # 대기하게 된다 (펌웨어팀 권장사항). write()에는 계속 락을
                 # 쓰므로 포트 자체는 스레드 안전하다.
+                #
+                # 다만 이 read() 도중 TX 쪽이 timeout으로 self.ser.close()를
+                # 부르면, pyserial 내부적으로 self.fd가 None이 되는 순간과
+                # 겹쳐서 SerialException이 아니라 TypeError/OSError가 나는
+                # 경우가 실제로 확인됨 (락 없이 읽기로 바꾸면서 생긴 트레이드
+                # 오프). 포트가 그 사이 죽은 것으로 보고 동일하게 재연결한다.
                 chunk = ser.read(ser.in_waiting or 1)
-            except serial.SerialException as e:
+            except (serial.SerialException, OSError, TypeError) as e:
                 # 시리얼 통신 오류 (예: USB 케이블 뽑음, 포트가 그 사이 닫힘)
                 self.get_logger().error(f"시리얼 수신 오류: {e}")
                 with self._serial_lock:
                     if self.ser:
-                        self.ser.close()
+                        try:
+                            self.ser.close()
+                        except Exception:
+                            pass
                     self.ser = None
                 continue
 

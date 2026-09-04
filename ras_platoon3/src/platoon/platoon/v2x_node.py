@@ -118,11 +118,13 @@ class V2XNode(Node):
                 if self.ser and self.ser.is_open:
                     self.ser.close()
                 
+                # read timeout 0.02~0.05s / write timeout 0.5s — 펌웨어팀 권장값
+                # (긴 read timeout이 TX를 오래 막던 문제 완화)
                 self.ser = serial.Serial(
                     self.port_path,
                     self.baud,
-                    timeout=0.5,
-                    write_timeout=0.2,
+                    timeout=0.02,
+                    write_timeout=0.5,
                 )
                 self.get_logger().info(f"ESP32-S3 시리얼 연결 성공: {self.port_path}")
                 return True
@@ -135,37 +137,56 @@ class V2XNode(Node):
     # 수신: ESP32-S3 -> Raspberry Pi (v2x_targets)
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     
+    _MAX_RX_BUFFER = 8192  # ESP32 쪽 이상으로 '\n'이 안 와도 버퍼가 무한정 안 커지게
+
     def _rx_loop(self):
         buf = b""  # 누적 버퍼 (완성된 라인 분리할 때까지 보관)
         while self._rx_running:
-            # 시리얼 포트 미연결 상태 처리
-            if self.ser is None or not self.ser.is_open:
+            # self.ser를 지역변수로 스냅샷 — 아래서 락 없이 read()하는 동안
+            # 다른 스레드가 self.ser를 바꿔도 이 지역변수는 안 바뀌므로 안전.
+            ser = self.ser
+            if ser is None or not ser.is_open:
                 time.sleep(1.0)  # 1초 대기 후 재연결 시도
                 self._open_serial()
                 continue
-            
+
             try:
-                # 시리얼 포트에서 사용 가능한 바이트 읽기
-                with self._serial_lock:
-                    if self.ser is None or not self.ser.is_open:
-                        chunk = b""
-                    else:
-                        chunk = self.ser.read(self.ser.in_waiting or 1)
-            except serial.SerialException as e:
-                # 시리얼 통신 오류 (예: USB 케이블 뽑음)
+                # 락 없이 읽는다 — 락을 잡은 채로 read()하면 그동안 TX
+                # (_send_self_status)의 write()가 막혀서 서로 불필요하게
+                # 대기하게 된다 (펌웨어팀 권장사항). write()에는 계속 락을
+                # 쓰므로 포트 자체는 스레드 안전하다.
+                #
+                # 다만 이 read() 도중 TX 쪽이 timeout으로 self.ser.close()를
+                # 부르면, pyserial 내부적으로 self.fd가 None이 되는 순간과
+                # 겹쳐서 SerialException이 아니라 TypeError/OSError가 나는
+                # 경우가 실제로 확인됨 (락 없이 읽기로 바꾸면서 생긴 트레이드
+                # 오프). 포트가 그 사이 죽은 것으로 보고 동일하게 재연결한다.
+                chunk = ser.read(ser.in_waiting or 1)
+            except (serial.SerialException, OSError, TypeError) as e:
+                # 시리얼 통신 오류 (예: USB 케이블 뽑음, 포트가 그 사이 닫힘)
                 self.get_logger().error(f"시리얼 수신 오류: {e}")
                 with self._serial_lock:
                     if self.ser:
-                        self.ser.close()
+                        try:
+                            self.ser.close()
+                        except Exception:
+                            pass
                     self.ser = None
                 continue
 
             if not chunk:
                 continue
-            
+
             # 버퍼에 수신 데이터 누적
             buf += chunk
-            
+
+            if len(buf) > self._MAX_RX_BUFFER:
+                self.get_logger().warn(
+                    f"V2X RX buffer reset: {len(buf)} bytes", throttle_duration_sec=2.0
+                )
+                buf = b""
+                continue
+
             # 버퍼에 완성된 라인('\n' 포함)이 있으면 하나씩 처리
             while b"\n" in buf:
                 line, buf = buf.split(b"\n", 1)  # 첫 '\n'을 기준으로 분리
@@ -317,6 +338,12 @@ class V2XNode(Node):
             if self.ser and self.ser.is_open:
                 try:
                     self.ser.write(line)
+                except serial.SerialTimeoutException as e:
+                    # write_timeout(0.5s) 안에 ESP32가 못 받아준 경우 — 일반
+                    # SerialException(케이블 뽑힘 등)과 구분해서 로그
+                    self.get_logger().error(f"ESP32 송신 timeout: {e}")
+                    self.ser.close()
+                    self.ser = None
                 except serial.SerialException as e:
                     self.get_logger().error(f"ESP32 송신 실패: {e}")
                     self.ser.close()
