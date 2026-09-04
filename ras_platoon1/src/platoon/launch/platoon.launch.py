@@ -9,8 +9,8 @@ def generate_launch_description():
     VEHICLE_ID = 101
     IS_DESIGNATED_LEADER = True   # platoon1 = 리더
     DESTINATION_ID = 9999
-    # UWB 아직 미구현 — 거리 없어도 JOIN/MAINTAIN 테스트되게 우회
-    ALLOW_UWB_LESS_JOIN = True
+    # UWB 실장치 연결 — 실측 확인 중, 문제 생기면 다시 True로
+    ALLOW_UWB_LESS_JOIN = False
     # 카메라 정상이면 False 유지, 문제 생기면 True로
     ALLOW_CAMERA_LESS_JOIN = False
     # -------------------------
