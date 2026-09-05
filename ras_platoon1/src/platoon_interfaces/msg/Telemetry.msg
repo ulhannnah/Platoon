@@ -7,4 +7,4 @@ float32 speed_mps       # left_delta/right_delta를 엔코더 CPR·바퀴 지름
                          # 환산한 실제 속도 (m/s). control_node.py가 계산해서 채움 —
                          # PID 제어에 안 쓰더라도(지금은 고정 듀티 방식) 다른 노드가
                          # "지금 실제로 얼마나 빠른가"를 알아야 할 때(V2X self_status 등)
-                         # 이 필드를 쓴다.
+                         # 이 필드를 쓴다. 

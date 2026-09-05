@@ -28,4 +28,4 @@ car1:
     ros__parameters:
       # 모터 고정 듀티 (0 ~ 255)
       slow_duty: 30                 # speed_mode 1 (감속/코너/복귀)
-      cruise_duty: 80               # speed_mode 2 (직진 크루즈)
+      cruise_duty: 55               # speed_mode 2 (직진 크루즈)

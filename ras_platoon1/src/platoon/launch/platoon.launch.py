@@ -29,6 +29,17 @@ def generate_launch_description():
         parameters=[config_file]
     )
 
+    # 단독주행 노드
+    decision = Node(
+        package='platoon',
+        executable='decision_node',
+        name='decision_node',
+        namespace=CAR_ID,
+        output='screen',
+        emulate_tty=True,
+        parameters=[config_file]
+    )
+
     # 플래툰 판단(FSM) 노드 — V2X 연동, 단독주행 decision_node 대신 이걸 씀
     fsm_decision = Node(
         package='platoon',
@@ -80,7 +91,6 @@ def generate_launch_description():
 
     return LaunchDescription([
         lane_detector,
-        fsm_decision,
-        v2x,
-        # control,  # STM32 뽑아놓은 상태 — 연결하면 주석 해제
+        decision,
+        control
     ])
