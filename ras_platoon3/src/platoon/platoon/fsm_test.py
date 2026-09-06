@@ -7,13 +7,14 @@ platoon_fsm.py(적합도 판단·후보 탐색·핸드셰이크 패킷 왕복)�
 - 상태 전이는 외부 명령(JOIN/EXIT/EXIT_TOGETHER)으로 트리거
 - 차선변경은 decision_node의 기존 request_lane_change 서비스를 "요청"만 함
   (조향각 계산은 절대 여기서 하지 않음 — decision_node가 전담)
-- 거리 제어는 UWB 없이 초음파(ego.front_distance)만 사용, 연속값 대신
-  decision_node의 기존 speed_mode 3단계(0/1/2)를 그대로 재사용
+- 거리 제어는 UWB 없이 초음파(ego.front_distance)만 사용. MAINTAIN 중에는
+  PD 제어로 control_node.py의 cruise_duty를 직접 연속 조정 (§8)
 
 로 완전히 다시 짠 버전. ROS/시리얼 의존성 없는 순수 로직 (fsm_decision_node.py가
 센서·통신과 이어준다).
 """
 
+import time
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Optional
@@ -28,7 +29,7 @@ class PlatoonState(Enum):
 
 
 # ── 파라미터 (실측 전 임시값 — docs/parameters.md 참고) ───────────────
-TARGET_DISTANCE_M = 0.4          # 목표 차간거리
+TARGET_DISTANCE_M = 0.16         # 목표 차간거리 (16cm)
 GAP_HYSTERESIS_M = 0.08          # 이 폭 안에서는 이전 속도단계 유지 (떨림 방지)
 OBSTACLE_STOP_DISTANCE_M = 0.15  # 전방 초근접 시 무조건 비상정지
 
@@ -36,6 +37,17 @@ OBSTACLE_STOP_DISTANCE_M = 0.15  # 전방 초근접 시 무조건 비상정지
 SPEED_STOP = 0
 SPEED_SLOW = 1
 SPEED_CRUISE = 2
+
+# §8 MAINTAIN 거리제어용 PD 게인 — control_node.py의 cruise_duty를 직접 조정한다.
+# (실측 전 임시값 — docs/parameters.md에 등재하고 튜닝 필요)
+DUTY_KP = 15.0           # 거리오차(m) 1당 duty 변화량
+DUTY_KD = 4.0            # 거리 변화율(m/s) 1당 duty 변화량 (상대속도 근사)
+DUTY_BASE = 60           # 시작 기준 duty (control_node.py 기본 cruise_duty와 맞출 것)
+DUTY_MIN = 30
+DUTY_MAX = 90
+# 곡선 등으로 초음파가 순간 유실됐을 때 — 앞차 speed_level이 바뀌는 "순간"에만
+# 그 방향으로 한 스텝 보정 (절대값 매칭 아님, 방향 보정용 — 실측 후 튜닝 필요)
+DUTY_LEVEL_STEP = 10
 
 
 @dataclass
@@ -60,8 +72,12 @@ class DrivingCommand:
     # "left"/"right" — 이번 주기에 1회 차선변경 요청 (아니면 None)
     request_lane_change_dir: Optional[str] = None
     # decision_node의 speed_mode를 이 값으로 덮어씀. None이면 decision_node
-    # 자체 기본값(cruise) 사용 — 리더는 항상 None (§7, 그냥 SOLO_DRIVE처럼 주행)
+    # 자체 기본값(cruise) 사용 — 리더는 항상 None (§7, 그냥 SOLO_DRIVE처럼 주행).
+    # 비상정지(SPEED_STOP) 지정에만 씀 — MAINTAIN 정상 가감속은 cruise_duty가 담당.
     speed_level: Optional[int] = None
+    # §8 MAINTAIN 팔로워 전용 — control_node.py의 cruise_duty를 이 값으로 직접
+    # 덮어씀(PD 제어, 연속값). None이면 건드리지 않음.
+    cruise_duty: Optional[int] = None
     emergency: bool = False
 
 
@@ -90,6 +106,12 @@ class PlatoonFSM:
         self._pending_lane_dir: Optional[str] = None
         self._lane_change_pending = False   # True인 동안은 아직 목표차선 도달 전
         self._last_speed_level: int = SPEED_CRUISE
+
+        # §8 MAINTAIN PD 제어 상태
+        self._duty: float = float(DUTY_BASE)
+        self._prev_distance: Optional[float] = None
+        self._prev_time: Optional[float] = None
+        self._last_partner_level: Optional[int] = None  # 곡선 등 초음파 유실 시 보조용
 
     # ══════════════════════════════════════════════════════════════
     # 외부 명령 — fsm_decision_node가 명령 토픽 수신 시 호출
@@ -204,25 +226,46 @@ class PlatoonFSM:
         if self.is_designated_leader:
             return DrivingCommand(mode=mode, speed_level=None)  # §7
 
-        # §8 — CACC를 3단계로 흉내: 앞차(partner)가 "지금 실제로 내고 있는"
-        # speed_mode를 피드포워드 기준값으로 삼고, 초음파 거리오차로 ±1단계만
-        # 보정한다. 순수 거리 히스테리시스보다 앞차 속도 변화에 더 빨리 반응함
-        # (거리가 실제로 벌어지길 기다리지 않아도 됨).
+        # §8 — PD 제어로 control_node.py의 cruise_duty를 직접 연속 조정한다.
+        # P: 목표거리와의 오차, D: 그 오차의 변화율(=거리 변화율, 상대속도 근사 —
+        # 앞차의 실제 speed_mps를 못 믿는 상황이라 내 초음파 거리 미분으로 대신함).
+        # base가 되는 절대 속도 기준이 없어서(리더의 실제 duty를 모름), self._duty를
+        # 상태로 들고 다니며 오차에 따라 계속 가감해서 스스로 안정점을 찾게 한다.
         partner = self._find(nearby, self.partner_id)
-        base = partner.speed_level if partner is not None else self._last_speed_level
-
         d = ego.front_distance
-        if d is None:
-            level = base
-        elif d < TARGET_DISTANCE_M - GAP_HYSTERESIS_M:
-            level = max(SPEED_STOP, base - 1)      # 너무 가까움 — 앞차보다 한 단계 감속
-        elif d > TARGET_DISTANCE_M + GAP_HYSTERESIS_M:
-            level = min(SPEED_CRUISE, base + 1)    # 너무 멂 — 한 단계 더 가속해서 따라잡기
-        else:
-            level = base                           # 적당함 — 앞차와 같은 속도단계 유지
+        now = time.time()
 
-        self._last_speed_level = level
-        return DrivingCommand(mode=mode, speed_level=level)
+        if d is not None:
+            error = d - TARGET_DISTANCE_M  # 양수면 너무 멂(가속 필요), 음수면 너무 가까움(감속 필요)
+
+            d_error = 0.0
+            if self._prev_distance is not None and self._prev_time is not None:
+                dt = now - self._prev_time
+                if dt > 0:
+                    d_error = (d - self._prev_distance) / dt
+
+            self._duty += DUTY_KP * error + DUTY_KD * d_error
+            self._prev_distance = d
+            self._prev_time = now
+
+        elif partner is not None:
+            # 곡선 등으로 초음파가 앞차를 놓친 경우 — 절대값을 모르니 앞차
+            # speed_level이 "바뀌는 순간"에만 그 방향으로 한 스텝 보정.
+            # (레벨이 그대로면 아무 것도 안 하고 직전 duty 유지)
+            if (self._last_partner_level is not None
+                    and partner.speed_level != self._last_partner_level):
+                step = DUTY_LEVEL_STEP if partner.speed_level > self._last_partner_level else -DUTY_LEVEL_STEP
+                self._duty += step
+            # 초음파 복귀 시 미분항이 곡선 구간 전체를 걸쳐 튀지 않도록 리셋
+            self._prev_distance = None
+            self._prev_time = None
+        # d도 없고 partner도 없으면(피어 정보 자체 소실) 직전 duty 그대로 유지
+
+        if partner is not None:
+            self._last_partner_level = partner.speed_level
+
+        self._duty = max(DUTY_MIN, min(DUTY_MAX, self._duty))
+        return DrivingCommand(mode=mode, cruise_duty=int(round(self._duty)))
 
     def _find(self, nearby: list, vid: Optional[int]) -> Optional[NearbyVehicle]:
         if vid is None:
@@ -234,3 +277,7 @@ class PlatoonFSM:
         self.partner_id = self.leader_id
         self._pending_lane_dir = None
         self._lane_change_pending = False
+        self._duty = float(DUTY_BASE)
+        self._prev_distance = None
+        self._prev_time = None
+        self._last_partner_level = None
