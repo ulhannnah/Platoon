@@ -21,7 +21,7 @@ STEER_MIN = -60
 
 # 차선 변경 파라미터 (차량 스케일에 맞춘 세팅)
 TURN_ANGLE = 35               # 1차 진입 시 강하게 꺾을 조향각
-RELEASE_ANGLE = -10             # 2차 진입 시 핸들을 풀어줄 조향각 (0도 = 직진 상태로 대각선 진입)
+RELEASE_ANGLE = 0             # 2차 진입 시 핸들을 풀어줄 조향각 (0도 = 직진 상태로 대각선 진입)
 PHASE1_DIST = 0.5            # 처음에 핸들을 꺾은 채로 이동할 거리 (m)
 TARGET_CHANGE_DISTANCE = 0.8 # 조향 권한을 다시 카메라(PD 제어)로 넘길 총 이동 거리 (m)
 
@@ -126,7 +126,7 @@ class DecisionNode(Node):
 
             if is_left_dashed:
                 self.current_state = 'CHANGING_LEFT'
-                self.change_start_distance = current_distance * 1.2
+                self.change_start_distance = current_distance
                 self.get_logger().info('좌측 점선 확인! 좌측 진입 기동을 시작합니다.')
 
             elif is_right_dashed:
@@ -135,13 +135,20 @@ class DecisionNode(Node):
                 self.get_logger().info('우측 점선 확인! 우측 진입 기동을 시작합니다.')
 
         elif self.current_state in ['CHANGING_LEFT', 'CHANGING_RIGHT']:
-            traveled_distance = current_distance - self.change_start_distance
+            # 음수 거리가 나오지 않도록 0.0으로 클램핑
+            traveled_distance = max(0.0, current_distance - self.change_start_distance)
 
-            self.get_logger().info(f'[FSM] 차선 변경 중... 이동한 거리: {traveled_distance:.3f}m / 목표: {TARGET_CHANGE_DISTANCE}m')
+            # 좌측 조향 시 거리가 짧아지는 기구학적 특성을 보정 — 거리 기준점(change_start_distance)이
+            # 아니라 목표거리 쪽에 비대칭을 줘야 이미 달려온 거리에 비례해 틀어지지 않는다.
+            current_target = TARGET_CHANGE_DISTANCE
+            if self.current_state == 'CHANGING_LEFT':
+                current_target = TARGET_CHANGE_DISTANCE * 1.8
 
-            # Phase 3: 목표 거리 이동 완료 시 직진(PD 제어) 모드 복귀
-            if traveled_distance >= TARGET_CHANGE_DISTANCE:
-                self.get_logger().info(f'목표 거리({TARGET_CHANGE_DISTANCE}m) 이동 완료. 카메라 인식을 통한 직진 모드로 전환합니다.')
+            self.get_logger().info(f'[FSM] 차선 변경 중... 이동한 거리: {traveled_distance:.3f}m / 목표: {current_target:.3f}m')
+
+            # Phase 3: 보정된 목표 거리 이동 완료 시 직진(PD 제어) 모드 복귀
+            if traveled_distance >= current_target:
+                self.get_logger().info(f'목표 거리({current_target:.3f}m) 이동 완료. 카메라 인식을 통한 직진 모드로 전환합니다.')
                 self.current_state = 'STRAIGHT'
                 self.target_lane_offset = 0.0
                 self.lane_change_done_pub.publish(Bool(data=True))
@@ -233,8 +240,8 @@ class DecisionNode(Node):
         self.pub.publish(cmd)
 
     def telemetry_callback(self, msg):
-        # 비정상적인 왼쪽 엔코더를 배제하고 오른쪽 엔코더(right_delta) 값만 사용합니다.
-        tick_delta = (msg.right_delta + msg.right_delta) / 2.0 
+        # 좌우 엔코더 평균으로 이동거리 계산.
+        tick_delta = (msg.left_delta + msg.right_delta) / 2.0
         delta_meters = tick_delta * self.meters_per_tick
         self.current_distance += delta_meters
 
