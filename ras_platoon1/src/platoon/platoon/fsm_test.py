@@ -28,7 +28,7 @@ class PlatoonState(Enum):
 
 
 # ── 파라미터 (실측 전 임시값 — docs/parameters.md 참고) ───────────────
-TARGET_DISTANCE_M = 0.4          # 목표 차간거리
+TARGET_DISTANCE_M = 0.4          # 목표 차간거리    
 GAP_HYSTERESIS_M = 0.08          # 이 폭 안에서는 이전 속도단계 유지 (떨림 방지)
 OBSTACLE_STOP_DISTANCE_M = 0.15  # 전방 초근접 시 무조건 비상정지
 
@@ -108,7 +108,7 @@ class PlatoonFSM:
     def handle_command(self, cmd: str, target_lane: int, current_lane: int) -> None:
         cmd = cmd.upper()
 
-        if cmd == "JOIN" and self.state == PlatoonState.SOLO_DRIVE and not self.is_designated_leader:
+        if cmd == "JOIN" and self.state == PlatoonState.SOLO_DRIVE:
             self.state = PlatoonState.PLATOON_JOIN
             self._start_lane_change(target_lane, current_lane)
 
@@ -156,7 +156,6 @@ class PlatoonFSM:
     def update(self, ego: EgoState, nearby: list) -> DrivingCommand:
         # 1. 안전 최우선.
         # §플래툰 전체 즉시 전파 — 초음파로 내 앞차가 서는 걸 감지할 때까지
-        # 기다리지 않고, 누구든(리더 포함) V2X로 emergency를 방송하는 순간
         # 나도 같이 선다. 안 그러면 맨 뒤차까지 정지가 순차적으로(체인 지연)
         # 전달되어 플래툰으로 비상정지하는 이점이 사라진다.
         peer_emergency = any(v.emergency for v in nearby)

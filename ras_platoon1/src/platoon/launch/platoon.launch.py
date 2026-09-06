@@ -30,16 +30,15 @@ def generate_launch_description():
     )
 
     # 단독주행 노드
-    # cruise_speed=1 — 리더는 계속 저속으로 주행 (config_file 다음에 와서 그 값을 덮어씀)
-    decision = Node(
-        package='platoon',
-        executable='decision_node',
-        name='decision_node',
-        namespace=CAR_ID,
-        output='screen',
-        emulate_tty=True,
-        parameters=[config_file, {'cruise_speed': 1}]
-    )
+    # decision = Node(
+    #     package='platoon',
+    #     executable='decision_node',
+    #     name='decision_node',
+    #     namespace=CAR_ID,
+    #     output='screen',
+    #     emulate_tty=True,
+    #     parameters=[config_file]
+    # )
 
     # 플래툰 판단(FSM) 노드 — V2X 연동, 단독주행 decision_node 대신 이걸 씀
     fsm_decision = Node(
@@ -63,16 +62,6 @@ def generate_launch_description():
         parameters=[config_file]
     )
 
-    # ESP32-S3 V2X 통신 노드 (가상 타겟 노드를 사용하므로 주석 처리하여 실행을 막음)
-    v2x = Node(
-        package='platoon',
-        executable='v2x_node',
-        name='v2x_node',
-        namespace=CAR_ID,
-        output='screen',
-        emulate_tty=True,
-    )
-
     # 라이다 노드
     lidar = Node(
         package='platoon',
@@ -86,8 +75,6 @@ def generate_launch_description():
 
     return LaunchDescription([
         lane_detector,
-        decision,
         fsm_decision,
-        control,
-        v2x,  # 배열에서도 제외
+        control
     ])

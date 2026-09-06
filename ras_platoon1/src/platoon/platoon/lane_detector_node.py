@@ -53,7 +53,6 @@ class LaneDetectorNode(Node):
         # ROS 2 퍼블리셔 설정
         # -------------------------------------------------------------
         self.lane_info_pub = self.create_publisher(LaneInfo, 'lane_info', 10)
-        self.image_pub = self.create_publisher(Image, 'processed_image', 10)
         self.bridge = CvBridge()
 
         # 웹 스트리밍용 인코딩 데이터 공유 변수 및 스레드 락

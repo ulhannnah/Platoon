@@ -10,12 +10,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/VehicleCmd.msg"
   "msg/Telemetry.msg"
   "msg/FsmCmd.msg"
-  "msg/V2xTarget.msg"
-  "msg/V2xTargets.msg"
-  "msg/SelfStatus.msg"
-  "msg/LocalTarget.msg"
-  "msg/LocalTargets.msg"
-  
+  "msg/SelfStatus.msg"  
 )
 
 ament_export_dependencies(rosidl_default_runtime)

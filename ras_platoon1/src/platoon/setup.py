@@ -35,19 +35,12 @@ setup(
 
             # 플래툰 주행할때는 이 코드로 (v2x_node도 같이 켜야 함 — nearby_vehicles 공급원)
             'fsm_decision_node = platoon.fsm_decision_node:main',
-            'v2x_node = platoon.v2x_node:main',
-
-            # 그냥 단독주행 할 때는 이 코드로
-            'decision_node = platoon.decision_node:main',
 
             # STM32 제어 / UART 통신 노드
             'control_node = platoon.control_node:main',
 
             # 레이다
             'lidar_node = platoon.lidar_node:main',
-
-            # 자기 상태 토픽 발행 노드
-            'target_node = platoon.target_node:main',
         ],
     },
 )
