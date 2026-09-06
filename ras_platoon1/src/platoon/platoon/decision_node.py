@@ -29,16 +29,18 @@ class DecisionNode(Node):
     def __init__(self):
         super().__init__('decision')
         
-        # 기본주행 속도 설정
-        self.cruise_speed = 2
         self.current_distance = 0.0
-        
+
         # ROS 2 동적 파라미터 등록
         self.declare_parameter('is_running', False)
         self.declare_parameter('lost_stop', True)
         self.declare_parameter('kp_gain', 0.13)
         self.declare_parameter('kd_gain', 0.05)
         self.declare_parameter('ff_gain', 10.0)
+        # 플래툰 개입 없을 때(platoon_speed_level=-1) 기본으로 내는 speed_mode.
+        # 차량마다 다르게 주고 싶으면 launch.py에서 이 파라미터를 덮어쓰면 됨
+        # (예: 리더를 계속 저속(1)으로 달리게 하고 싶을 때).
+        self.declare_parameter('cruise_speed', 2)
         # fsm_decision_node가 플래툰 상태에 따라 속도를 강제할 때 씀.
         # -1 = 오버라이드 없음(기존처럼 cruise_speed 사용), 0/1/2 = speed_mode 강제 지정.
         self.declare_parameter('platoon_speed_level', -1)
@@ -52,6 +54,7 @@ class DecisionNode(Node):
         self.kp_gain = self.get_parameter('kp_gain').value
         self.kd_gain = self.get_parameter('kd_gain').value
         self.ff_gain = self.get_parameter('ff_gain').value
+        self.cruise_speed = int(self.get_parameter('cruise_speed').value)
         self.platoon_speed_level = int(self.get_parameter('platoon_speed_level').value)
         self.lane_change_dir = self.get_parameter('lane_change_dir').value
 
@@ -95,6 +98,7 @@ class DecisionNode(Node):
             elif param.name == 'ff_gain': self.ff_gain = float(param.value)
             elif param.name == 'is_running': self.is_running = bool(param.value)
             elif param.name == 'lost_stop': self.lost_stop = bool(param.value)
+            elif param.name == 'cruise_speed': self.cruise_speed = int(param.value)
             elif param.name == 'platoon_speed_level': self.platoon_speed_level = int(param.value)
             elif param.name == 'lane_change_dir': self.lane_change_dir = param.value
         return SetParametersResult(successful=True)

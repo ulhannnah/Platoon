@@ -35,6 +35,7 @@ def generate_launch_description():
     )
 
     # 단독주행 노드
+    # cruise_speed=1 — 리더는 계속 저속으로 주행 (config_file 다음에 와서 그 값을 덮어씀)
     decision = Node(
         package='platoon',
         executable='decision_node',
@@ -42,7 +43,7 @@ def generate_launch_description():
         namespace=CAR_ID,
         output='screen',
         emulate_tty=True,
-        parameters=[config_file]
+        parameters=[config_file, {'cruise_speed': 1}]
     )
 
     # 플래툰 판단(FSM) 노드 — fsm_test.py 기반. decision_node를 파라미터/서비스로

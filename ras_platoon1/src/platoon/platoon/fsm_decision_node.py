@@ -8,9 +8,11 @@ FSM 판단 노드 (fsm_test.py 기반 — 촬영 시나리오 전용 경량 버�
                        decision_node "조작"으로 바꿔주는 배선판
                        (vehicle_cmd에는 절대 직접 발행하지 않음 — 조향 소유권 충돌 방지)
 
-decision_node 조작 방법:
+decision_node/control_node 조작 방법:
     - 차선변경: lane_change_dir 파라미터 세팅 후 request_lane_change 서비스 호출
-    - 속도(가감속): platoon_speed_level 파라미터 세팅 (-1=오버라이드 해제)
+    - 비상정지: decision_node의 platoon_speed_level=0 강제 (-1=오버라이드 해제)
+    - MAINTAIN 가감속(§8): control_node의 cruise_duty를 PD로 연속 조정 +
+      decision_node의 platoon_speed_level을 SPEED_CRUISE로 강제해 그 경로를 태움
     - 차선변경 완료 통보: decision_node가 발행하는 lane_change_done(Bool) 구독
 
 외부 명령(JOIN/EXIT/EXIT_TOGETHER)은 'platoon_cmd'(std_msgs/String) 토픽으로 받는다.
@@ -27,7 +29,7 @@ from rcl_interfaces.msg import Parameter, ParameterValue, ParameterType
 from std_msgs.msg import String, Bool
 from std_srvs.srv import Trigger
 
-from .fsm_test import PlatoonFSM, EgoState, NearbyVehicle, DrivingCommand
+from .fsm_test import PlatoonFSM, EgoState, NearbyVehicle, DrivingCommand, SPEED_CRUISE
 from .v2x_node import (
     PLATOON_STATE_SOLO, PLATOON_STATE_JOIN, PLATOON_STATE_KEEP, PLATOON_STATE_EXIT,
     PLATOON_ROLE_NONE, PLATOON_ROLE_LEADER, PLATOON_ROLE_FOLLOWER,
@@ -108,9 +110,14 @@ class FsmDecisionNode(Node):
         self._decision_param_client = self.create_client(
             SetParameters, 'decision_node/set_parameters'
         )
+        # §8 MAINTAIN PD 제어용 — control_node.py의 cruise_duty를 직접 조정
+        self._control_param_client = self.create_client(
+            SetParameters, 'control_node/set_parameters'
+        )
         self._lane_change_client = self.create_client(
             Trigger, 'request_lane_change'
         )
+        self._last_cruise_duty_sent = None  # 파라미터 서비스 스팸 방지용 캐시
 
         # ── 구독/발행 ────────────────────────────────────────────────
         self.create_subscription(Telemetry, 'telemetry', self.on_telemetry, 10)
@@ -192,7 +199,7 @@ class FsmDecisionNode(Node):
     # ══════════════════════════════════════════════════════════════
     # decision_node 조작
     # ══════════════════════════════════════════════════════════════
-    def _set_decision_param(self, name: str, value) -> None:
+    def _set_param(self, client, service_label: str, name: str, value) -> None:
         if isinstance(value, bool):
             pv = ParameterValue(type=ParameterType.PARAMETER_BOOL, bool_value=value)
         elif isinstance(value, int):
@@ -201,10 +208,16 @@ class FsmDecisionNode(Node):
             pv = ParameterValue(type=ParameterType.PARAMETER_STRING, string_value=str(value))
 
         req = SetParameters.Request(parameters=[Parameter(name=name, value=pv)])
-        if not self._decision_param_client.service_is_ready():
-            self.get_logger().warn(f'decision_node/set_parameters 서비스 준비 안 됨 (param={name})')
+        if not client.service_is_ready():
+            self.get_logger().warn(f'{service_label} 서비스 준비 안 됨 (param={name})')
             return
-        self._decision_param_client.call_async(req)
+        client.call_async(req)
+
+    def _set_decision_param(self, name: str, value) -> None:
+        self._set_param(self._decision_param_client, 'decision_node/set_parameters', name, value)
+
+    def _set_control_param(self, name: str, value) -> None:
+        self._set_param(self._control_param_client, 'control_node/set_parameters', name, value)
 
     def _request_lane_change(self, direction: str) -> None:
         # 방향 파라미터를 먼저 세팅한 뒤 서비스 호출 (decision_node가 그 방향만 인정)
@@ -221,6 +234,22 @@ class FsmDecisionNode(Node):
             return  # 값 안 바뀌었으면 파라미터 서비스 스팸 방지
         self._last_speed_level_sent = wire_level
         self._set_decision_param('platoon_speed_level', wire_level)
+
+    def _apply_cruise_duty(self, duty) -> None:
+        """§8 MAINTAIN PD 제어 — control_node.py의 cruise_duty를 매 주기 값이
+        바뀔 때만 반영. decision_node의 speed_mode가 cruise_duty 경로(>=2)를
+        타도록 platoon_speed_level도 SPEED_CRUISE로 같이 강제한다.
+        duty가 None이면(MAINTAIN 종료) 오버라이드만 풀고 cruise_duty 값 자체는
+        마지막 값 그대로 둔다 — 이후 SOLO_DRIVE에서도 그 값을 기준으로 계속 쓰임.
+        """
+        if duty is None:
+            return
+        self._apply_speed_level(SPEED_CRUISE)
+        duty = int(duty)
+        if duty == self._last_cruise_duty_sent:
+            return
+        self._last_cruise_duty_sent = duty
+        self._set_control_param('cruise_duty', duty)
 
     # ══════════════════════════════════════════════════════════════
     def _build_self_status(self) -> SelfStatus:
@@ -246,7 +275,8 @@ class FsmDecisionNode(Node):
         state_msg = String()
         state_msg.data = (
             f"State: {self.fsm.state.name} | Mode: {cmd.mode} | "
-            f"speed_level: {cmd.speed_level} | lane: {self.ego_state.lane}"
+            f"speed_level: {cmd.speed_level} | cruise_duty: {cmd.cruise_duty} | "
+            f"lane: {self.ego_state.lane}"
         )
         self.pub_fsm_state.publish(state_msg)
 
@@ -255,7 +285,10 @@ class FsmDecisionNode(Node):
         if cmd.request_lane_change_dir is not None:
             self._request_lane_change(cmd.request_lane_change_dir)
 
-        self._apply_speed_level(cmd.speed_level)
+        if cmd.cruise_duty is not None:
+            self._apply_cruise_duty(cmd.cruise_duty)
+        else:
+            self._apply_speed_level(cmd.speed_level)
 
 
 def main(args=None):
