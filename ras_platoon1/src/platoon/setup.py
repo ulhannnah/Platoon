@@ -45,6 +45,9 @@ setup(
 
             # 레이다
             'lidar_node = platoon.lidar_node:main',
+
+            # 자기 상태 토픽 발행 노드
+            'target_node = platoon.target_node:main',
         ],
     },
 )

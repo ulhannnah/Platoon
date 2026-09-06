@@ -22,7 +22,7 @@ import rclpy
 from rclpy.node import Node
 import serial
 
-from platoon_interfaces.msg import V2xTarget, V2xTargets, SelfStatus
+from platoon_interfaces.msg import V2xTarget, V2xTargets, SelfStatus, Telemetry
 
 ESP32_BY_ID_GLOB = "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_*-if00"
 
@@ -93,6 +93,10 @@ class V2XNode(Node):
 
         # ESP32-S3과 시리얼 연결 시도
         self._open_serial()
+
+        self.create_subscription(Telemetry, 'telemetry', self._on_telemetry, 10)
+        self._last_telemetry = Telemetry()
+
 
         # 수신 루프 플래그 (종료 시 False로 설정해 스레드 정지)
         self._rx_running = True
@@ -303,6 +307,10 @@ class V2XNode(Node):
         msg.targets = targets
         return msg
 
+    # msg 해석하고 JSON으로 변환
+    def _on_telemetry(self, msg: Telemetry) -> None:
+        self._last_telemetry = msg
+
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     # 송신: Raspberry Pi -> ESP32-S3 (self_status)
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -313,6 +321,11 @@ class V2XNode(Node):
     def _send_self_status(self) -> None:
         s = self._last_self_status
         self._tx_seq += 1  # 송신 시퀀스 번호 증가
+
+        # 자기 속도 계산
+        avg_delta = (self._last_telemetry.left_delta + self._last_telemetry.right_delta) / 2.0
+        estimated_speed = avg_delta * 0.01
+
         
         # JSON 페이로드 구성
         payload = {
@@ -323,16 +336,14 @@ class V2XNode(Node):
             "destination_id": s.destination_id,
             "driving_state": s.driving_state,
             "platoon_state": s.platoon_state,
-            "speed_mps": s.speed_mps,
-            "heading_deg": s.heading_deg,
+            "speed_mps": float(estimated_speed),
+            "heading_deg": float(self._last_telemetry.steer_deg),
             "platoon_enable": s.platoon_enable,
             "platoon_id": s.platoon_id,
             "platoon_role": s.platoon_role,
             "platoon_index": s.platoon_index,
             "leader_vehicle_id": s.leader_vehicle_id,
             "front_vehicle_id": s.front_vehicle_id,
-            "target_speed_mps": s.target_speed_mps,
-            "target_gap_m": s.target_gap_m,
             "emergency": s.emergency,
             "speed_level": s.speed_level,
         }
@@ -404,4 +415,4 @@ def main(args=None):
 
 
 if __name__ == "__main__":
-    main()
+    main()  

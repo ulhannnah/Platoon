@@ -27,7 +27,8 @@ from rcl_interfaces.msg import Parameter, ParameterValue, ParameterType
 from std_msgs.msg import String, Bool
 from std_srvs.srv import Trigger
 
-from .fsm_test import PlatoonFSM, EgoState, NearbyVehicle, DrivingCommand
+# [수정됨] PlatoonState를 추가로 임포트합니다.
+from .fsm_test import PlatoonFSM, EgoState, NearbyVehicle, DrivingCommand, PlatoonState
 from .v2x_node import (
     PLATOON_STATE_SOLO, PLATOON_STATE_JOIN, PLATOON_STATE_KEEP, PLATOON_STATE_EXIT,
     PLATOON_ROLE_NONE, PLATOON_ROLE_LEADER, PLATOON_ROLE_FOLLOWER,
@@ -52,14 +53,15 @@ _STATE_TO_WIRE = {
     "CONVOY_EXIT": PLATOON_STATE_KEEP,
 }
 
+SPEED_CRUISE = 2
 
 class FsmDecisionNode(Node):
     def __init__(self):
         super().__init__('fsm_decision')
 
         # ── 파라미터 ────────────────────────────────────────────────
-        self.declare_parameter('vehicle_id', 101)
-        self.declare_parameter('is_designated_leader', True)
+        self.declare_parameter('vehicle_id', 102)
+        self.declare_parameter('is_designated_leader', False)
         # 팔로워만 의미 있음 — 전체 리더 ID, 그리고 JOIN 시 바로 붙을 내 앞차 ID
         # (3대 이상 체인의 맨 뒤 차량만 leader_id와 다르게 지정)
         self.declare_parameter('leader_id', 0)
@@ -111,6 +113,14 @@ class FsmDecisionNode(Node):
         self._lane_change_client = self.create_client(
             Trigger, 'request_lane_change'
         )
+        self._lane_change_client = self.create_client(
+            Trigger, 'request_lane_change'
+        )
+        # §8 MAINTAIN PD 제어용 — control_node.py의 cruise_duty를 직접 조정
+        self._control_param_client = self.create_client(
+            SetParameters, 'control_node/set_parameters'
+        )
+        self._last_cruise_duty_sent = None
 
         # ── 구독/발행 ────────────────────────────────────────────────
         self.create_subscription(Telemetry, 'telemetry', self.on_telemetry, 10)
@@ -182,10 +192,11 @@ class FsmDecisionNode(Node):
         self.fsm.handle_command(cmd, target_lane=target_lane, current_lane=self.ego_state.lane)
 
         if cmd == 'JOIN':
-            # 정지 대기 중(is_running=False)이던 차량도 JOIN 명령 하나로 바로
-            # 출발하도록. decision_node는 is_running=False면 차선변경 상태여도
-            # speed_mode/steering을 무조건 0으로 깔아버리므로 이게 없으면 안 움직임.
             self._set_decision_param('is_running', True)
+            
+            # [수정됨] 차선 변경 여부와 무관하게 즉시 MAINTAIN(거리 제어) 상태로 강제 전환합니다.
+            if self.fsm.state == PlatoonState.PLATOON_JOIN:
+                self.fsm.state = PlatoonState.PLATOON_MAINTAIN
 
         self.get_logger().info(f'명령 수신: {cmd} (목표 lane={target_lane})')
 
@@ -203,7 +214,7 @@ class FsmDecisionNode(Node):
         req = SetParameters.Request(parameters=[Parameter(name=name, value=pv)])
         if not self._decision_param_client.service_is_ready():
             self.get_logger().warn(f'decision_node/set_parameters 서비스 준비 안 됨 (param={name})')
-            return
+            return  
         self._decision_param_client.call_async(req)
 
     def _request_lane_change(self, direction: str) -> None:
@@ -221,6 +232,29 @@ class FsmDecisionNode(Node):
             return  # 값 안 바뀌었으면 파라미터 서비스 스팸 방지
         self._last_speed_level_sent = wire_level
         self._set_decision_param('platoon_speed_level', wire_level)
+
+        def _set_control_param(self, name: str, value) -> None:
+            if isinstance(value, bool):
+                pv = ParameterValue(type=ParameterType.PARAMETER_BOOL, bool_value=value)
+            elif isinstance(value, int):
+                pv = ParameterValue(type=ParameterType.PARAMETER_INTEGER, integer_value=value)
+            else:
+                pv = ParameterValue(type=ParameterType.PARAMETER_STRING, string_value=str(value))
+            req = SetParameters.Request(parameters=[Parameter(name=name, value=pv)])
+            if not self._control_param_client.service_is_ready():
+                self.get_logger().warn(f'control_node/set_parameters 서비스 준비 안 됨 (param={name})')
+                return
+            self._control_param_client.call_async(req)
+
+    def _apply_cruise_duty(self, duty) -> None:
+        if duty is None:
+            return
+        self._apply_speed_level(SPEED_CRUISE)
+        duty = int(duty)
+        if duty == self._last_cruise_duty_sent:
+            return
+        self._last_cruise_duty_sent = duty
+        self._set_control_param('cruise_duty', duty)
 
     # ══════════════════════════════════════════════════════════════
     def _build_self_status(self) -> SelfStatus:
@@ -255,7 +289,10 @@ class FsmDecisionNode(Node):
         if cmd.request_lane_change_dir is not None:
             self._request_lane_change(cmd.request_lane_change_dir)
 
-        self._apply_speed_level(cmd.speed_level)
+        if cmd.cruise_duty is not None:
+            self._apply_cruise_duty(cmd.cruise_duty)
+        else:
+            self._apply_speed_level(cmd.speed_level)
 
 
 def main(args=None):
