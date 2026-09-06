@@ -8,11 +8,16 @@ def generate_launch_description():
     CAR_ID = 'car1'
     VEHICLE_ID = 101
     IS_DESIGNATED_LEADER = True   # platoon1 = 리더
-    DESTINATION_ID = 9999
-    # UWB 실장치 연결 — 실측 확인 중, 문제 생기면 다시 True로
-    ALLOW_UWB_LESS_JOIN = False
-    # 카메라 정상이면 False 유지, 문제 생기면 True로
-    ALLOW_CAMERA_LESS_JOIN = False
+    # 팔로워 전용 — 리더 차량은 0(미사용)으로 둔다.
+    LEADER_ID = 0
+    INITIAL_PARTNER_ID = 0
+    # 리더 전용 — 뒤에 붙을 것으로 예정된 팔로워 ID들(콤마 구분). 팔로워는 빈 문자열.
+    EXPECTED_FOLLOWER_IDS = '102,103'
+    DEFAULT_JOIN_LANE = 1   # §3 — JOIN 시 목표 차선(lane1)
+    DEFAULT_EXIT_LANE = 2   # EXIT 시 목표 차선(lane2)
+    # 이 차량이 처음 출발하는 차선. Platoon1은 이미 lane1에서 출발.
+    # Platoon2/3(진입로 대기)는 반드시 2로 설정해야 JOIN 차선변경이 트리거됨.
+    INITIAL_LANE = 1
     # -------------------------
 
     pkg_share = FindPackageShare('platoon').find('platoon')
@@ -40,7 +45,8 @@ def generate_launch_description():
         parameters=[config_file]
     )
 
-    # 플래툰 판단(FSM) 노드 — V2X 연동, 단독주행 decision_node 대신 이걸 씀
+    # 플래툰 판단(FSM) 노드 — fsm_test.py 기반. decision_node를 파라미터/서비스로
+    # 조작만 하고 vehicle_cmd는 직접 발행하지 않는다 (조향 소유권은 decision_node 전담).
     fsm_decision = Node(
         package='platoon',
         executable='fsm_decision_node',
@@ -51,9 +57,12 @@ def generate_launch_description():
         parameters=[{
             'vehicle_id': VEHICLE_ID,
             'is_designated_leader': IS_DESIGNATED_LEADER,
-            'destination_id': DESTINATION_ID,
-            'allow_camera_less_join': ALLOW_CAMERA_LESS_JOIN,
-            'allow_uwb_less_join': ALLOW_UWB_LESS_JOIN,
+            'leader_id': LEADER_ID,
+            'initial_partner_id': INITIAL_PARTNER_ID,
+            'expected_follower_ids': EXPECTED_FOLLOWER_IDS,
+            'default_join_lane': DEFAULT_JOIN_LANE,
+            'default_exit_lane': DEFAULT_EXIT_LANE,
+            'initial_lane': INITIAL_LANE,
         }]
     )
 
@@ -92,5 +101,7 @@ def generate_launch_description():
     return LaunchDescription([
         lane_detector,
         decision,
-        control
+        control,
+        fsm_decision,
+        v2x,
     ])

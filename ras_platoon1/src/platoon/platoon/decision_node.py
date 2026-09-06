@@ -11,6 +11,7 @@ from rclpy.node import Node
 from rcl_interfaces.msg import SetParametersResult
 from platoon_interfaces.msg import LaneInfo, VehicleCmd, Telemetry
 from std_srvs.srv import Trigger
+from std_msgs.msg import Bool
 
 os.environ['RCUTILS_CONSOLE_OUTPUT_FORMAT'] = '[{severity}] [{name}]: {message}'
 
@@ -33,17 +34,26 @@ class DecisionNode(Node):
         self.current_distance = 0.0
         
         # ROS 2 동적 파라미터 등록
-        self.declare_parameter('is_running', False) 
+        self.declare_parameter('is_running', False)
         self.declare_parameter('lost_stop', True)
         self.declare_parameter('kp_gain', 0.13)
         self.declare_parameter('kd_gain', 0.05)
         self.declare_parameter('ff_gain', 10.0)
+        # fsm_decision_node가 플래툰 상태에 따라 속도를 강제할 때 씀.
+        # -1 = 오버라이드 없음(기존처럼 cruise_speed 사용), 0/1/2 = speed_mode 강제 지정.
+        self.declare_parameter('platoon_speed_level', -1)
+        # fsm_decision_node가 request_lane_change 호출 직전에 세팅.
+        # 'left'/'right' 지정 시 그 방향의 점선만 인정(반대쪽은 무시).
+        # 빈 문자열이면 기존 동작(먼저 보이는 쪽) 그대로.
+        self.declare_parameter('lane_change_dir', '')
 
         self.is_running = self.get_parameter('is_running').value
         self.lost_stop = self.get_parameter('lost_stop').value
         self.kp_gain = self.get_parameter('kp_gain').value
         self.kd_gain = self.get_parameter('kd_gain').value
         self.ff_gain = self.get_parameter('ff_gain').value
+        self.platoon_speed_level = int(self.get_parameter('platoon_speed_level').value)
+        self.lane_change_dir = self.get_parameter('lane_change_dir').value
 
         # --- 내부 FSM 상태 관리 변수 ---
         self.current_state = 'STRAIGHT'  
@@ -69,6 +79,9 @@ class DecisionNode(Node):
         self.sub = self.create_subscription(LaneInfo, 'lane_info', self.on_lane_info, 10)
         self.pub = self.create_publisher(VehicleCmd, 'vehicle_cmd', 10)
         self.telemetry_sub = self.create_subscription(Telemetry, '/telemetry', self.telemetry_callback, 10)
+        # 차선변경(CHANGING_LEFT/RIGHT -> STRAIGHT) 완료 시 1회 발행.
+        # fsm_decision_node가 이걸 받아서 PLATOON_JOIN/EXIT 완료 판정에 씀.
+        self.lane_change_done_pub = self.create_publisher(Bool, 'lane_change_done', 10)
 
     def on_param_change(self, params):
         for param in params:
@@ -77,6 +90,8 @@ class DecisionNode(Node):
             elif param.name == 'ff_gain': self.ff_gain = float(param.value)
             elif param.name == 'is_running': self.is_running = bool(param.value)
             elif param.name == 'lost_stop': self.lost_stop = bool(param.value)
+            elif param.name == 'platoon_speed_level': self.platoon_speed_level = int(param.value)
+            elif param.name == 'lane_change_dir': self.lane_change_dir = param.value
         return SetParametersResult(successful=True)
 
     def lane_change_callback(self, request, response):
@@ -96,24 +111,33 @@ class DecisionNode(Node):
             is_left_dashed = (msg.left_style == LaneInfo.DASHED)
             is_right_dashed = (msg.right_style == LaneInfo.DASHED)
 
-            if is_left_dashed:  
+            # lane_change_dir가 지정돼 있으면 그 방향의 점선만 인정한다.
+            # (안 그러면 양쪽 다 점선일 때 원치 않는 방향으로 바뀔 수 있음 — 플래툰
+            #  시나리오처럼 목표 차선이 명확히 정해져 있을 때 방향을 강제하기 위함)
+            if self.lane_change_dir == 'left':
+                is_right_dashed = False
+            elif self.lane_change_dir == 'right':
+                is_left_dashed = False
+
+            if is_left_dashed:
                 self.current_state = 'CHANGING_LEFT'
                 self.change_start_distance = current_distance
                 self.get_logger().info('좌측 점선 확인! 좌측 진입 기동을 시작합니다.')
-            
+
             elif is_right_dashed:
                 self.current_state = 'CHANGING_RIGHT'
                 self.change_start_distance = current_distance
                 self.get_logger().info('우측 점선 확인! 우측 진입 기동을 시작합니다.')
-        
+
         elif self.current_state in ['CHANGING_LEFT', 'CHANGING_RIGHT']:
             traveled_distance = current_distance - self.change_start_distance
-            
+
             # Phase 3: 목표 거리 이동 완료 시 직진(PD 제어) 모드 복귀
             if traveled_distance >= TARGET_CHANGE_DISTANCE:
                 self.get_logger().info(f'목표 거리({TARGET_CHANGE_DISTANCE}m) 이동 완료. 카메라 인식을 통한 직진 모드로 전환합니다.')
                 self.current_state = 'STRAIGHT'
                 self.target_lane_offset = 0.0
+                self.lane_change_done_pub.publish(Bool(data=True))
 
     # ---------------------------------------------------------
     # 조향 제어 독립 함수들
@@ -191,10 +215,13 @@ class DecisionNode(Node):
             cmd.speed_mode = 0  
             cmd.steering_deg = 0
         elif not msg.lane_detected and self.lost_stop and not is_changing:
-            cmd.speed_mode = 0  
+            cmd.speed_mode = 0
             cmd.steering_deg = 0
+        elif self.platoon_speed_level >= 0:
+            # fsm_decision_node가 플래툰 거리제어를 위해 강제한 속도단계
+            cmd.speed_mode = self.platoon_speed_level
         else:
-            cmd.speed_mode = self.cruise_speed  
+            cmd.speed_mode = self.cruise_speed
 
         self.pub.publish(cmd)
 
