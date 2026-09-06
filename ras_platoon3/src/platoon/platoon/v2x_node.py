@@ -293,6 +293,11 @@ class V2XNode(Node):
             # front_vehicle_id: ESP32가 직접 계산해서 주는 값, 그대로 사용
             v.front_vehicle_id = int(t.get("front_vehicle_id", 0))
 
+            # 비상정지 즉시 전파용 (구버전 펌웨어는 필드 자체가 없어 기본값 0)
+            v.emergency = int(t.get("emergency", 0))
+            # CACC 피드포워드 기준값 (구버전 펌웨어는 필드 없어 기본값 cruise=2)
+            v.speed_level = int(t.get("speed_level", 2))
+
             targets.append(v)
 
         msg.targets = targets
@@ -328,6 +333,8 @@ class V2XNode(Node):
             "front_vehicle_id": s.front_vehicle_id,
             "target_speed_mps": s.target_speed_mps,
             "target_gap_m": s.target_gap_m,
+            "emergency": s.emergency,
+            "speed_level": s.speed_level,
         }
         
         # JSON을 문자열로 변환 후 개행 추가 (JSON Line 프로토콜)

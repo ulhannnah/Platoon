@@ -4,13 +4,18 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
-    # --- [차량 1호기 설정] ---
+    # --- [차량 3호기 설정] ---
     CAR_ID = 'car3'
     VEHICLE_ID = 103
-    IS_DESIGNATED_LEADER = False   # platoon1 = 리더
-    DESTINATION_ID = 9999
-    # UWB 아직 미구현 — 거리 없어도 JOIN/MAINTAIN 테스트되게 우회
-    ALLOW_UWB_LESS_JOIN = True
+    IS_DESIGNATED_LEADER = False   # platoon3 = 팔로워
+    LEADER_ID = 101                # 전체 리더(Platoon1) ID
+    INITIAL_PARTNER_ID = 102       # JOIN 시 바로 붙을 내 앞차 = Platoon2
+    EXPECTED_FOLLOWER_IDS = ''     # 팔로워는 미사용
+    DEFAULT_JOIN_LANE = 1          # §3 — JOIN 시 목표 차선(lane1)
+    DEFAULT_EXIT_LANE = 2          # EXIT 시 목표 차선(lane2)
+    # 진입로에서 대기하는 차량이라 리더(lane1)와 다른 차선에서 시작.
+    # 이 값 틀리면 JOIN 목표(lane1)와 같아 보여 차선변경이 트리거 안 됨.
+    INITIAL_LANE = 2
     # -------------------------
 
     pkg_share = FindPackageShare('platoon').find('platoon')
@@ -26,34 +31,38 @@ def generate_launch_description():
         emulate_tty=True,
         parameters=[config_file]
     )
-    
-    # 단독 주행 판단 노드
+
+    # 단독주행 노드 (조향/차선변경 전담 — fsm_decision_node는 이걸 파라미터/서비스로 조작만 함)
     decision = Node(
         package='platoon',
         executable='decision_node',
         name='decision_node',
+        namespace=CAR_ID,   # 예전 버전에 이게 빠져있었음 — namespace 없으면 전역으로 떠서
+                            # fsm_decision_node/lane_detector_node와 안 붙는다.
         output='screen',
         emulate_tty=True,
         parameters=[config_file]
     )
 
-
-    # 플래툰 판단(FSM) 노드 — V2X 연동, 단독주행 decision_node 대신 이걸 씀
-    # fsm_decision = Node(
-    #     package='platoon',
-    #     executable='fsm_decision_node',
-    #     name='fsm_decision_node',
-    #     namespace=CAR_ID,
-    #     output='screen',
-    #     emulate_tty=True,
-    #     parameters=[{
-    #         'vehicle_id': VEHICLE_ID,
-    #         'is_designated_leader': IS_DESIGNATED_LEADER,
-    #         'destination_id': DESTINATION_ID,
-    #         'allow_camera_less_join': ALLOW_CAMERA_LESS_JOIN,
-    #         'allow_uwb_less_join': ALLOW_UWB_LESS_JOIN,
-    #     }]
-    # )
+    # 플래툰 판단(FSM) 노드 — fsm_test.py 기반. vehicle_cmd는 직접 발행하지 않음.
+    fsm_decision = Node(
+        package='platoon',
+        executable='fsm_decision_node',
+        name='fsm_decision_node',
+        namespace=CAR_ID,
+        output='screen',
+        emulate_tty=True,
+        parameters=[{
+            'vehicle_id': VEHICLE_ID,
+            'is_designated_leader': IS_DESIGNATED_LEADER,
+            'leader_id': LEADER_ID,
+            'initial_partner_id': INITIAL_PARTNER_ID,
+            'expected_follower_ids': EXPECTED_FOLLOWER_IDS,
+            'default_join_lane': DEFAULT_JOIN_LANE,
+            'default_exit_lane': DEFAULT_EXIT_LANE,
+            'initial_lane': INITIAL_LANE,
+        }]
+    )
 
     # STM32 제어 / UART 통신 노드
     control = Node(
@@ -76,19 +85,10 @@ def generate_launch_description():
         emulate_tty=True,
     )
 
-    # 라이다 노드
-    lidar = Node(
-        package='platoon',
-        executable='lidar_node',
-        name='lidar_node',
-        namespace=CAR_ID,
-        output='screen',
-        emulate_tty=True,
-        parameters=[config_file]
-    )
-
     return LaunchDescription([
         lane_detector,
         decision,
-        control
+        control,
+        fsm_decision,
+        v2x,
     ])
