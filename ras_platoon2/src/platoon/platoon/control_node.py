@@ -77,8 +77,7 @@ class ControlNode(Node):
         self.open_serial()
 
         # 3. ROS 2 토픽 구독 및 발행 설정
-        self.sub = self.create_subscription(
-            VehicleCmd, 'vehicle_cmd', self.on_cmd, 10)
+        self.sub = self.create_subscription(VehicleCmd, 'vehicle_cmd', self.on_cmd, 10)
         self.tele_pub = self.create_publisher(Telemetry, 'telemetry', 10)
 
         # 4. 백그라운드 수신 스레드 생성 및 시작

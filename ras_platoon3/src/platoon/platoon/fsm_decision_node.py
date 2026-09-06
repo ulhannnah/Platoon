@@ -1,215 +1,294 @@
 """
-FSM 기반 판단 노드
-- platoon_fsm.py 모듈을 불러와 ROS 2 환경에서 가동
+FSM 판단 노드 (fsm_test.py 기반 — 촬영 시나리오 전용 경량 버전)
 
-V2X 연동 (v2x_node.py와 토픽으로만 연결, 서로 import 안 함):
-    구독 /v2x/targets       (V2xTargets) → NearbyVehicle 리스트로 변환해 FSM에 공급
-    발행 /v2x/self_status   (SelfStatus) → v2x_node.py가 그대로 ESP32로 중계
+역할 분담:
+    decision_node   : 조향(카메라 PD) + STM32로 나갈 VehicleCmd 실제 발행 (유일한 발행자)
+    fsm_test.py     : SOLO_DRIVE/JOIN/MAINTAIN/EXIT 상태만 판단하는 순수 로직
+    fsm_decision_node(이 파일) : 센서·V2X를 fsm_test.py에 먹이고, 결과를
+                       decision_node "조작"으로 바꿔주는 배선판
+                       (vehicle_cmd에는 절대 직접 발행하지 않음 — 조향 소유권 충돌 방지)
+
+decision_node/control_node 조작 방법:
+    - 차선변경: lane_change_dir 파라미터 세팅 후 request_lane_change 서비스 호출
+    - 비상정지: decision_node의 platoon_speed_level=0 강제 (-1=오버라이드 해제)
+    - MAINTAIN 가감속(§8): control_node의 cruise_duty를 PD로 연속 조정 +
+      decision_node의 platoon_speed_level을 SPEED_CRUISE로 강제해 그 경로를 태움
+    - 차선변경 완료 통보: decision_node가 발행하는 lane_change_done(Bool) 구독
+
+외부 명령(JOIN/EXIT/EXIT_TOGETHER)은 'platoon_cmd'(std_msgs/String) 토픽으로 받는다.
+    예) ros2 topic pub --once /car2/platoon_cmd std_msgs/String "{data: 'JOIN'}"
+        ros2 topic pub --once /car2/platoon_cmd std_msgs/String "{data: 'EXIT:2'}"
+        ros2 topic pub --once /car1/platoon_cmd std_msgs/String "{data: 'EXIT_TOGETHER:2'}"
 """
 
-import math
 import rclpy
 from rclpy.node import Node
 
-# 동일 패키지 내의 platoon_fsm 모듈 import
-from .platoon_fsm import PlatoonFSM, EgoState, NearbyVehicle, DrivingCommand
-from .ros_comm import RosPlatoonComm
+from rcl_interfaces.srv import SetParameters
+from rcl_interfaces.msg import Parameter, ParameterValue, ParameterType
+from std_msgs.msg import String, Bool
+from std_srvs.srv import Trigger
+
+from .fsm_test import PlatoonFSM, EgoState, NearbyVehicle, DrivingCommand, SPEED_CRUISE
 from .v2x_node import (
-    DRIVING_STATE_AUTO, DRIVING_STATE_PLATOON,
     PLATOON_STATE_SOLO, PLATOON_STATE_JOIN, PLATOON_STATE_KEEP, PLATOON_STATE_EXIT,
     PLATOON_ROLE_NONE, PLATOON_ROLE_LEADER, PLATOON_ROLE_FOLLOWER,
+    DRIVING_STATE_AUTO, DRIVING_STATE_PLATOON,
 )
 
-from platoon_interfaces.msg import LaneInfo, Telemetry, VehicleCmd, V2xTargets, SelfStatus
+from platoon_interfaces.msg import Telemetry, V2xTargets, SelfStatus, VehicleCmd
 
-from std_msgs.msg import String
-
-_PLATOON_STATE_MAP = {
+# ESP32 wire 값(int) -> fsm_test.py의 문자열 상태 매핑
+_WIRE_TO_STR = {
+    PLATOON_STATE_SOLO: "SOLO",
+    PLATOON_STATE_JOIN: "JOIN",
+    PLATOON_STATE_KEEP: "MAINTAIN",
+    PLATOON_STATE_EXIT: "EXIT",
+}
+# fsm_test.py 상태 -> ESP32 wire 값. CONVOY_EXIT은 "플래툰 유지" 취지라 KEEP으로 보고한다.
+_STATE_TO_WIRE = {
     "SOLO_DRIVE": PLATOON_STATE_SOLO,
     "PLATOON_JOIN": PLATOON_STATE_JOIN,
     "PLATOON_MAINTAIN": PLATOON_STATE_KEEP,
     "PLATOON_EXIT": PLATOON_STATE_EXIT,
+    "CONVOY_EXIT": PLATOON_STATE_KEEP,
 }
-_ROLE_MAP = {None: PLATOON_ROLE_NONE, "LEADER": PLATOON_ROLE_LEADER, "FOLLOWER": PLATOON_ROLE_FOLLOWER}
 
 
 class FsmDecisionNode(Node):
     def __init__(self):
         super().__init__('fsm_decision')
 
-        # FSM 상태 모니터링용 토픽 퍼블리셔 추가
-        # (아래 구독/발행 전부 상대경로로 통일 — v2x_node/control_node/
-        #  lane_detector_node도 상대경로라, launch의 namespace=CAR_ID 안에서
-        #  같은 차량 노드끼리 실제로 연결되려면 여기도 절대경로(/...)면 안 됨.
-        #  절대경로였을 때는 fsm_decision_node만 전역 토픽을 보고 있어서 다른
-        #  3개 노드와 아예 연결이 안 되는 상태였음.)
-        self.pub_fsm_state = self.create_publisher(String, 'fsm_state_debug', 10)
-
-        # 1. 파라미터 선언
-        # 기본값은 이 차량(리더)을 기준으로 잡아둔다. 팔로워 차량은 실행할 때
-        # --ros-args -p vehicle_id:=102 -p is_designated_leader:=false ... 로
-        # 덮어써서 쓴다 (docs/250901_차량별_설정값_정리.md 참고).
+        # ── 파라미터 ────────────────────────────────────────────────
         self.declare_parameter('vehicle_id', 101)
         self.declare_parameter('is_designated_leader', True)
-        self.declare_parameter('destination_id', 0)  # 목적지 인식 방법 미정이라 당분간 고정값
-        # 카메라/UWB 미연결 상태에서도 JOIN/MAINTAIN 테스트가 가능하게 하는
-        # 데모용 우회 스위치. 실제 카메라·UWB 붙으면 launch에서 false로.
-        self.declare_parameter('allow_camera_less_join', False)
-        self.declare_parameter('allow_uwb_less_join', False)
+        # 팔로워만 의미 있음 — 전체 리더 ID, 그리고 JOIN 시 바로 붙을 내 앞차 ID
+        # (3대 이상 체인의 맨 뒤 차량만 leader_id와 다르게 지정)
+        self.declare_parameter('leader_id', 0)
+        self.declare_parameter('initial_partner_id', 0)
+        # 리더만 의미 있음 — 뒤에 붙을 것으로 예정된 차량 ID들, 콤마로 구분 (예: "102,103")
+        self.declare_parameter('expected_follower_ids', '')
+        # 명령에 lane 번호가 없을 때 쓸 기본 목표차선
+        self.declare_parameter('default_join_lane', 1)
+        self.declare_parameter('default_exit_lane', 2)
+        # 이 차량이 처음 출발하는 차선 (Platoon2/3처럼 진입로에서 대기하는
+        # 차량은 리더와 다른 차선에서 시작하므로 반드시 맞게 지정해야 함 —
+        # 안 그러면 JOIN 목표차선과 같아 보여 차선변경이 트리거 안 됨)
+        self.declare_parameter('initial_lane', 1)
 
         vehicle_id = self.get_parameter('vehicle_id').value
         is_designated_leader = self.get_parameter('is_designated_leader').value
-        self.vehicle_id = vehicle_id
-        self.destination_id = self.get_parameter('destination_id').value
-        allow_camera_less_join = self.get_parameter('allow_camera_less_join').value
-        allow_uwb_less_join = self.get_parameter('allow_uwb_less_join').value
+        leader_id = self.get_parameter('leader_id').value or None
+        initial_partner_id = self.get_parameter('initial_partner_id').value or None
+        expected_followers_raw = self.get_parameter('expected_follower_ids').value
+        expected_followers = [int(x) for x in expected_followers_raw.split(',') if x.strip()]
+        self.default_join_lane = int(self.get_parameter('default_join_lane').value)
+        self.default_exit_lane = int(self.get_parameter('default_exit_lane').value)
 
-        # 2. FSM 객체 생성
-        # RosPlatoonComm: 2차량 LAN 데모용 — JOIN 핸드셰이크 패킷을 ROS 토픽
-        # (/v2x/handshake)으로 왕복. ESP32가 핸드셰이크를 릴레이하지 않는
-        # 구조에서 두 차량이 서로 JOIN/MAINTAIN을 완수할 수 있게 한다.
+        self.vehicle_id = vehicle_id
+
+        # ── FSM ────────────────────────────────────────────────────
         self.fsm = PlatoonFSM(
             vehicle_id=vehicle_id,
             is_designated_leader=is_designated_leader,
-            comm=RosPlatoonComm(self),
-            allow_camera_less_join=allow_camera_less_join,
-            allow_uwb_less_join=allow_uwb_less_join,
+            leader_id=leader_id,
+            initial_partner_id=initial_partner_id,
+            expected_follower_ids=expected_followers,
         )
 
-        # 자차 상태(EgoState) 및 주변 차량 정보 저장용 변수
-        self.ego_state = EgoState()
-        self.ego_state.destination = self.destination_id
-        self.nearby_vehicles = []  # /v2x/targets 수신 시 on_v2x_targets()가 채움
+        self.ego_state = EgoState(lane=int(self.get_parameter('initial_lane').value))
+        self.nearby_vehicles = []
+        self._pending_target_lane = None  # lane_change_done 왔을 때 ego_state.lane에 반영할 값
+        self._last_speed_level_sent = None  # decision_node 파라미터 스팸 방지용 캐시
+        self._last_lane_dir_sent = None
+        self._last_emergency = False  # 매 주기 fsm.update() 결과로 갱신, self_status에 반영
+        # decision_node가 "지금 실제로" 내는 speed_mode. vehicle_cmd를 읽기 전용으로
+        # 구독해서 얻음 (decision_node 수정 없이 CACC 피드포워드용으로 방송하기 위함)
+        self._own_speed_level = 2
 
-        # 3. 구독 및 발행
-        self.sub_lane = self.create_subscription(
-            LaneInfo, 'lane_info', self.on_lane_info, 10
+        # ── decision_node 조작용 클라이언트 ──────────────────────────
+        self._decision_param_client = self.create_client(
+            SetParameters, 'decision_node/set_parameters'
         )
-        self.sub_tele = self.create_subscription(
-            Telemetry, 'telemetry', self.on_telemetry, 10
+        # §8 MAINTAIN PD 제어용 — control_node.py의 cruise_duty를 직접 조정
+        self._control_param_client = self.create_client(
+            SetParameters, 'control_node/set_parameters'
         )
-        self.sub_v2x = self.create_subscription(
-            V2xTargets, 'v2x/targets', self.on_v2x_targets, 10
+        self._lane_change_client = self.create_client(
+            Trigger, 'request_lane_change'
         )
-        self.pub_cmd = self.create_publisher(
-            VehicleCmd, 'vehicle_cmd', 10
-        )
-        self.pub_self_status = self.create_publisher(
-            SelfStatus, 'v2x/self_status', 10
+        self._last_cruise_duty_sent = None  # 파라미터 서비스 스팸 방지용 캐시
+
+        # ── 구독/발행 ────────────────────────────────────────────────
+        self.create_subscription(Telemetry, 'telemetry', self.on_telemetry, 10)
+        self.create_subscription(VehicleCmd, 'vehicle_cmd', self.on_vehicle_cmd, 10)
+        self.create_subscription(V2xTargets, 'v2x/targets', self.on_v2x_targets, 10)
+        self.create_subscription(Bool, 'lane_change_done', self.on_lane_change_done, 10)
+        self.create_subscription(String, 'platoon_cmd', self.on_platoon_cmd, 10)
+        self.pub_self_status = self.create_publisher(SelfStatus, 'v2x/self_status', 10)
+        self.pub_fsm_state = self.create_publisher(String, 'fsm_state_debug', 10)
+
+        self.create_timer(0.1, self.control_loop)  # 10Hz
+
+        self.get_logger().info(
+            f'fsm_decision_node(fsm_test 기반) 시작 (ID: {vehicle_id}, Leader: {is_designated_leader}, '
+            f'leader_id={leader_id}, initial_partner_id={initial_partner_id}, followers={expected_followers})'
         )
 
-        # 4. 20Hz (0.05초) 주기로 FSM update 실행
-        self.timer = self.create_timer(0.05, self.control_loop)
-
-        self.get_logger().info(f'FSM 판단 노드 실행 시작 (ID: {vehicle_id}, Leader: {is_designated_leader})')
-
-    def on_lane_info(self, msg: LaneInfo):
-        """차선 인지 정보를 EgoState로 전달"""
-        self.ego_state.lane_detected = msg.lane_detected
-        # 픽셀 offset을 -1.0 ~ +1.0 범위로 정규화 (카메라 Width 640px 기준)
-        self.ego_state.lane_offset = float(msg.offset) / 320.0
-        self.ego_state.lane = 0
+    # ══════════════════════════════════════════════════════════════
+    # 센서/V2X 입력
+    # ══════════════════════════════════════════════════════════════
+    def on_vehicle_cmd(self, msg: VehicleCmd):
+        # decision_node가 실제로 내고 있는 speed_mode를 그대로 관찰 (읽기 전용,
+        # 여기서 vehicle_cmd에 발행은 절대 안 함 — 조향 소유권 충돌 방지 원칙 유지)
+        self._own_speed_level = int(msg.speed_mode)
 
     def on_telemetry(self, msg: Telemetry):
-        """
-        STM32 텔레메트리 정보를 EgoState로 전달.
-
-        ego_state.speed는 여기서 채워야 self_status.speed_mps로 다른 차량에
-        실제 속도가 나간다. control_node.py가 채워주는 msg.speed_mps를 그대로
-        받는다(고정 듀티 제어라도 이 필드는 참고용으로 계속 채워져야 함).
-        """
-        self.ego_state.speed = msg.speed_mps
-
-        # dist_cm (cm) -> front_distance (m 단위 변환)
         if msg.dist_cm > 0:
             self.ego_state.front_distance = float(msg.dist_cm) / 100.0
         else:
             self.ego_state.front_distance = None
 
     def on_v2x_targets(self, msg: V2xTargets):
-        """
-        v2x_node.py가 ESP32에서 받은 주변 차량 목록을 NearbyVehicle 리스트로 변환.
-        """
         self.nearby_vehicles = [
             NearbyVehicle(
                 vehicle_id=t.vehicle_id,
-                speed=t.speed_mps,
-                heading=math.radians(t.heading_deg),
-                platoon_allow=bool(t.platoon_enable),
-                platoon_id=(t.platoon_id if t.platoon_id else None),
-                leader_id=(t.leader_vehicle_id if t.leader_vehicle_id != -1 else None),
-                uwb_distance=t.distance_m,
-                uwb_angle=math.radians(t.angle_deg),
+                platoon_state=_WIRE_TO_STR.get(t.platoon_state, "SOLO"),
+                emergency=bool(t.emergency),
+                speed_level=int(t.speed_level),
                 timestamp=msg.timestamp_ms / 1000.0,
             )
             for t in msg.targets
         ]
 
-    def _build_self_status(self, cmd: DrivingCommand) -> SelfStatus:
-        """self_status로 내보낼 값을 FSM 현재 상태에서 뽑아 채운다."""
+    def on_lane_change_done(self, msg: Bool):
+        self.fsm.notify_lane_change_done()
+        if self._pending_target_lane is not None:
+            self.ego_state.lane = self._pending_target_lane
+            self._pending_target_lane = None
+        self.get_logger().info(f'차선변경 완료 통보 수신 (현재 lane={self.ego_state.lane})')
+
+    def on_platoon_cmd(self, msg: String):
+        """예: 'JOIN', 'EXIT:2', 'EXIT_TOGETHER:2'"""
+        raw = msg.data.strip()
+        if ':' in raw:
+            cmd, lane_str = raw.split(':', 1)
+            try:
+                target_lane = int(lane_str)
+            except ValueError:
+                target_lane = None
+        else:
+            cmd = raw
+            target_lane = None
+
+        cmd = cmd.strip().upper()
+        if target_lane is None:
+            target_lane = self.default_join_lane if cmd == 'JOIN' else self.default_exit_lane
+
+        self._pending_target_lane = target_lane
+        self.fsm.handle_command(cmd, target_lane=target_lane, current_lane=self.ego_state.lane)
+
+        if cmd == 'JOIN':
+            # 정지 대기 중(is_running=False)이던 차량도 JOIN 명령 하나로 바로
+            # 출발하도록. decision_node는 is_running=False면 차선변경 상태여도
+            # speed_mode/steering을 무조건 0으로 깔아버리므로 이게 없으면 안 움직임.
+            self._set_decision_param('is_running', True)
+
+        self.get_logger().info(f'명령 수신: {cmd} (목표 lane={target_lane})')
+
+    # ══════════════════════════════════════════════════════════════
+    # decision_node 조작
+    # ══════════════════════════════════════════════════════════════
+    def _set_param(self, client, service_label: str, name: str, value) -> None:
+        if isinstance(value, bool):
+            pv = ParameterValue(type=ParameterType.PARAMETER_BOOL, bool_value=value)
+        elif isinstance(value, int):
+            pv = ParameterValue(type=ParameterType.PARAMETER_INTEGER, integer_value=value)
+        else:
+            pv = ParameterValue(type=ParameterType.PARAMETER_STRING, string_value=str(value))
+
+        req = SetParameters.Request(parameters=[Parameter(name=name, value=pv)])
+        if not client.service_is_ready():
+            self.get_logger().warn(f'{service_label} 서비스 준비 안 됨 (param={name})')
+            return
+        client.call_async(req)
+
+    def _set_decision_param(self, name: str, value) -> None:
+        self._set_param(self._decision_param_client, 'decision_node/set_parameters', name, value)
+
+    def _set_control_param(self, name: str, value) -> None:
+        self._set_param(self._control_param_client, 'control_node/set_parameters', name, value)
+
+    def _request_lane_change(self, direction: str) -> None:
+        # 방향 파라미터를 먼저 세팅한 뒤 서비스 호출 (decision_node가 그 방향만 인정)
+        self._set_decision_param('lane_change_dir', direction)
+        if not self._lane_change_client.service_is_ready():
+            self.get_logger().warn('request_lane_change 서비스 준비 안 됨')
+            return
+        self._lane_change_client.call_async(Trigger.Request())
+        self.get_logger().info(f'차선변경 요청 전송 (방향={direction})')
+
+    def _apply_speed_level(self, level) -> None:
+        wire_level = -1 if level is None else int(level)
+        if wire_level == self._last_speed_level_sent:
+            return  # 값 안 바뀌었으면 파라미터 서비스 스팸 방지
+        self._last_speed_level_sent = wire_level
+        self._set_decision_param('platoon_speed_level', wire_level)
+
+    def _apply_cruise_duty(self, duty) -> None:
+        """§8 MAINTAIN PD 제어 — control_node.py의 cruise_duty를 매 주기 값이
+        바뀔 때만 반영. decision_node의 speed_mode가 cruise_duty 경로(>=2)를
+        타도록 platoon_speed_level도 SPEED_CRUISE로 같이 강제한다.
+        duty가 None이면(MAINTAIN 종료) 오버라이드만 풀고 cruise_duty 값 자체는
+        마지막 값 그대로 둔다 — 이후 SOLO_DRIVE에서도 그 값을 기준으로 계속 쓰임.
+        """
+        if duty is None:
+            return
+        self._apply_speed_level(SPEED_CRUISE)
+        duty = int(duty)
+        if duty == self._last_cruise_duty_sent:
+            return
+        self._last_cruise_duty_sent = duty
+        self._set_control_param('cruise_duty', duty)
+
+    # ══════════════════════════════════════════════════════════════
+    def _build_self_status(self) -> SelfStatus:
         s = SelfStatus()
         s.vehicle_id = self.vehicle_id
-        s.destination_id = self.destination_id
-
         in_platoon = self.fsm.state.name != "SOLO_DRIVE"
         s.driving_state = DRIVING_STATE_PLATOON if in_platoon else DRIVING_STATE_AUTO
-        s.platoon_state = _PLATOON_STATE_MAP.get(self.fsm.state.name, PLATOON_STATE_SOLO)
-
-        s.speed_mps = self.ego_state.speed
-        s.heading_deg = math.degrees(self.ego_state.heading)
-
-        s.platoon_enable = int(self.ego_state.platoon_allow)
-        s.platoon_id = self.fsm.platoon_id or 0
-        s.platoon_role = _ROLE_MAP.get(self.fsm.role, PLATOON_ROLE_NONE)
-
-        # TODO: 대열 내 절대 순번은 이 차량 혼자서는 알 수 없다 — 각자 앞/뒤차
-        # ID만 안다(platoon_fsm.py의 partner_id/successor_id). 리더는 0으로
-        # 확정할 수 있지만 팔로워 순번은 근거가 없어 1로 잠정 처리한다.
-        s.platoon_index = 0 if s.platoon_role == PLATOON_ROLE_LEADER else (
-            1 if s.platoon_role == PLATOON_ROLE_FOLLOWER else 0
+        s.platoon_state = _STATE_TO_WIRE.get(self.fsm.state.name, PLATOON_STATE_SOLO)
+        s.platoon_role = (
+            PLATOON_ROLE_LEADER if self.fsm.is_designated_leader
+            else (PLATOON_ROLE_FOLLOWER if in_platoon else PLATOON_ROLE_NONE)
         )
-
-        s.leader_vehicle_id = self.fsm.leader_id if self.fsm.leader_id is not None else 0
-        s.front_vehicle_id = (
-            self.fsm.partner_id if (self.fsm.role == "FOLLOWER" and self.fsm.partner_id) else 0
-        )
-
-        s.target_speed_mps = cmd.target_speed if cmd.target_speed is not None else 0.0
-        s.target_gap_m = cmd.target_distance if cmd.target_distance is not None else 0.0
+        s.leader_vehicle_id = self.fsm.leader_id or 0
+        s.front_vehicle_id = self.fsm.partner_id or 0
+        s.emergency = 1 if self._last_emergency else 0
+        s.speed_level = self._own_speed_level
         return s
 
     def control_loop(self):
-        """20Hz 메인 제어 주기로 FSM 실행 및 출력값 매핑"""
-        # 1. FSM 연산 수행
         cmd: DrivingCommand = self.fsm.update(self.ego_state, self.nearby_vehicles)
+        self._last_emergency = cmd.emergency
 
-        # 2. FSM 상태 및 모드 디버그 문자열 발행
         state_msg = String()
-        state_msg.data = f"State: {self.fsm.state.name} | MatchState: {self.fsm.match_state.name} | Mode: {cmd.mode} | TargetSpeed: {cmd.target_speed}"
+        state_msg.data = (
+            f"State: {self.fsm.state.name} | Mode: {cmd.mode} | "
+            f"speed_level: {cmd.speed_level} | cruise_duty: {cmd.cruise_duty} | "
+            f"lane: {self.ego_state.lane}"
+        )
         self.pub_fsm_state.publish(state_msg)
 
-        # V2X로 내 상태 보고 (ESP32 -> 주변 차량에 브로드캐스트됨)
-        self.pub_self_status.publish(self._build_self_status(cmd))
+        self.pub_self_status.publish(self._build_self_status())
 
-        # 3. DrivingCommand -> VehicleCmd 매핑
-        vehicle_cmd = VehicleCmd()
+        if cmd.request_lane_change_dir is not None:
+            self._request_lane_change(cmd.request_lane_change_dir)
 
-        # [속도 판단]
-        if cmd.emergency or (cmd.target_speed is not None and cmd.target_speed == 0.0):
-            vehicle_cmd.speed_mode = 0  # 정지
-            vehicle_cmd.steering_deg = 0.0
-        elif cmd.target_speed is not None and cmd.target_speed < 0.3:
-            vehicle_cmd.speed_mode = 1  # 감속 / 저속
+        if cmd.cruise_duty is not None:
+            self._apply_cruise_duty(cmd.cruise_duty)
         else:
-            vehicle_cmd.speed_mode = 2  # 크루즈 / 정상 속도
-
-        # [조향각 판단]
-        # FSM에서 구한 차선 오프셋을 조향각(-70 ~ +70)으로 P 제어 변환
-        steer = int(self.ego_state.lane_offset * -70.0)
-        vehicle_cmd.steering_deg = max(-70, min(70, steer))
-
-        # 4. 하위 제어 노드로 전송
-        self.pub_cmd.publish(vehicle_cmd)
+            self._apply_speed_level(cmd.speed_level)
 
 
 def main(args=None):

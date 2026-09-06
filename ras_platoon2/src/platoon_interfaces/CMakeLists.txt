@@ -13,7 +13,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/V2xTarget.msg"
   "msg/V2xTargets.msg"
   "msg/SelfStatus.msg"
-
+  "msg/LocalTarget.msg"
+  "msg/LocalTargets.msg"
+  
 )
 
 ament_export_dependencies(rosidl_default_runtime)

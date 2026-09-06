@@ -32,3 +32,11 @@ float32 confidence
 int32 leader_vehicle_id
 int32 front_vehicle_id
 # 둘 다 -1이면 이번 패킷만으로는 알 수 없음 (구버전 펌웨어 폴백 실패 등).
+
+# 이 차량이 비상정지 중인지. 초음파로 물리적 간격이 좁혀지길 기다리지 않고
+# 플래툰 전체가 즉시 같이 서게 하는 용도 (구버전 펌웨어는 항상 0).
+int32 emergency
+
+# 이 차량이 지금 실제로 내고 있는 speed_mode(0/1/2). 뒤차의 CACC 피드포워드
+# 기준값 (구버전 펌웨어는 필드가 없어 기본값 2=cruise로 처리됨).
+int32 speed_level
