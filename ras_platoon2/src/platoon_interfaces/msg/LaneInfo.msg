@@ -15,3 +15,6 @@ int8 right_style
 # 전향 보상(Feed-Forward) 연산을 위한 차선 기울기
 float32 left_slope
 float32 right_slope
+
+# 차선 폭
+float32 dynamic_virtual_offset

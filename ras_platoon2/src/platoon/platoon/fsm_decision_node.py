@@ -203,7 +203,7 @@ class FsmDecisionNode(Node):
         req = SetParameters.Request(parameters=[Parameter(name=name, value=pv)])
         if not self._decision_param_client.service_is_ready():
             self.get_logger().warn(f'decision_node/set_parameters 서비스 준비 안 됨 (param={name})')
-            return
+            return  
         self._decision_param_client.call_async(req)
 
     def _request_lane_change(self, direction: str) -> None:
