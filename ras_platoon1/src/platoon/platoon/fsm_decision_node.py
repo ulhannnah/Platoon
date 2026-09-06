@@ -15,8 +15,9 @@ decision_node/control_node 조작 방법:
       decision_node의 platoon_speed_level을 SPEED_CRUISE로 강제해 그 경로를 태움
     - 차선변경 완료 통보: decision_node가 발행하는 lane_change_done(Bool) 구독
 
-외부 명령(JOIN/EXIT/EXIT_TOGETHER)은 'platoon_cmd'(std_msgs/String) 토픽으로 받는다.
+외부 명령(JOIN/MAINTAIN/EXIT/EXIT_TOGETHER)은 'platoon_cmd'(std_msgs/String) 토픽으로 받는다.
     예) ros2 topic pub --once /car2/platoon_cmd std_msgs/String "{data: 'JOIN'}"
+        ros2 topic pub --once /car2/platoon_cmd std_msgs/String "{data: 'MAINTAIN'}"  # 테스트용, 차선변경 생략하고 바로 MAINTAIN
         ros2 topic pub --once /car2/platoon_cmd std_msgs/String "{data: 'EXIT:2'}"
         ros2 topic pub --once /car1/platoon_cmd std_msgs/String "{data: 'EXIT_TOGETHER:2'}"
 """
@@ -188,7 +189,7 @@ class FsmDecisionNode(Node):
         self._pending_target_lane = target_lane
         self.fsm.handle_command(cmd, target_lane=target_lane, current_lane=self.ego_state.lane)
 
-        if cmd == 'JOIN':
+        if cmd in ('JOIN', 'MAINTAIN'):
             # 정지 대기 중(is_running=False)이던 차량도 JOIN 명령 하나로 바로
             # 출발하도록. decision_node는 is_running=False면 차선변경 상태여도
             # speed_mode/steering을 무조건 0으로 깔아버리므로 이게 없으면 안 움직임.

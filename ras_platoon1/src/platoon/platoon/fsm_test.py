@@ -123,6 +123,12 @@ class PlatoonFSM:
             self.state = PlatoonState.PLATOON_JOIN
             self._start_lane_change(target_lane, current_lane)
 
+        elif cmd == "MAINTAIN" and self.state in (PlatoonState.SOLO_DRIVE, PlatoonState.PLATOON_JOIN):
+            # 테스트용 — 차선변경/점선대기 없이 바로 MAINTAIN으로 점프 (PD 가감속만 검증할 때)
+            self.state = PlatoonState.PLATOON_MAINTAIN
+            self._pending_lane_dir = None
+            self._lane_change_pending = False
+
         elif cmd == "EXIT" and self.state == PlatoonState.PLATOON_MAINTAIN:
             self.state = PlatoonState.PLATOON_EXIT
             self._start_lane_change(target_lane, current_lane)
