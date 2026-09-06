@@ -20,9 +20,9 @@ STEER_MIN = -60
 
 # 차선 변경 파라미터 (차량 스케일에 맞춘 세팅)
 TURN_ANGLE = 35               # 1차 진입 시 강하게 꺾을 조향각
-RELEASE_ANGLE = 0             # 2차 진입 시 핸들을 풀어줄 조향각 (0도 = 직진 상태로 대각선 진입)
-PHASE1_DIST = 0.25            # 처음에 핸들을 꺾은 채로 이동할 거리 (m)
-TARGET_CHANGE_DISTANCE = 0.45 # 조향 권한을 다시 카메라(PD 제어)로 넘길 총 이동 거리 (m)
+RELEASE_ANGLE = -10             # 2차 진입 시 핸들을 풀어줄 조향각 (0도 = 직진 상태로 대각선 진입)
+PHASE1_DIST = 0.5            # 처음에 핸들을 꺾은 채로 이동할 거리 (m)
+TARGET_CHANGE_DISTANCE = 0.8 # 조향 권한을 다시 카메라(PD 제어)로 넘길 총 이동 거리 (m)
 
 class DecisionNode(Node):
     def __init__(self):
@@ -65,10 +65,10 @@ class DecisionNode(Node):
         self.add_on_set_parameters_callback(self.on_param_change)
         
         # 토픽 관리
-        self.srv = self.create_service(Trigger, 'request_lane_change', self.lane_change_callback)
+        self.srv = self.create_service(Trigger, '/car1/decision_node/request_lane_change', self.lane_change_callback)
         self.sub = self.create_subscription(LaneInfo, 'lane_info', self.on_lane_info, 10)
         self.pub = self.create_publisher(VehicleCmd, 'vehicle_cmd', 10)
-        self.telemetry_sub = self.create_subscription(Telemetry, '/telemetry', self.telemetry_callback, 10)
+        self.telemetry_sub = self.create_subscription(Telemetry, '/car1/telemetry', self.telemetry_callback, 10)
 
     def on_param_change(self, params):
         for param in params:
@@ -98,7 +98,7 @@ class DecisionNode(Node):
 
             if is_left_dashed:  
                 self.current_state = 'CHANGING_LEFT'
-                self.change_start_distance = current_distance
+                self.change_start_distance = current_distance * 1.2
                 self.get_logger().info('좌측 점선 확인! 좌측 진입 기동을 시작합니다.')
             
             elif is_right_dashed:
@@ -108,6 +108,8 @@ class DecisionNode(Node):
         
         elif self.current_state in ['CHANGING_LEFT', 'CHANGING_RIGHT']:
             traveled_distance = current_distance - self.change_start_distance
+
+            self.get_logger().info(f'[FSM] 차선 변경 중... 이동한 거리: {traveled_distance:.3f}m / 목표: {TARGET_CHANGE_DISTANCE}m')
             
             # Phase 3: 목표 거리 이동 완료 시 직진(PD 제어) 모드 복귀
             if traveled_distance >= TARGET_CHANGE_DISTANCE:
@@ -147,16 +149,16 @@ class DecisionNode(Node):
     def execute_change_left(self, traveled_distance: float) -> float:
         """좌측 차선 변경: 1차 진입 후 핸들을 풀어 사선으로 진입합니다."""
         if traveled_distance < PHASE1_DIST:
-            return -TURN_ANGLE
+            return TURN_ANGLE
         else:
-            return -RELEASE_ANGLE
+            return RELEASE_ANGLE
 
     def execute_change_right(self, traveled_distance: float) -> float:
         """우측 차선 변경: 1차 진입 후 핸들을 풀어 사선으로 진입합니다."""
         if traveled_distance < PHASE1_DIST:
-            return TURN_ANGLE
+            return -TURN_ANGLE
         else:
-            return RELEASE_ANGLE
+            return -RELEASE_ANGLE
     # ---------------------------------------------------------
 
     def on_lane_info(self, msg: LaneInfo):
@@ -200,7 +202,7 @@ class DecisionNode(Node):
 
     def telemetry_callback(self, msg):
         # 비정상적인 왼쪽 엔코더를 배제하고 오른쪽 엔코더(right_delta) 값만 사용합니다.
-        tick_delta = msg.right_delta
+        tick_delta = (msg.right_delta + msg.right_delta) / 2.0 
         delta_meters = tick_delta * self.meters_per_tick
         self.current_distance += delta_meters
 
